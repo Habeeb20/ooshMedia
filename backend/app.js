@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import { connectDb } from "./db.js";
 import authRoutes from "./routes/authRoutes.js"
+import sellerRoutes from "./routes/sellerRoutes.js"
+import productRoutes from './routes/sellers/productRoutes.js';
 
 dotenv.config();
 connectDb()
@@ -39,9 +41,10 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes)
 
+app.use('/api/seller', sellerRoutes)
 
 
-
+app.use('/api/inventory', productRoutes);
 
 
 

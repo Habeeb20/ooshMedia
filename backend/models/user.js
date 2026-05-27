@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
         enum: ['image', 'video'], 
         default: 'image' 
       },
-      platform: {              // To know where it's stored
+      platform: {              // To know where it's storedc
         type: String, 
         enum: ['cloudinary', 's3'], 
         default: 'cloudinary' 
@@ -68,6 +68,12 @@ const userSchema = new mongoose.Schema({
 
     verified: { type: Boolean, default: false },
     businessDocuments: [String], // For CAC, Tax ID, etc.
+    isSeller:   { type: Boolean, default: false },
+isEmployer: { type: Boolean, default: false },
+
+// Refs to the separate profile documents
+sellerProfile:   { type: mongoose.Schema.Types.ObjectId, ref: 'SellerProfile' },
+employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' },
 
     // ==================== TRACKING FIELDS ====================
   businessProfileCompleted: { 
@@ -83,12 +89,90 @@ const userSchema = new mongoose.Schema({
   },
   },
 
+
+    // ==================== SELLER PROFILE ====================
+  isSeller: { type: Boolean, default: false },
+  sellerProfile: {
+    sellerTypes: [{
+      type: String,
+      enum: ['manufacturer', 'wholesaler', 'retailer']
+    }],
+
+    // Seller Chain (especially for Manufacturers)
+    sellerChain: [{
+      businessName: String,
+      email: String,
+      phoneNumber: String,
+      address: String,
+      relationship: { 
+        type: String, 
+        enum: ['wholesaler', 'retailer', 'distributor'] 
+      }
+    }],
+
+    // Product Categories (Multiple selection)
+    productCategories: [{ type: String }],   // Will match your product categories JSON
+
+    // Additional seller info
+    shopName: String,
+    shopDescription: String,
+    verifiedSeller: { type: Boolean, default: false },
+  },
+
+  // ==================== EMPLOYER PROFILE ====================
+  isEmployer: { type: Boolean, default: false },
+  employerProfile: {
+    companyName: String,
+    hiringFor: [{ type: String }],           // Job categories
+    totalEmployees: Number,
+    aboutCompany: String,
+  },
+
+  // Tracking fields
+  businessProfileCompleted: { type: Boolean, default: false },
+  businessProfileUpdatedAt: Date,
+  businessProfileCompletionPercentage: { type: Number, default: 0 },
+
 }, { timestamps: true });
 
 // Index for better performance
 userSchema.index({ "businessProfile.businessName": "text" });
 
 export default mongoose.model('User', userSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

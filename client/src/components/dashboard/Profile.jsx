@@ -31,8 +31,27 @@ export default function BusinessProfileUpdate() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
-        if (data.success && data.user.businessProfile) {
-          setFormData(data.user.businessProfile);
+       console.log("Fetched profile data:", data);
+        if (data.success && data.user?.businessProfile) {
+          const bp = data.user.businessProfile;
+
+          setFormData({
+            businessName: bp.businessName || '',
+            businessAddress: bp.businessAddress || '',
+            entityCategory: bp.entityCategory || [],
+            yearsInBusiness: bp.yearsInBusiness || '',
+            staffCount: bp.staffCount || '',
+            registeredBusiness: bp.registeredBusiness || false,
+   openingHours: bp.openingHours && bp.openingHours.length > 0 
+              ? bp.openingHours 
+              : ['Monday - Friday: 8:00 AM - 6:00 PM'],
+          });
+
+          // Prefill existing gallery images
+          if (bp.gallery && bp.gallery.length > 0) {
+            const imagesOnly = bp.gallery.filter(item => item.type === 'image');
+            setGalleryImages(imagesOnly);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -77,6 +96,54 @@ export default function BusinessProfileUpdate() {
     setVideoFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   const formPayload = new FormData();
+
+  //   // Append text fields
+  //   Object.keys(formData).forEach(key => {
+  //     if (key === 'entityCategory') {
+  //       formPayload.append('entityCategory', JSON.stringify(formData.entityCategory));
+  //     } else {
+  //       formPayload.append(key, formData[key]);
+  //     }
+  //   });
+
+  //   // Append Cloudinary images
+  //   formPayload.append('gallery', JSON.stringify(galleryImages));
+
+  //   // Append Videos for S3 (Multer will handle)
+  //   videoFiles.forEach(file => {
+  //     formPayload.append('gallery', file);
+  //   });
+
+  //   try {
+  //     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/profile`, {
+  //       method: 'PUT',
+
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //       },
+  //       body: formPayload,
+  //     });
+
+  //     const data = await res.json();
+
+  //     if (data.success) {
+  //       toast.success("Business profile updated successfully! 🎉");
+  //     } else {
+  //       toast.error(data.message || "Update failed");
+  //     }
+  //   } catch (err) {
+  //     toast.error("Something went wrong. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -84,18 +151,20 @@ export default function BusinessProfileUpdate() {
     const formPayload = new FormData();
 
     // Append text fields
-    Object.keys(formData).forEach(key => {
-      if (key === 'entityCategory') {
-        formPayload.append('entityCategory', JSON.stringify(formData.entityCategory));
-      } else {
-        formPayload.append(key, formData[key]);
-      }
-    });
+    formPayload.append('businessName', formData.businessName);
+    formPayload.append('businessAddress', formData.businessAddress);
+    formPayload.append('yearsInBusiness', formData.yearsInBusiness);
+    formPayload.append('staffCount', formData.staffCount);
+    formPayload.append('registeredBusiness', formData.registeredBusiness);
+    formPayload.append('entityCategory', JSON.stringify(formData.entityCategory));
+    formPayload.append('openingHours', JSON.stringify(formData.openingHours));
 
     // Append Cloudinary images
-    formPayload.append('gallery', JSON.stringify(galleryImages));
+    if (galleryImages.length > 0) {
+      formPayload.append('gallery', JSON.stringify(galleryImages));
+    }
 
-    // Append Videos for S3 (Multer will handle)
+    // Append Videos for S3
     videoFiles.forEach(file => {
       formPayload.append('gallery', file);
     });
@@ -103,7 +172,6 @@ export default function BusinessProfileUpdate() {
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/profile`, {
         method: 'PUT',
-
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -178,30 +246,62 @@ export default function BusinessProfileUpdate() {
           </div>
         </div>
 
-        {/* Entity Categories */}
+     {/* Entity Categories - FIXED TO SHOW SELECTED STATE */}
         <div className="bg-white rounded-3xl p-8 shadow-sm">
           <h2 className="text-2xl font-semibold mb-6">Business Categories</h2>
           <p className="text-gray-600 mb-4">Select all that apply</p>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {entityCategories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => toggleCategory(cat.id)}
-                className={`p-4 rounded-2xl border text-left transition-all ${
-                  formData.entityCategory.includes(cat.id)
-                    ? 'border-[#8B1E3F] bg-[#8B1E3F]/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <span className="text-2xl mb-2 block">{cat.icon}</span>
-                <p className="font-medium">{cat.name}</p>
-              </button>
-            ))}
+            {entityCategories.map((cat) => {
+              const isSelected = formData.entityCategory.includes(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => toggleCategory(cat.id)}
+                  className={`p-4 rounded-2xl border text-left transition-all ${
+                    isSelected
+                      ? 'border-[#8B1E3F] bg-[#8B1E3F]/5 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="text-2xl mb-2 block">{cat.icon}</span>
+                  <p className="font-medium">{cat.name}</p>
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Staff Count & Opening Hours */}
+        <div className="bg-white rounded-3xl p-8 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Staff Count</label>
+            <input
+              type="number"
+              name="staffCount"
+              value={formData.staffCount}
+              onChange={handleChange}
+              className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+              placeholder="Number of employees"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Opening Hours</label>
+            <input
+              type="text"
+              name="openingHours"
+              value={formData.openingHours[0] || ''}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                openingHours: [e.target.value]
+              }))}
+              className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+              placeholder="e.g Monday - Friday: 8am - 6pm"
+            />
+          </div>
+        </div>
         {/* Gallery - Images & Videos */}
         <div className="bg-white rounded-3xl p-8 shadow-sm">
           <h2 className="text-2xl font-semibold mb-6">Gallery</h2>
@@ -254,3 +354,92 @@ export default function BusinessProfileUpdate() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

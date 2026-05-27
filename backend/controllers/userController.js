@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/auth.js'
+import User from '../models/user.js'
 import { generateAndSendOTP, verifyOTP } from '../utills/sendOtp.js';
 
 import { uploadVideoToS3 } from '../utills/s3BucketUpload.js';
@@ -207,12 +207,72 @@ export const resetPassword = async (req, res) => {
 
 
 // Get Dashboard Data (Simple Version - Only User Data)
+// export const getDashboard = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+// console.log(req.user)
+//     const user = await User.findById(userId).select(
+//       'firstName lastName username email phoneNumber profilePicture role state lga dateOfBirth createdAt businessProfile'
+//     );
+
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found"
+//       });
+//     }
+
+//     // Calculate account age in days
+//     const accountAge = Math.floor(
+//       (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 3600 * 24)
+//     );
+
+//     const dashboardData = {
+//       success: true,
+//       user: {
+//         id: user._id,
+//         firstName: user.firstName,
+//         lastName: user.lastName,
+//         username: user.username,
+//         email: user.email,
+//         phoneNumber: user.phoneNumber,
+//         profilePicture: user.profilePicture,
+//         role: user.role,
+//         state: user.state,
+//         lga: user.lga,
+//         dateOfBirth: user.dateOfBirth,
+//         accountAge: `${accountAge} days`,
+//         memberSince: new Date(user.createdAt).toLocaleDateString('en-NG', {
+//           year: 'numeric',
+//           month: 'long'
+//         })
+//       },
+//       stats: {
+//         profileComplete: calculateProfileCompletion(user),
+//         accountAge: accountAge,
+//         status: "Active",
+//       },
+//       message: `Welcome back, ${user.firstName}!`
+//     };
+
+//     res.json(dashboardData);
+//   } catch (error) {
+//     console.error("Dashboard Error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to load dashboard"
+//     });
+//   }
+// };
+// Get Dashboard Data - Including Full Business Profile
 export const getDashboard = async (req, res) => {
   try {
-    const userId = req.user._id;
-console.log(req.user)
+    const userId = req.user._id;   // Make sure you're using req.user._id (not userId)
+
+    console.log("User from token:", req.user); // For debugging
+
     const user = await User.findById(userId).select(
-      'firstName lastName username email phoneNumber profilePicture role state lga dateOfBirth createdAt'
+      'firstName lastName username email phoneNumber profilePicture isSeller role state lga dateOfBirth createdAt businessProfile sellerProfile'
     );
 
     if (!user) {
@@ -222,7 +282,7 @@ console.log(req.user)
       });
     }
 
-    // Calculate account age in days
+    // Calculate account age
     const accountAge = Math.floor(
       (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 3600 * 24)
     );
@@ -240,23 +300,29 @@ console.log(req.user)
         role: user.role,
         state: user.state,
         lga: user.lga,
+        isSeller: user.isSeller,
         dateOfBirth: user.dateOfBirth,
         accountAge: `${accountAge} days`,
         memberSince: new Date(user.createdAt).toLocaleDateString('en-NG', {
           year: 'numeric',
           month: 'long'
-        })
+        }),
+        // Include full business profile
+        businessProfile: user.businessProfile || null,
+        sellerProfile: user.sellerProfile || null
       },
       stats: {
         profileComplete: calculateProfileCompletion(user),
         accountAge: accountAge,
         status: "Active",
+        businessProfileCompleted: user.businessProfileCompleted || false,
+        businessProfileCompletionPercentage: user.businessProfileCompletionPercentage || 0,
       },
       message: `Welcome back, ${user.firstName}!`
     };
-
+console.log("Dashboard Data:", dashboardData.user); // For debugging
     res.json(dashboardData);
-  } catch (error) {
+  } catch (error) {d
     console.error("Dashboard Error:", error);
     res.status(500).json({
       success: false,
@@ -265,10 +331,10 @@ console.log(req.user)
   }
 };
 
-// Helper function to calculate profile completion percentage
+// Helper Function
 const calculateProfileCompletion = (user) => {
   let completed = 0;
-  let total = 8; // Total fields to check
+  let total = 8;
 
   if (user.firstName) completed++;
   if (user.lastName) completed++;
@@ -281,6 +347,22 @@ const calculateProfileCompletion = (user) => {
 
   return Math.round((completed / total) * 100);
 };
+// Helper function to calculate profile completion percentage
+// const calculateProfileCompletion = (user) => {
+//   let completed = 0;
+//   let total = 8; // Total fields to check
+
+//   if (user.firstName) completed++;
+//   if (user.lastName) completed++;
+//   if (user.username) completed++;
+//   if (user.email || user.phoneNumber) completed++;
+//   if (user.profilePicture) completed++;
+//   if (user.state) completed++;
+//   if (user.lga) completed++;
+//   if (user.dateOfBirth) completed++;
+
+//   return Math.round((completed / total) * 100);
+// };
 
 
 

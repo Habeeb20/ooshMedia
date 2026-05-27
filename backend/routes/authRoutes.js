@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendOTP, verifyOtp, signup, login, forgotPassword, resetPassword, getDashboard, updateBusinessProfile } from '../controllers/authController.js';
+import { sendOTP, verifyOtp, signup, login, forgotPassword, resetPassword, getDashboard, updateBusinessProfile } from '../controllers/userController.js';
 import {verifyToken} from "../middleware/verifyToken.js"
 import {upload} from "../middleware/multer.js"
 const router = express.Router();
