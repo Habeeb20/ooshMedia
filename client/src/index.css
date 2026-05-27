@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+
+:root {
+  --color-primary: #8B1E3F;     /* Wine */
+  --color-primary-hover: #A6224A;
+  --color-primary-light: #C44A6F;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-light: var(--color-primary-light);
+}
