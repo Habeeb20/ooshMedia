@@ -1,0 +1,763 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import axios from "axios";
+
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  Truck,
+  ShieldCheck,
+  Loader2,
+} from "lucide-react";
+
+import appConfig from "../../config/appConfig";
+
+export default function ProductDetails() {
+  const { slug } = useParams();
+
+  const [product, setProduct] = useState(null);
+  const [mainImage, setMainImage] = useState("");
+  const [loading, setLoading] = useState(true);
+const [relatedProducts, setRelatedProducts] = useState([]);
+  // SLUGIFY
+  const slugify = (text) => {
+    return text
+      ?.toLowerCase()
+      ?.replace(/[^\w ]+/g, "")
+      ?.replace(/ +/g, "-");
+  };
+
+  // FETCH PRODUCT
+//   const fetchProduct = async () => {
+//     try {
+//       const response = await axios.get(
+//         `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
+//       );
+
+//       const products =
+//         response.data?.products ||
+//         response.data ||
+//         [];
+
+//       // FIND PRODUCT USING SLUG
+//       const foundProduct = products.find(
+//         (item) => slugify(item.name) === slug
+//       );
+
+//       setProduct(foundProduct);
+
+//       if (foundProduct?.images?.length > 0) {
+//         setMainImage(
+//           foundProduct.images[0].url
+//         );
+//       }
+//     } catch (error) {
+//       console.log("PRODUCT ERROR:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+
+  const fetchProduct = async () => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
+    );
+
+    const products =
+      response.data?.products ||
+      response.data ||
+      [];
+
+    // FIND CURRENT PRODUCT
+    const foundProduct = products.find(
+      (item) => slugify(item.name) === slug
+    );
+
+    setProduct(foundProduct);
+
+    // MAIN IMAGE
+    if (foundProduct?.images?.length > 0) {
+      setMainImage(
+        foundProduct.images[0].url
+      );
+    }
+
+    // RELATED PRODUCTS
+    const related = products.filter(
+      (item) =>
+        item.category ===
+          foundProduct?.category &&
+        item._id !== foundProduct?._id
+    );
+
+    setRelatedProducts(related);
+  } catch (error) {
+    console.log("PRODUCT ERROR:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+    fetchProduct();
+  }, [slug]);
+
+  // LOADING
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#f5f5f7]">
+        <Loader2
+          className="animate-spin"
+          size={45}
+          color={appConfig.colors.primary}
+        />
+      </div>
+    );
+  }
+
+  // PRODUCT NOT FOUND
+  if (!product) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-[#f5f5f7]">
+        <h1 className="text-3xl font-black text-gray-800">
+          Product Not Found
+        </h1>
+
+        <p className="text-gray-500 mt-3">
+          The product you are looking for does not exist.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <section className="bg-[#f5f5f7] min-h-screen py-6">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="bg-white rounded-3xl p-5 md:p-8 grid lg:grid-cols-2 gap-10 shadow-sm">
+          {/* LEFT SIDE */}
+          <div>
+            {/* MAIN IMAGE */}
+            <div className="bg-gray-100 rounded-3xl overflow-hidden">
+              <img
+                src={
+                  mainImage ||
+                  "https://via.placeholder.com/700"
+                }
+                alt={product?.name}
+                className="w-full h-[350px] md:h-[550px] object-cover"
+              />
+            </div>
+
+            {/* THUMBNAILS */}
+            <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+              {product?.images?.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    setMainImage(img.url)
+                  }
+                  className={`border-2 rounded-2xl overflow-hidden min-w-[90px] transition-all ${
+                    mainImage === img.url
+                      ? "border-[#8B1E3F]"
+                      : "border-transparent"
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt=""
+                    className="w-20 h-20 object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div>
+            {/* CATEGORY */}
+            <p
+              className="uppercase text-sm font-bold tracking-wider"
+              style={{
+                color: appConfig.colors.primary,
+              }}
+            >
+              {product?.category}
+            </p>
+
+            {/* NAME */}
+            <h1 className="text-3xl md:text-5xl font-black mt-3 text-gray-900 leading-tight">
+              {product?.name}
+            </h1>
+
+            {/* BRAND */}
+            {product?.brand && (
+              <p className="mt-3 text-gray-500">
+                Brand:
+                <span className="font-semibold text-gray-800 ml-2">
+                  {product.brand}
+                </span>
+              </p>
+            )}
+
+            {/* RATINGS */}
+            <div className="flex items-center gap-2 mt-4">
+              <div className="flex text-amber-400">
+                {[...Array(5)].map((_, index) => (
+                  <Star
+                    key={index}
+                    fill="currentColor"
+                    size={20}
+                  />
+                ))}
+              </div>
+
+              <span className="text-gray-500">
+                ({product?.ratings || 0} Ratings)
+              </span>
+            </div>
+
+            {/* PRICE */}
+            <div className="mt-6">
+              <h2
+                className="text-4xl md:text-5xl font-black"
+                style={{
+                  color: appConfig.colors.primary,
+                }}
+              >
+                ₦
+                {(
+                  product?.salePrice ||
+                  product?.price
+                )?.toLocaleString()}
+              </h2>
+
+              {product?.salePrice && (
+                <p className="line-through text-gray-400 mt-2 text-xl">
+                  ₦
+                  {product?.price?.toLocaleString()}
+                </p>
+              )}
+            </div>
+
+            {/* STOCK */}
+            <div className="mt-6 flex items-center gap-4">
+              <span className="font-semibold">
+                Stock Left:
+              </span>
+
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-bold ${
+                  product?.stockQuantity > 0
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {product?.stockQuantity > 0
+                  ? `${product?.stockQuantity} Available`
+                  : "Out Of Stock"}
+              </span>
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="mt-8">
+              <h3 className="font-bold text-xl">
+                Description
+              </h3>
+
+              <p className="text-gray-600 leading-relaxed mt-3">
+                {product?.description}
+              </p>
+            </div>
+
+            {/* TAGS */}
+            {product?.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-6">
+                {product.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 rounded-full bg-gray-100 text-sm font-medium"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* ACTION BUTTONS */}
+            <div className="flex flex-col md:flex-row gap-4 mt-10">
+              <button
+                className="flex-1 py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 hover:scale-[1.02] transition"
+                style={{
+                  background: appConfig.colors.primary,
+                }}
+              >
+                <ShoppingCart />
+                Add To Cart
+              </button>
+
+              <button className="w-full md:w-16 h-16 rounded-2xl border flex items-center justify-center hover:bg-gray-50">
+                <Heart />
+              </button>
+            </div>
+
+            {/* FEATURES */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
+              <div className="border rounded-2xl p-4 flex gap-4">
+                <Truck
+                  color={appConfig.colors.primary}
+                />
+
+                <div>
+                  <h4 className="font-bold">
+                    Fast Delivery
+                  </h4>
+
+                  <p className="text-sm text-gray-500">
+                    Nationwide shipping available
+                  </p>
+                </div>
+              </div>
+
+              <div className="border rounded-2xl p-4 flex gap-4">
+                <ShieldCheck
+                  color={appConfig.colors.primary}
+                />
+
+                <div>
+                  <h4 className="font-bold">
+                    Secure Payments
+                  </h4>
+
+                  <p className="text-sm text-gray-500">
+                    100% secure payment system
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* SPECIFICATIONS */}
+            {product?.specifications &&
+              Object.keys(product.specifications)
+                .length > 0 && (
+                <div className="mt-10">
+                  <h3 className="font-bold text-xl mb-4">
+                    Specifications
+                  </h3>
+
+                  <div className="border rounded-2xl overflow-hidden">
+                    {Object.entries(
+                      product.specifications
+                    ).map(
+                      ([key, value], index) => (
+                        <div
+                          key={index}
+                          className="grid grid-cols-2 border-b last:border-0"
+                        >
+                          <div className="bg-gray-50 p-4 font-semibold capitalize">
+                            {key}
+                          </div>
+
+                          <div className="p-4 text-gray-600">
+                            {value}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              
+          </div>
+          {/* SELLER INFO */}
+<div className="mt-10 border rounded-3xl overflow-hidden">
+  {/* HEADER */}
+  <div
+    className="px-5 py-4 text-white"
+    style={{
+      background: appConfig.colors.primary,
+    }}
+  >
+    <h2 className="font-bold text-lg">
+      Seller Information
+    </h2>
+  </div>
+
+  {/* CONTENT */}
+  <div className="p-5">
+    <div className="flex items-start gap-4">
+      {/* PROFILE IMAGE */}
+      <img
+        src={
+          product?.seller?.profilePicture ||
+          "https://ui-avatars.com/api/?name=Seller"
+        }
+        alt=""
+        className="w-20 h-20 rounded-2xl object-cover border"
+      />
+
+      {/* SELLER DETAILS */}
+      <div className="flex-1">
+        {/* NAME */}
+        <h3 className="text-2xl font-black text-gray-800">
+          {product?.seller?.businessProfile
+            ?.businessName ||
+            product?.seller?.sellerProfile
+              ?.shopName ||
+            `${product?.seller?.firstName} ${product?.seller?.lastName}`}
+        </h3>
+
+        {/* USERNAME */}
+        <p className="text-gray-500 mt-1">
+          @{product?.seller?.username}
+        </p>
+
+        {/* BADGES */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {product?.seller?.isSeller && (
+            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+              Verified Seller
+            </span>
+          )}
+
+          {product?.seller?.businessProfile
+            ?.verified && (
+            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+              Verified Business
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* DESCRIPTION */}
+    {product?.seller?.sellerProfile
+      ?.shopDescription && (
+      <div className="mt-6">
+        <h4 className="font-bold text-gray-800">
+          About Seller
+        </h4>
+
+        <p className="text-gray-600 mt-2 leading-relaxed">
+          {
+            product?.seller?.sellerProfile
+              ?.shopDescription
+          }
+        </p>
+      </div>
+    )}
+
+    {/* CONTACT INFO */}
+    <div className="grid md:grid-cols-2 gap-4 mt-6">
+      {/* PHONE */}
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <p className="text-xs text-gray-400 uppercase">
+          Phone Number
+        </p>
+
+        <h4 className="font-bold text-gray-800 mt-1">
+          {product?.seller?.phoneNumber ||
+            "Not Available"}
+        </h4>
+      </div>
+
+      {/* EMAIL */}
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <p className="text-xs text-gray-400 uppercase">
+          Email Address
+        </p>
+
+        <h4 className="font-bold text-gray-800 mt-1 break-all">
+          {product?.seller?.email ||
+            "Not Available"}
+        </h4>
+      </div>
+
+      {/* LOCATION */}
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <p className="text-xs text-gray-400 uppercase">
+          Location
+        </p>
+
+        <h4 className="font-bold text-gray-800 mt-1">
+          {product?.seller?.state},{" "}
+          {product?.seller?.lga}
+        </h4>
+      </div>
+
+      {/* BUSINESS YEARS */}
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <p className="text-xs text-gray-400 uppercase">
+          Years In Business
+        </p>
+
+        <h4 className="font-bold text-gray-800 mt-1">
+          {product?.seller?.businessProfile
+            ?.yearsInBusiness || 0}{" "}
+          Years
+        </h4>
+      </div>
+    </div>
+
+    {/* BUSINESS ADDRESS */}
+    {product?.seller?.businessProfile
+      ?.businessAddress && (
+      <div className="mt-6 bg-gray-50 rounded-2xl p-4">
+        <p className="text-xs text-gray-400 uppercase">
+          Business Address
+        </p>
+
+        <h4 className="font-bold text-gray-800 mt-1">
+          {
+            product?.seller?.businessProfile
+              ?.businessAddress
+          }
+        </h4>
+      </div>
+    )}
+
+    {/* SELLER STATS */}
+    <div className="grid grid-cols-3 gap-4 mt-6">
+      <div className="bg-gray-50 rounded-2xl p-4 text-center">
+        <h3
+          className="text-2xl font-black"
+          style={{
+            color: appConfig.colors.primary,
+          }}
+        >
+          {product?.seller?.businessProfile
+            ?.likes || 0}
+        </h3>
+
+        <p className="text-xs text-gray-500 mt-1">
+          Likes
+        </p>
+      </div>
+
+      <div className="bg-gray-50 rounded-2xl p-4 text-center">
+        <h3
+          className="text-2xl font-black"
+          style={{
+            color: appConfig.colors.primary,
+          }}
+        >
+          {product?.seller?.businessProfile
+            ?.shares || 0}
+        </h3>
+
+        <p className="text-xs text-gray-500 mt-1">
+          Shares
+        </p>
+      </div>
+
+      <div className="bg-gray-50 rounded-2xl p-4 text-center">
+        <h3
+          className="text-2xl font-black"
+          style={{
+            color: appConfig.colors.primary,
+          }}
+        >
+          {product?.seller?.businessProfile
+            ?.reviews?.length || 0}
+        </h3>
+
+        <p className="text-xs text-gray-500 mt-1">
+          Reviews
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+        </div>
+
+        {/* RELATED PRODUCTS */}
+{relatedProducts.length > 0 && (
+  <div className="mt-12">
+    {/* HEADER */}
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h2 className="text-1xl md:text-2xl font-black text-gray-900">
+          You May Also Like
+        </h2>
+
+        <p className="text-gray-500 mt-1">
+          Similar products in this category
+        </p>
+      </div>
+    </div>
+
+    {/* SWIPER */}
+    <Swiper
+      modules={[Navigation, Autoplay]}
+      navigation
+      autoplay={{
+        delay: 2500,
+        disableOnInteraction: false,
+      }}
+      spaceBetween={20}
+      slidesPerView={2}
+      breakpoints={{
+        480: {
+          slidesPerView: 2,
+        },
+
+        640: {
+          slidesPerView: 3,
+        },
+
+        1024: {
+          slidesPerView: 4,
+        },
+
+        1280: {
+          slidesPerView: 5,
+        },
+      }}
+    >
+      {relatedProducts.map((item) => {
+        const relatedSlug = slugify(
+          item.name
+        );
+
+        return (
+          <SwiperSlide key={item._id}>
+            <Link
+              to={`/product/${relatedSlug}`}
+            >
+              <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group">
+                {/* IMAGE */}
+                <div className="overflow-hidden relative">
+                  <img
+                    src={
+                      item?.images?.[0]
+                        ?.url ||
+                      "https://via.placeholder.com/500"
+                    }
+                    alt={item?.name}
+                    className="w-full h-52 object-cover group-hover:scale-105 transition duration-500"
+                  />
+
+                  {/* SALE */}
+                  {item?.salePrice && (
+                    <div
+                      className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white"
+                      style={{
+                        background:
+                          appConfig.colors
+                            .primary,
+                      }}
+                    >
+                      SALE
+                    </div>
+                  )}
+                </div>
+
+                {/* CONTENT */}
+                <div className="p-4">
+                  {/* CATEGORY */}
+                  <p
+                    className="uppercase text-xs font-bold tracking-wider"
+                    style={{
+                      color:
+                        appConfig.colors
+                          .primary,
+                    }}
+                  >
+                    {item?.category}
+                  </p>
+
+                  {/* NAME */}
+                  <h3 className="font-semibold text-gray-800 mt-2 line-clamp-2 min-h-[48px]">
+                    {item?.name}
+                  </h3>
+
+                  {/* RATING */}
+                  <div className="flex items-center gap-1 mt-3">
+                    <Star
+                      size={15}
+                      fill="currentColor"
+                      className="text-amber-400"
+                    />
+
+                    <span className="text-sm text-gray-500">
+                      {item?.ratings || 0}
+                    </span>
+                  </div>
+
+                  {/* PRICE */}
+                  <div className="mt-3">
+                    <h3
+                      className="text-2xl font-black"
+                      style={{
+                        color:
+                          appConfig.colors
+                            .primary,
+                      }}
+                    >
+                      ₦
+                      {(
+                        item?.salePrice ||
+                        item?.price
+                      )?.toLocaleString()}
+                    </h3>
+
+                    {item?.salePrice && (
+                      <p className="line-through text-gray-400 text-sm mt-1">
+                        ₦
+                        {item?.price?.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* STOCK */}
+                  <div className="mt-3">
+                    <span
+                      className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        item?.stockQuantity > 0
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {item?.stockQuantity > 0
+                        ? `${item.stockQuantity} Left`
+                        : "Out Of Stock"}
+                    </span>
+                  </div>
+
+                  {/* BUTTON */}
+                  {/* <button
+                    className="w-full mt-4 py-3 rounded-2xl text-white font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition"
+                    style={{
+                      background:
+                        appConfig.colors
+                          .primary,
+                    }}
+                  >
+                    <ShoppingCart
+                      size={18}
+                    />
+                    View Product
+                  </button> */}
+                </div>
+              </div>
+            </Link>
+          </SwiperSlide>
+        );
+      })}
+    </Swiper>
+  </div>
+)}
+      </div>
+    </section>
+  );
+}

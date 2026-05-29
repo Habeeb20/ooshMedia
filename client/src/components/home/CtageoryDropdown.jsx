@@ -1,0 +1,195 @@
+import { useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  X,
+} from "lucide-react";
+
+import { productCategories } from "../../categories/productCategories";
+import appConfig from "../../config/appConfig";
+
+export default function CategoryDropdown() {
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // SHOW ONLY 3 INITIALLY
+  const visibleCategories = productCategories.slice(0, 3);
+  const remainingCategories = productCategories.slice(3);
+
+  const toggleCategory = (id) => {
+    setActiveCategory(activeCategory === id ? null : id);
+  };
+
+  const CategoryItem = ({ category }) => {
+    const isOpen = activeCategory === category.id;
+
+    return (
+      <div className="transition-all duration-300">
+        {/* CATEGORY HEADER */}
+        <button
+          onClick={() => toggleCategory(category.id)}
+          className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            {/* ICON */}
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center text-lg"
+              style={{
+                background: `${appConfig.colors.primary}12`,
+              }}
+            >
+              {category.icon}
+            </div>
+
+            {/* TEXT */}
+            <div className="text-left">
+              <h3 className="font-semibold text-sm text-gray-800">
+                {category.name}
+              </h3>
+
+              <p className="text-gray-400 text-xs">
+                {category.subcategories.length} subcategories
+              </p>
+            </div>
+          </div>
+
+          {/* ARROW */}
+          <div>
+            {isOpen ? (
+              <ChevronUp
+                size={18}
+                color={appConfig.colors.primary}
+              />
+            ) : (
+              <ChevronDown
+                size={18}
+                color={appConfig.colors.primary}
+              />
+            )}
+          </div>
+        </button>
+
+        {/* SUBCATEGORIES */}
+        <div
+          className={`grid transition-all duration-500 overflow-hidden ${
+            isOpen
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {category.subcategories.map((sub, index) => (
+                  <button
+                    key={index}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-white hover:shadow-sm transition-all text-left group"
+                  >
+                    <span className="font-medium text-xs text-gray-700">
+                      {sub}
+                    </span>
+
+                    <ChevronRight
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition"
+                      color={appConfig.colors.primary}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <section className="mt-6">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* HEADER */}
+          <div className="flex justify-between items-center px-4 py-4 border-b">
+            <div>
+              <h2
+                className="text-lg md:text-xl font-bold"
+                style={{
+                  color: appConfig.colors.primary,
+                }}
+              >
+                Browse Categories
+              </h2>
+
+              <p className="text-gray-400 mt-1 text-xs">
+                Explore by category
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowModal(true)}
+              className="text-xs md:text-sm font-semibold px-4 py-2 rounded-lg text-white"
+              style={{
+                background: appConfig.colors.primary,
+              }}
+            >
+              See More
+            </button>
+          </div>
+
+          {/* CATEGORY LIST */}
+          <div className="divide-y divide-gray-100">
+            {visibleCategories.map((category) => (
+              <CategoryItem
+                key={category.id}
+                category={category}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            {/* MODAL HEADER */}
+            <div className="flex items-center justify-between px-5 py-4 border-b">
+              <div>
+                <h2
+                  className="text-xl font-bold"
+                  style={{
+                    color: appConfig.colors.primary,
+                  }}
+                >
+                  All Categories
+                </h2>
+
+                <p className="text-gray-400 text-sm mt-1">
+                  Browse all product categories
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="max-h-[75vh] overflow-y-auto divide-y divide-gray-100">
+              {remainingCategories.map((category) => (
+                <CategoryItem
+                  key={category.id}
+                  category={category}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

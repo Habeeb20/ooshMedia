@@ -48,6 +48,8 @@ const productSchema = new mongoose.Schema({
   specifications: Map, // Flexible key-value specs
 
   views: { type: Number, default: 0 },
+  likes: { type: Number, default: 0 },
+  ratings:{ type: Number, default: 0 },
   sold: { type: Number, default: 0 },
 
 }, { timestamps: true });

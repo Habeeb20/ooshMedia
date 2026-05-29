@@ -1,3 +1,4 @@
+import { AlertTriangle } from "lucide-react";
 export default function StockAlert({ products }) {
   const lowStock = products.filter(p => p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0);
   const outOfStock = products.filter(p => p.stockQuantity === 0);

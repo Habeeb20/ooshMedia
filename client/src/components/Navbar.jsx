@@ -2,7 +2,7 @@ import { useState } from 'react';
 import appConfig from '../config/AppConfig';
 import { useAuth } from '../context/AuthContext';
 import { Menu, X, Play } from 'lucide-react';
-import { Link } from "react-router-dom";
+import { Link, Links } from "react-router-dom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           
           {/* Logo */}
+            <Link to="/" className="flex items-center gap-3">
           <div className="flex items-center gap-3">
+          
             <div 
               className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
               style={{ 
@@ -26,6 +28,7 @@ export default function Navbar() {
             >
               <Play className="w-5 h-5 text-white" fill="white" />
             </div>
+       
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900">
                 {appConfig.name}
@@ -33,6 +36,7 @@ export default function Navbar() {
               <p className="text-[10px] text-gray-500 -mt-1">BUSINESS MEDIA</p>
             </div>
           </div>
+               </Link>
 
           {/* Static Navigation Links */}
           <div className="hidden md:flex items-center gap-10">
