@@ -64,6 +64,7 @@ export const signup = async (req, res) => {
     });
 
     if (existingUser) {
+   
       return res.status(409).json({ message: "User already exists" });
     }
 
@@ -206,65 +207,6 @@ export const resetPassword = async (req, res) => {
 
 
 
-// Get Dashboard Data (Simple Version - Only User Data)
-// export const getDashboard = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-// console.log(req.user)
-//     const user = await User.findById(userId).select(
-//       'firstName lastName username email phoneNumber profilePicture role state lga dateOfBirth createdAt businessProfile'
-//     );
-
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found"
-//       });
-//     }
-
-//     // Calculate account age in days
-//     const accountAge = Math.floor(
-//       (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 3600 * 24)
-//     );
-
-//     const dashboardData = {
-//       success: true,
-//       user: {
-//         id: user._id,
-//         firstName: user.firstName,
-//         lastName: user.lastName,
-//         username: user.username,
-//         email: user.email,
-//         phoneNumber: user.phoneNumber,
-//         profilePicture: user.profilePicture,
-//         role: user.role,
-//         state: user.state,
-//         lga: user.lga,
-//         dateOfBirth: user.dateOfBirth,
-//         accountAge: `${accountAge} days`,
-//         memberSince: new Date(user.createdAt).toLocaleDateString('en-NG', {
-//           year: 'numeric',
-//           month: 'long'
-//         })
-//       },
-//       stats: {
-//         profileComplete: calculateProfileCompletion(user),
-//         accountAge: accountAge,
-//         status: "Active",
-//       },
-//       message: `Welcome back, ${user.firstName}!`
-//     };
-
-//     res.json(dashboardData);
-//   } catch (error) {
-//     console.error("Dashboard Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to load dashboard"
-//     });
-//   }
-// };
-// Get Dashboard Data - Including Full Business Profile
 export const getDashboard = async (req, res) => {
   try {
     const userId = req.user._id;   // Make sure you're using req.user._id (not userId)
@@ -320,7 +262,7 @@ export const getDashboard = async (req, res) => {
       },
       message: `Welcome back, ${user.firstName}!`
     };
-console.log("Dashboard Data:", dashboardData.user); // For debugging
+
     res.json(dashboardData);
   } catch (error) {d
     console.error("Dashboard Error:", error);
@@ -368,6 +310,105 @@ const calculateProfileCompletion = (user) => {
 
 
 // Update Business Profile
+
+// export const updateBusinessProfile = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     if (user.role !== 'entity') {
+//       return res.status(403).json({ 
+//         success: false, 
+//         message: "Only business entities can update business profile" 
+//       });
+//     }
+
+//     const {
+//       businessName,
+//       businessAddress,
+//       entityCategory,
+//       yearsInBusiness,
+//       staffCount,
+//       registeredBusiness,
+//       openingHours,
+//     } = req.body;
+
+//     // Handle Gallery (Images from Cloudinary + Videos from S3)
+//     let gallery = user.businessProfile?.gallery || [];
+
+//     // If new gallery items are sent from frontend (Cloudinary URLs)
+//     if (req.body.gallery && Array.isArray(req.body.gallery)) {
+//       gallery = [...gallery, ...req.body.gallery];
+//     }
+
+//     // If videos are uploaded directly (via multer)
+//     if (req.files && req.files.length > 0) {
+//       const videoUploads = await Promise.all(
+//         req.files.map(file => uploadVideoToS3(file, 'business-gallery'))
+//       );
+
+//       const videoEntries = videoUploads.map(upload => ({
+//         url: upload.url,
+//         publicId: upload.key,
+//         type: 'video',
+//         platform: 's3'
+//       }));
+
+//       gallery = [...gallery, ...videoEntries];
+//     }
+
+//     // Update Business Profile
+//     user.businessProfile = {
+//       ...user.businessProfile,
+//       businessName: businessName || user.businessProfile?.businessName,
+//       businessAddress: businessAddress || user.businessProfile?.businessAddress,
+//       entityCategory: entityCategory || user.businessProfile?.entityCategory || [],
+//       yearsInBusiness: yearsInBusiness !== undefined ? Number(yearsInBusiness) : user.businessProfile?.yearsInBusiness,
+//       staffCount: staffCount !== undefined ? Number(staffCount) : user.businessProfile?.staffCount,
+//       registeredBusiness: registeredBusiness !== undefined ? registeredBusiness : user.businessProfile?.registeredBusiness,
+//       openingHours: openingHours || user.businessProfile?.openingHours || [],
+//       gallery: gallery,
+//     };
+
+//     // Calculate Completion Percentage
+//     const completionPercentage = calculateBusinessProfileCompletion(user.businessProfile);
+
+//     user.businessProfileCompleted = completionPercentage === 100;
+//     user.businessProfileUpdatedAt = new Date();
+//     user.businessProfileCompletionPercentage = completionPercentage;
+
+//     await user.save();
+
+//     res.json({
+//       success: true,
+//       message: "Business profile updated successfully",
+//       businessProfile: user.businessProfile,
+//       completionPercentage,
+//       isCompleted: user.businessProfileCompleted
+//     });
+
+//   } catch (error) {
+//     console.error("Business Profile Update Error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to update business profile",
+//       error: error.message
+//     });
+//   }
+// };
+
+
+
+
+// Helper Function to Calculate Completion
+
+
+
+
 export const updateBusinessProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -377,14 +418,22 @@ export const updateBusinessProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    if (user.role !== 'entity') {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Only business entities can update business profile" 
-      });
-    }
+    // if (user.role !== 'entity') {
+    //   return res.status(403).json({ 
+    //     success: false, 
+    //     message: "Only business entities can update business profile" 
+    //   });
+    // }
 
     const {
+      // Basic User Info
+      firstName,
+      lastName,
+      state,
+      lga,
+      profilePicture,
+
+      // Business Profile Fields
       businessName,
       businessAddress,
       entityCategory,
@@ -394,15 +443,20 @@ export const updateBusinessProfile = async (req, res) => {
       openingHours,
     } = req.body;
 
-    // Handle Gallery (Images from Cloudinary + Videos from S3)
+    // ==================== UPDATE BASIC USER INFO ====================
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (state) user.state = state;
+    if (lga) user.lga = lga;
+    if (profilePicture) user.profilePicture = profilePicture;
+
+    // ==================== HANDLE GALLERY (Existing Logic) ====================
     let gallery = user.businessProfile?.gallery || [];
 
-    // If new gallery items are sent from frontend (Cloudinary URLs)
     if (req.body.gallery && Array.isArray(req.body.gallery)) {
       gallery = [...gallery, ...req.body.gallery];
     }
 
-    // If videos are uploaded directly (via multer)
     if (req.files && req.files.length > 0) {
       const videoUploads = await Promise.all(
         req.files.map(file => uploadVideoToS3(file, 'business-gallery'))
@@ -418,7 +472,7 @@ export const updateBusinessProfile = async (req, res) => {
       gallery = [...gallery, ...videoEntries];
     }
 
-    // Update Business Profile
+    // ==================== UPDATE BUSINESS PROFILE ====================
     user.businessProfile = {
       ...user.businessProfile,
       businessName: businessName || user.businessProfile?.businessName,
@@ -442,7 +496,14 @@ export const updateBusinessProfile = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Business profile updated successfully",
+      message: "Profile updated successfully",
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        state: user.state,
+        lga: user.lga,
+        profilePicture: user.profilePicture,
+      },
       businessProfile: user.businessProfile,
       completionPercentage,
       isCompleted: user.businessProfileCompleted
@@ -452,13 +513,13 @@ export const updateBusinessProfile = async (req, res) => {
     console.error("Business Profile Update Error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to update business profile",
+      message: "Failed to update profile",
       error: error.message
     });
   }
 };
 
-// Helper Function to Calculate Completion
+// Helper Function (unchanged)
 const calculateBusinessProfileCompletion = (profile) => {
   if (!profile) return 0;
 
@@ -475,3 +536,23 @@ const calculateBusinessProfileCompletion = (profile) => {
 
   return Math.round((score / totalFields) * 100);
 };
+
+
+
+
+// const calculateBusinessProfileCompletion = (profile) => {
+//   if (!profile) return 0;
+
+//   let score = 0;
+//   const totalFields = 7;
+
+//   if (profile.businessName?.trim()) score++;
+//   if (profile.businessAddress?.trim()) score++;
+//   if (profile.entityCategory?.length > 0) score++;
+//   if (profile.yearsInBusiness !== undefined && profile.yearsInBusiness > 0) score++;
+//   if (profile.staffCount !== undefined && profile.staffCount > 0) score++;
+//   if (profile.registeredBusiness !== undefined) score++;
+//   if (profile.openingHours?.length > 0) score++;
+
+//   return Math.round((score / totalFields) * 100);
+// };

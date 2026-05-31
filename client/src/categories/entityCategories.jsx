@@ -18,6 +18,12 @@ export const entityCategories = [
     examples: ["Supermarket", "Mini Mart", "Fashion Store", "Electronics Store", "Wholesale"]
   },
   {
+    id: "restaurant",
+    name: "Restaurant",
+    icon: "🛒",
+    examples: ["Supermarket", "Mini Mart", "Fashion Store", "Electronics Store", "Wholesale"]
+  },
+  {
     id: "healthcare",
     name: "Healthcare & Medical",
     icon: "🩺",

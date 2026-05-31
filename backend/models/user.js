@@ -41,8 +41,14 @@ const userSchema = new mongoose.Schema({
 
     // Social & Engagement
     likes: { type: Number, default: 0 },
+    likedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
     comments: { type: Number, default: 0 },
     shares: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
+
     reviews: [{
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       rating: { type: Number, min: 1, max: 5 },

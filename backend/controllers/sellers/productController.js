@@ -213,3 +213,82 @@ export const getAllProducts = async (req, res) => {
     });
   }
 };
+
+
+
+// Like a Product
+export const likeProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.id;
+
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { $inc: { likes: 1 } },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Product liked",
+      likes: product.likes
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// View a Product (Increment Views)
+export const viewProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    // You can also track who viewed it if needed (optional)
+    res.json({
+      success: true,
+      views: product.views
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Optional: Record Rating for Product
+export const rateProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { rating } = req.body; // 1-5
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Invalid rating" });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { $inc: { ratings: rating } }, // You might want average logic later
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: "Rating recorded",
+      totalRatings: product.ratings
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

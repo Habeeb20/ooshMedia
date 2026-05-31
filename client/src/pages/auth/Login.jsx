@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import appConfig from '../../config/AppConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import Loading from '../../config/Loading';
-
+import {useAuth} from "../../context/AuthContext"
 export default function Login() {
   const [formData, setFormData] = useState({
     contact: '',
@@ -15,6 +15,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,7 +45,9 @@ export default function Login() {
         toast.success(`Welcome back, ${data.user.firstName}!`);
         
         // Redirect to dashboard
-        navigate('/dashboard');
+        login(data.token, data.user);
+        const from = location.state?.from || '/dashboard';
+        navigate(from, { replace: true });
       } else {
         toast.error(data.message || "Invalid credentials");
       }
@@ -164,3 +168,12 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

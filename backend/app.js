@@ -8,7 +8,8 @@ import { connectDb } from "./db.js";
 import authRoutes from "./routes/authRoutes.js"
 import sellerRoutes from "./routes/sellerRoutes.js"
 import productRoutes from './routes/sellers/productRoutes.js';
-
+import chainRoutes from "./routes/sellers/distributionChainRoutes.js"
+import postRoutes from "./routes/post/postRoutes.js"
 dotenv.config();
 connectDb()
 
@@ -46,8 +47,8 @@ app.use('/api/seller', sellerRoutes)
 
 app.use('/api/inventory', productRoutes);
 
-
-
+app.use('/api/chain', chainRoutes)
+app.use('/api/posts', postRoutes)
 // Start server
 const port = process.env.PORT || 2020;
 

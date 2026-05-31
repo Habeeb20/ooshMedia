@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import { useUserLocation, getDistanceKm } from './../../location/UserLocation';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
-
+import { useJobDistance } from "../../location/UseJobDistance";
 import "swiper/css";
 import "swiper/css/navigation";
 import axios from "axios";
@@ -17,9 +17,9 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
-
+import JobLocationMap from "../../location/JobLocationMap";
 import appConfig from "../../config/appConfig";
-
+import { MapPin } from "lucide-react";
 export default function ProductDetails() {
   const { slug } = useParams();
 
@@ -27,6 +27,9 @@ export default function ProductDetails() {
   const [mainImage, setMainImage] = useState("");
   const [loading, setLoading] = useState(true);
 const [relatedProducts, setRelatedProducts] = useState([]);
+const { location: userLocation } = useUserLocation();
+const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocation, product?.seller?.lga, product?.seller?.state);
+
   // SLUGIFY
   const slugify = (text) => {
     return text
@@ -72,6 +75,7 @@ const [relatedProducts, setRelatedProducts] = useState([]);
     const response = await axios.get(
       `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
     );
+
 
     const products =
       response.data?.products ||
@@ -195,7 +199,7 @@ const [relatedProducts, setRelatedProducts] = useState([]);
             </p>
 
             {/* NAME */}
-            <h1 className="text-3xl md:text-5xl font-black mt-3 text-gray-900 leading-tight">
+            <h1 className="text-1xl md:text-3xl font-black mt-3 text-gray-900 leading-tight">
               {product?.name}
             </h1>
 
@@ -379,61 +383,60 @@ const [relatedProducts, setRelatedProducts] = useState([]);
 
               
           </div>
+
+        </div>
           {/* SELLER INFO */}
-<div className="mt-10 border rounded-3xl overflow-hidden">
+{/* SELLER INFO */}
+<div className="mt-10 border border-gray-200 rounded-3xl overflow-hidden shadow-sm bg-white">
+  
   {/* HEADER */}
   <div
-    className="px-5 py-4 text-white"
-    style={{
-      background: appConfig.colors.primary,
-    }}
+    className="px-6 py-5 text-white flex items-center gap-3"
+    style={{ background: appConfig.colors.primary }}
   >
-    <h2 className="font-bold text-lg">
-      Seller Information
-    </h2>
+    <div className="w-8 h-8 bg-white/20 rounded-2xl flex items-center justify-center">
+      👤
+    </div>
+    <h2 className="font-bold text-xl">Seller Information</h2>
   </div>
 
   {/* CONTENT */}
-  <div className="p-5">
-    <div className="flex items-start gap-4">
+  <div className="p-6">
+    {/* Seller Profile Header */}
+    <div className="flex flex-col sm:flex-row items-start gap-5">
       {/* PROFILE IMAGE */}
       <img
         src={
           product?.seller?.profilePicture ||
           "https://ui-avatars.com/api/?name=Seller"
         }
-        alt=""
-        className="w-20 h-20 rounded-2xl object-cover border"
+        alt="Seller"
+        className="w-24 h-24 rounded-3xl object-cover border-4 border-white shadow-md flex-shrink-0"
       />
 
       {/* SELLER DETAILS */}
-      <div className="flex-1">
-        {/* NAME */}
-        <h3 className="text-2xl font-black text-gray-800">
-          {product?.seller?.businessProfile
-            ?.businessName ||
-            product?.seller?.sellerProfile
-              ?.shopName ||
-            `${product?.seller?.firstName} ${product?.seller?.lastName}`}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-2xl font-black text-gray-900 leading-tight">
+          {product?.seller?.businessProfile?.businessName ||
+           product?.seller?.sellerProfile?.shopName ||
+           `${product?.seller?.firstName} ${product?.seller?.lastName}`}
         </h3>
 
-        {/* USERNAME */}
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-500 mt-1 text-lg">
           @{product?.seller?.username}
         </p>
 
         {/* BADGES */}
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-4">
           {product?.seller?.isSeller && (
-            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-              Verified Seller
+            <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1">
+              ✓ Verified Seller
             </span>
           )}
 
-          {product?.seller?.businessProfile
-            ?.verified && (
-            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-              Verified Business
+          {product?.seller?.businessProfile?.verified && (
+            <span className="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1">
+              ✓ Verified Business
             </span>
           )}
         </div>
@@ -441,145 +444,119 @@ const [relatedProducts, setRelatedProducts] = useState([]);
     </div>
 
     {/* DESCRIPTION */}
-    {product?.seller?.sellerProfile
-      ?.shopDescription && (
-      <div className="mt-6">
-        <h4 className="font-bold text-gray-800">
-          About Seller
-        </h4>
-
-        <p className="text-gray-600 mt-2 leading-relaxed">
-          {
-            product?.seller?.sellerProfile
-              ?.shopDescription
-          }
+    {product?.seller?.sellerProfile?.shopDescription && (
+      <div className="mt-8">
+        <h4 className="font-semibold text-gray-800 text-lg mb-3">About the Seller</h4>
+        <p className="text-gray-600 leading-relaxed text-[15.5px]">
+          {product?.seller?.sellerProfile?.shopDescription}
         </p>
       </div>
     )}
 
-    {/* CONTACT INFO */}
-    <div className="grid md:grid-cols-2 gap-4 mt-6">
-      {/* PHONE */}
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <p className="text-xs text-gray-400 uppercase">
-          Phone Number
-        </p>
-
-        <h4 className="font-bold text-gray-800 mt-1">
-          {product?.seller?.phoneNumber ||
-            "Not Available"}
+    {/* CONTACT & BUSINESS INFO */}
+    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+      
+      {/* Phone */}
+      <div className="bg-gray-50 rounded-3xl p-5 hover:bg-gray-100 transition-colors">
+        <p className="text-xs tracking-widest text-gray-400 uppercase font-medium">Phone Number</p>
+        <h4 className="font-bold text-gray-800 mt-2 text-lg">
+          {product?.seller?.phoneNumber || "Not Available"}
         </h4>
       </div>
 
-      {/* EMAIL */}
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <p className="text-xs text-gray-400 uppercase">
-          Email Address
-        </p>
-
-        <h4 className="font-bold text-gray-800 mt-1 break-all">
-          {product?.seller?.email ||
-            "Not Available"}
+      {/* Email */}
+      <div className="bg-gray-50 rounded-3xl p-5 hover:bg-gray-100 transition-colors">
+        <p className="text-xs tracking-widest text-gray-400 uppercase font-medium">Email Address</p>
+        <h4 className="font-bold text-gray-800 mt-2 text-lg break-all">
+          {product?.seller?.email || "Not Available"}
         </h4>
       </div>
 
-      {/* LOCATION */}
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <p className="text-xs text-gray-400 uppercase">
-          Location
-        </p>
+      {/* Location with Map */}
+      <div className="md:col-span-2 bg-gray-50 rounded-3xl p-5">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <p className="text-xs tracking-widest text-gray-400 uppercase font-medium">Location</p>
+            <h4 className="font-bold text-gray-800 mt-1 text-lg">
+              {product?.seller?.state}, {product?.seller?.lga}
+            </h4>
+          </div>
+          
+          {/* Distance Badge */}
+          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-5 py-2 rounded-2xl text-sm">
+            <MapPin className="w-4 h-4 text-emerald-600" />
+            {!userLocation ? (
+              <span className="text-gray-500">Enable location</span>
+            ) : distanceLoading ? (
+              <span className="text-gray-400 animate-pulse">Calculating...</span>
+            ) : distanceKm != null ? (
+              <span className="font-medium text-emerald-700">
+                {distanceKm < 1
+                  ? `${Math.round(distanceKm * 1000)}m away`
+                  : `${distanceKm.toFixed(1)} km away`}
+                {' · '}~{driveMinutes} min drive
+              </span>
+            ) : (
+              <span className="text-gray-400">Distance N/A</span>
+            )}
+          </div>
+        </div>
 
-        <h4 className="font-bold text-gray-800 mt-1">
-          {product?.seller?.state},{" "}
-          {product?.seller?.lga}
-        </h4>
+        {/* MAP */}
+        <div className="mt-3 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
+          <JobLocationMap
+            lga={product?.seller?.lga}
+            state={product?.seller?.state}
+            address={product?.seller?.businessProfile?.businessAddress}
+          />
+        </div>
       </div>
 
-      {/* BUSINESS YEARS */}
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <p className="text-xs text-gray-400 uppercase">
-          Years In Business
-        </p>
-
-        <h4 className="font-bold text-gray-800 mt-1">
-          {product?.seller?.businessProfile
-            ?.yearsInBusiness || 0}{" "}
-          Years
+      {/* Business Years */}
+      <div className="bg-gray-50 rounded-3xl p-5">
+        <p className="text-xs tracking-widest text-gray-400 uppercase font-medium">Years In Business</p>
+        <h4 className="font-bold text-gray-800 mt-2 text-2xl">
+          {product?.seller?.businessProfile?.yearsInBusiness || 0}{" "}
+          <span className="text-base font-normal text-gray-500">Years</span>
         </h4>
       </div>
     </div>
 
     {/* BUSINESS ADDRESS */}
-    {product?.seller?.businessProfile
-      ?.businessAddress && (
-      <div className="mt-6 bg-gray-50 rounded-2xl p-4">
-        <p className="text-xs text-gray-400 uppercase">
-          Business Address
-        </p>
-
-        <h4 className="font-bold text-gray-800 mt-1">
-          {
-            product?.seller?.businessProfile
-              ?.businessAddress
-          }
+    {product?.seller?.businessProfile?.businessAddress && (
+      <div className="mt-6 bg-gray-50 rounded-3xl p-5">
+        <p className="text-xs tracking-widest text-gray-400 uppercase font-medium">Business Address</p>
+        <h4 className="font-medium text-gray-700 mt-2 leading-relaxed">
+          {product?.seller?.businessProfile?.businessAddress}
         </h4>
       </div>
     )}
 
     {/* SELLER STATS */}
-    <div className="grid grid-cols-3 gap-4 mt-6">
-      <div className="bg-gray-50 rounded-2xl p-4 text-center">
-        <h3
-          className="text-2xl font-black"
-          style={{
-            color: appConfig.colors.primary,
-          }}
-        >
-          {product?.seller?.businessProfile
-            ?.likes || 0}
+    <div className="grid grid-cols-3 gap-4 mt-8">
+      <div className="bg-gray-50 rounded-3xl p-5 text-center hover:bg-gray-100 transition-colors">
+        <h3 className="text-3xl font-black" style={{ color: appConfig.colors.primary }}>
+          {product?.seller?.businessProfile?.likes || 0}
         </h3>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Likes
-        </p>
+        <p className="text-xs text-gray-500 mt-1 font-medium">Likes</p>
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 text-center">
-        <h3
-          className="text-2xl font-black"
-          style={{
-            color: appConfig.colors.primary,
-          }}
-        >
-          {product?.seller?.businessProfile
-            ?.shares || 0}
+      <div className="bg-gray-50 rounded-3xl p-5 text-center hover:bg-gray-100 transition-colors">
+        <h3 className="text-3xl font-black" style={{ color: appConfig.colors.primary }}>
+          {product?.seller?.businessProfile?.shares || 0}
         </h3>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Shares
-        </p>
+        <p className="text-xs text-gray-500 mt-1 font-medium">Shares</p>
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 text-center">
-        <h3
-          className="text-2xl font-black"
-          style={{
-            color: appConfig.colors.primary,
-          }}
-        >
-          {product?.seller?.businessProfile
-            ?.reviews?.length || 0}
+      <div className="bg-gray-50 rounded-3xl p-5 text-center hover:bg-gray-100 transition-colors">
+        <h3 className="text-3xl font-black" style={{ color: appConfig.colors.primary }}>
+          {product?.seller?.businessProfile?.reviews?.length || 0}
         </h3>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Reviews
-        </p>
+        <p className="text-xs text-gray-500 mt-1 font-medium">Reviews</p>
       </div>
     </div>
   </div>
 </div>
-        </div>
-
         {/* RELATED PRODUCTS */}
 {relatedProducts.length > 0 && (
   <div className="mt-12">

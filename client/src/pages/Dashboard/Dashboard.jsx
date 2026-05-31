@@ -15,6 +15,8 @@ import SellerProfileSetup from '../../components/dashboard/SellerProfile';
 import Loading from '../../config/Loading';
 import InventoryDashboard from '../inventory/InventoryDashboard';
 import ProductList from '../inventory/ProductsList';
+import CreatePostModal from '../post/CreatePost';
+import FeedPage from '../post/FeedPage';
 
 const Jobs = () => <div className="p-8 text-center text-2xl text-gray-500">Jobs Page - Coming Soon</div>;
 const Marketplace = () => <div className="p-8 text-center text-2xl text-gray-500">Marketplace Page - Coming Soon</div>;
@@ -22,6 +24,7 @@ const Media = () => <div className="p-8 text-center text-2xl text-gray-500">Medi
 
 const pages = {
   home: DashboardHome,
+  post: FeedPage,
   jobs: Jobs,
   marketplace: Marketplace,
   media: Media,
@@ -32,7 +35,12 @@ const pages = {
 };
 
 export default function Dashboard() {
-  const [activePage, setActivePage] = useState('home');
+ const getPageFromURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('page') || 'home';
+};
+
+const [activePage, setActivePage] = useState(getPageFromURL());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +48,12 @@ export default function Dashboard() {
 
   const ActiveComponent = pages[activePage];
   const isSeller = dashboardData?.user?.isSeller || false;
+
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  params.set('page', activePage);
+  window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+}, [activePage]);
 
   // Fetch Dashboard Data
   useEffect(() => {
@@ -89,7 +103,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Fixed Sidebar - Desktop */}
-      <div className="hidden lg:block fixed top-0 left-0 h-screen w-72 bg-white border-r border-gray-100 z-40 overflow-y-auto shadow-sm">
+      <div className="hidden lg:block fixed top-0 left-0 h-screen w-62 bg-white border-r border-gray-100 z-40 overflow-y-auto shadow-sm">
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
             <div 
@@ -110,6 +124,7 @@ export default function Dashboard() {
           {/* Main Navigation */}
           {[
             { id: 'home', label: 'Dashboard', icon: Home },
+            { id: 'post', label: 'Make a post', icon: Home },
             // { id: 'jobs', label: 'Jobs', icon: Briefcase },
             // { id: 'marketplace', label: 'Marketplace', icon: Store },
             // { id: 'media', label: 'Media Hub', icon: PlaySquare },
@@ -212,7 +227,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-62 flex flex-col min-h-screen">
         {/* Top Navbar */}
         <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
           <div className="flex items-center gap-3">
@@ -255,7 +270,7 @@ export default function Dashboard() {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-50 lg:hidden" onClick={() => setSidebarOpen(false)}>
           <div 
-            className="bg-white w-72 h-full overflow-y-auto"
+            className="bg-white w-62 h-full overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="p-6 border-b">

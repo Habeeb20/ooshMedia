@@ -55,7 +55,7 @@ export default function Signup() {
           <p className="text-gray-600 mt-2">Create your account in 3 easy steps</p>
         </div>
 
-        <ProgressBar step={step} totalSteps={3} />s
+        <ProgressBar step={step} totalSteps={3} />
 
         <div className="bg-white rounded-3xl shadow-xl p-8 md:p-10">
           {step === 1 && <Step1_ContactOTP formData={formData} updateForm={updateForm} nextStep={nextStep} />}

@@ -92,7 +92,7 @@ export default function PriceChecker() {
               </div>
 
               <div>
-                <h1 className="text-3xl md:text-5xl font-black">
+                <h1 className="text-2xl md:text-3xl font-black">
                   Price Checker
                 </h1>
 

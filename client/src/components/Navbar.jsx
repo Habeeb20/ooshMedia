@@ -38,19 +38,32 @@ export default function Navbar() {
           </div>
                </Link>
 
+               
+
           {/* Static Navigation Links */}
           <div className="hidden md:flex items-center gap-10">
-            <a href="#features" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
-              Features
-            </a>
-            <a href="#solutions" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
-              Solutions
-            </a>
+           {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/business" 
+                  className="px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                >
+                  Businesses
+                </Link>
+              
+              </>
+            ) : (
+              <>
+            
+        
+             
+              </>
+            )}
             <a href="#pricing" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               Pricing
             </a>
-            <a href="#blog" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
-              Insights
+            <a href="/chain" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
+              Distribution chain
             </a>
             <a href="#about" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               About Us
@@ -76,9 +89,12 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <button className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-full transition-all">
+              <Link to='/login'>
+                 <button className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-full transition-all">
                   Log in
                 </button>
+              </Link>
+             <Link to='/signup'>
                 <button 
                   className="px-6 py-2.5 font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                   style={{ 
@@ -90,6 +106,8 @@ export default function Navbar() {
                 >
                   Get Started Free
                 </button>
+             </Link>
+             
               </>
             )}
           </div>
@@ -108,10 +126,24 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-white border-t shadow-lg">
           <div className="px-6 py-8 flex flex-col gap-6 text-lg">
-            <a href="#features" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Features</a>
-            <a href="#solutions" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Solutions</a>
+             {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/business" 
+                  className="px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                >
+                  Businesses
+                </Link>
+            
+              </>
+            ) : (
+              <>
+            
+             
+              </>
+            )}
             <a href="#pricing" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Pricing</a>
-            <a href="#blog" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Insights</a>
+            <a href="/chain" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Distribution Chain</a>
             <a href="#about" className="font-medium text-gray-700 hover:text-[#8B1E3F]">About Us</a>
 
             <div className="pt-6 border-t flex flex-col gap-4">
@@ -136,13 +168,19 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <button className="py-3 text-gray-700 font-medium text-left">Log in</button>
-                  <button 
+                <Link to='/login'>
+                                  <button className="py-3 text-gray-700 font-medium text-left">Log in</button>
+                </Link>
+
+                <Link to='/signup'>
+                      <button 
                     className="py-3 text-white font-semibold rounded-2xl"
                     style={{ backgroundColor: primary }}
                   >
                     Get Started Free
                   </button>
+                </Link>
+            
                 </>
               )}
             </div>
