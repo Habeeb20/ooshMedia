@@ -12,6 +12,7 @@ import SellerDetail from "./pages/vendor/vendorDetails"
 import ProtectedRoute from "./config/protectedRoute";
 import DistributionChainView from "./pages/vendor/DistributionChainView";
 import FeedPage from "./pages/post/FeedPage";
+import ProductsGrid from "./components/home/ProductByCategory";
 const App =()=>  {
   return (
     <>
@@ -54,6 +55,7 @@ const App =()=>  {
                             <Route path="/login" element={<Login />} />
                             <Route path="/dashboard/*" element={<Dashboard />} />
                             <Route path="/business/*" element={<FeedPage />} />
+                            <Route path="/category/:categorySlug"  element={<ProductsGrid />} />
         </Routes>
       </div>
     </>

@@ -658,9 +658,9 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
             <p className="text-sm text-gray-500 capitalize">
               {dist.relationship}
             </p>
-            <p className="text-sm text-gray-500 capitalize">
+            {/* <p className="text-sm text-gray-500 capitalize">
               {dist.email}
-            </p>
+            </p> */}
             <p className="text-sm text-gray-500 capitalize">
               {dist.phoneNumber}
             </p>

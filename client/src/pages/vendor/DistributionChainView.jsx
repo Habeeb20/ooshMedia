@@ -271,7 +271,7 @@ const SellerCard = ({ seller, type, isChain }) => (
         {seller.businessName?.[0] || seller.email?.[0] || '?'}
       </div>
       <div>
-        <p className="font-medium">{seller.businessProfile.businessName || seller.email}</p>
+        <p className="font-medium">{seller.businessProfile?.businessName || seller?.email}</p>
         <p className="text-xs text-gray-500">{seller.email}</p>
         <p className="text-xs text-gray-500">{seller.username}</p>
         {isChain && seller.relationship && (

@@ -1,4 +1,5 @@
-import CategoryDropdown from "./CategoryDropdown";
+
+import CategoryDropdown from "./CtageoryDropdown";
 import HeroSwiper from "./HeroSwiper";
 import PromoCards from "./Promocard";
 

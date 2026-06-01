@@ -197,18 +197,238 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState } from "react";
+// import { ChevronDown, ChevronUp, ChevronRight, X, Grid3X3 } from "lucide-react";
+// import { productCategories } from "../../categories/productCategories";
+// import appConfig from "../../config/appConfig";
+
+// function CategoryItem({ category, onClose }) {
+//   const [isOpen, setIsOpen] = useState(false);
+
+//   return (
+//     <div className="border-b border-gray-50 last:border-0">
+//       <button
+//         onClick={() => setIsOpen(!isOpen)}
+//         className="w-full flex items-center justify-between px-4 py-3 hover:bg-rose-50 transition-colors group"
+//       >
+//         <div className="flex items-center gap-3 min-w-0">
+//           <div
+//             className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0 transition-transform group-hover:scale-110"
+//             style={{ background: appConfig.colors.primary + "12" }}
+//           >
+//             {category.icon}
+//           </div>
+//           <div className="text-left min-w-0">
+//             <p className="text-sm font-bold text-gray-800 truncate group-hover:text-[#8B1E3F] transition-colors">{category.name}</p>
+//             <p className="text-[10px] text-gray-400">{category.subcategories.length} subcategories</p>
+//           </div>
+//         </div>
+//         <span className="flex-shrink-0 ml-2">
+//           {isOpen
+//             ? <ChevronUp size={15} style={{ color: appConfig.colors.primary }} />
+//             : <ChevronDown size={15} className="text-gray-400" />
+//           }
+//         </span>
+//       </button>
+
+//       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96" : "max-h-0"}`}>
+//         <div className="px-4 pb-3 grid grid-cols-1 gap-1">
+//           {category.subcategories.map((sub, i) => (
+//             <button
+//               key={i}
+//               onClick={onClose}
+//               className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-white hover:shadow-sm transition-all text-left group/sub"
+//             >
+//               <span className="text-xs font-semibold text-gray-600 group-hover/sub:text-[#8B1E3F] transition-colors">{sub}</span>
+//               <ChevronRight size={12} className="opacity-0 group-hover/sub:opacity-100 transition-opacity flex-shrink-0" style={{ color: appConfig.colors.primary }} />
+//             </button>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default function CategoryDropdown() {
+//   const [showModal, setShowModal] = useState(false);
+//   const visibleCategories = productCategories.slice(0, 5);
+//   const remainingCategories = productCategories.slice(5);
+
+//   return (
+//     <>
+//       <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 h-full">
+//         {/* Header */}
+//         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100" style={{ background: appConfig.colors.primary + "08" }}>
+//           <div className="flex items-center gap-2">
+//             <Grid3X3 size={16} style={{ color: appConfig.colors.primary }} />
+//             <div>
+//               <h2 className="text-sm font-black" style={{ color: appConfig.colors.primary }}>Categories</h2>
+//               <p className="text-[10px] text-gray-400 leading-none">{productCategories.length} categories</p>
+//             </div>
+//           </div>
+//           <button
+//             onClick={() => setShowModal(true)}
+//             className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
+//             style={{ background: appConfig.colors.primary }}
+//           >
+//             See All
+//           </button>
+//         </div>
+
+//         <div className="divide-y divide-gray-50">
+//           {visibleCategories.map(cat => (
+//             <CategoryItem key={cat.id} category={cat} onClose={() => {}} />
+//           ))}
+//         </div>
+
+//         {/* Show more teaser */}
+//         <button
+//           onClick={() => setShowModal(true)}
+//           className="w-full py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-t border-gray-100 hover:bg-rose-50 transition-colors"
+//           style={{ color: appConfig.colors.primary }}
+//         >
+//           +{remainingCategories.length} more categories <ChevronRight size={13} />
+//         </button>
+//       </div>
+
+//       {/* Modal */}
+//       {showModal && (
+//         <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
+//           <div className="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
+//             <div className="flex items-center justify-between px-5 py-4 border-b">
+//               <div>
+//                 <h2 className="text-lg font-black" style={{ color: appConfig.colors.primary }}>All Categories</h2>
+//                 <p className="text-xs text-gray-400 mt-0.5">Browse {productCategories.length} product categories</p>
+//               </div>
+//               <button
+//                 onClick={() => setShowModal(false)}
+//                 className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+//               >
+//                 <X size={16} />
+//               </button>
+//             </div>
+//             <div className="max-h-[70vh] overflow-y-auto">
+//               {remainingCategories.map(cat => (
+//                 <CategoryItem key={cat.id} category={cat} onClose={() => setShowModal(false)} />
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";   // ← Added
 import { ChevronDown, ChevronUp, ChevronRight, X, Grid3X3 } from "lucide-react";
 import { productCategories } from "../../categories/productCategories";
 import appConfig from "../../config/appConfig";
 
+// Slugify function (consistent with your other components)
+const slugify = (text) => {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s&-]/g, "")
+    .replace(/[\s&]+/g, "-")
+    .replace(/-+/g, "-");
+};
+
 function CategoryItem({ category, onClose }) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleCategoryClick = () => {
+    const categorySlug = slugify(category.name);
+    navigate(`/category/${categorySlug}`);
+    onClose?.(); // Close modal if open
+  };
 
   return (
     <div className="border-b border-gray-50 last:border-0">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleCategoryClick}   // ← Now navigates
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-rose-50 transition-colors group"
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -219,18 +439,22 @@ function CategoryItem({ category, onClose }) {
             {category.icon}
           </div>
           <div className="text-left min-w-0">
-            <p className="text-sm font-bold text-gray-800 truncate group-hover:text-[#8B1E3F] transition-colors">{category.name}</p>
+            <p className="text-sm font-bold text-gray-800 truncate group-hover:text-[#8B1E3F] transition-colors">
+              {category.name}
+            </p>
             <p className="text-[10px] text-gray-400">{category.subcategories.length} subcategories</p>
           </div>
         </div>
         <span className="flex-shrink-0 ml-2">
-          {isOpen
-            ? <ChevronUp size={15} style={{ color: appConfig.colors.primary }} />
-            : <ChevronDown size={15} className="text-gray-400" />
-          }
+          {isOpen ? (
+            <ChevronUp size={15} style={{ color: appConfig.colors.primary }} />
+          ) : (
+            <ChevronDown size={15} className="text-gray-400" />
+          )}
         </span>
       </button>
 
+      {/* Subcategories (still expandable) */}
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96" : "max-h-0"}`}>
         <div className="px-4 pb-3 grid grid-cols-1 gap-1">
           {category.subcategories.map((sub, i) => (
@@ -239,8 +463,14 @@ function CategoryItem({ category, onClose }) {
               onClick={onClose}
               className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-white hover:shadow-sm transition-all text-left group/sub"
             >
-              <span className="text-xs font-semibold text-gray-600 group-hover/sub:text-[#8B1E3F] transition-colors">{sub}</span>
-              <ChevronRight size={12} className="opacity-0 group-hover/sub:opacity-100 transition-opacity flex-shrink-0" style={{ color: appConfig.colors.primary }} />
+              <span className="text-xs font-semibold text-gray-600 group-hover/sub:text-[#8B1E3F] transition-colors">
+                {sub}
+              </span>
+              <ChevronRight 
+                size={12} 
+                className="opacity-0 group-hover/sub:opacity-100 transition-opacity flex-shrink-0" 
+                style={{ color: appConfig.colors.primary }} 
+              />
             </button>
           ))}
         </div>
@@ -308,8 +538,12 @@ export default function CategoryDropdown() {
               </button>
             </div>
             <div className="max-h-[70vh] overflow-y-auto">
-              {remainingCategories.map(cat => (
-                <CategoryItem key={cat.id} category={cat} onClose={() => setShowModal(false)} />
+              {productCategories.map(cat => (   // ← Changed to show ALL in modal
+                <CategoryItem 
+                  key={cat.id} 
+                  category={cat} 
+                  onClose={() => setShowModal(false)} 
+                />
               ))}
             </div>
           </div>
