@@ -101,7 +101,7 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
   sellerProfile: {
     sellerTypes: [{
       type: String,
-      enum: ['manufacturer', 'wholesaler', 'retailer']
+      enum: ['manufacturer', 'wholesaler', 'retailer', 'distributor', "agent"]
     }],
 
     // Seller Chain (especially for Manufacturers)
@@ -112,7 +112,7 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
       address: String,
       relationship: { 
         type: String, 
-        enum: ['wholesaler', 'retailer', 'distributor'] 
+        enum: ['wholesaler', 'retailer', 'distributor',  "agent"] 
       }
     }],
 

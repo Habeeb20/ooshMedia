@@ -1,7 +1,7 @@
 
 
 import Topbar from "../../components/home/Topbar";
-import Navbar from "../../components/home/Navbar";
+import Navbar from "../../components/home/NavbarHome";
 import HeroSection from "../../components/home/HeroSection";
 import PromoBanner from "../../components/home/PromoBanner";
 import FashionDeals from "../../components/home/FashionDeals";
@@ -9,7 +9,11 @@ import FeatureGrid from "./FeaturedGrid";
 import ProductsGrid from "../product/ProductGrid";
 import appConfig from "../../config/appConfig";
 import { Truck, ShieldCheck, RefreshCw, Headphones } from "lucide-react";
-
+import { FlashSaleSection,
+   DiscountDealsSection, TrendingNowSection,
+  TopSellersSection, TopProductsSection, AnniversaryDealsSection,
+  CompanyAdDisplay
+ } from "../ads/EcommerceAdsBanner";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "Same day in Lagos" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% protected" },
@@ -61,6 +65,13 @@ export default function Home() {
 
       {/* Fashion deals */}
       <FashionDeals />
+
+        <FlashSaleSection />
+    <DiscountDealsSection />
+    <TrendingNowSection />
+    <TopSellersSection />
+    <TopProductsSection />
+    <AnniversaryDealsSection />
 
       {/* Footer strip */}
       <div className="text-white text-center py-4 text-xs mt-8" style={{ background: appConfig.colors.primary }}>
@@ -121,39 +132,23 @@ export default function Home() {
 
 
 
-// import Topbar from "../../components/home/Topbar";
-// import Navbar from "../../components/home/Navbar";
-// import HeroSection from "../../components/home/HeroSection";
-// import PromoBanner from "../../components/home/PromoBanner";
-// import PromoCards from "../../components/home/Promocard";
-
-// import FashionDeals from "../../components/home/FashionDeals";
-
-// import FeatureGrid from "./FeaturedGrid";
-// import CategoryDropdown from "../../components/home/CtageoryDropdown";
-// import ProductsGrid from "../product/ProductGrid";
 
 
+// import {
+//   FlashSaleSection, DiscountDealsSection, TrendingNowSection,
+//   TopSellersSection, TopProductsSection, AnniversaryDealsSection,
+//   CompanyAdDisplay
+// } from './components/ads/EcommerceAdsBanner';
 
-
-// export default function Home() {
-//   return (
-//     <div className="bg-[#f5f5f7] min-h-screen overflow-x-hidden">
-//       <Topbar />
-//       <Navbar />
-
-//       <HeroSection />
-   
-//       <FeatureGrid />
-
-//       <PromoBanner />
-// <ProductsGrid/>
-
-
-//       <FashionDeals />
-   
-
-  
-//     </div>
-//   );
-// }
+// // In your homepage layout:
+// <div style={{ display: 'flex', gap: 20 }}>
+//   <div style={{ flex: 1 }}>
+//     <FlashSaleSection />
+//     <DiscountDealsSection />
+//     <TrendingNowSection />
+//     <TopSellersSection />
+//     <TopProductsSection />
+//     <AnniversaryDealsSection />
+//   </div>
+//   <CompanyAdDisplay /> {/* shows sidebar on desktop, popup on mobile */}
+// </div>

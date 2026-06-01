@@ -67,6 +67,7 @@ export const addSellerChain = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error)
     res.status(500).json({ success: false, message: "Failed to add seller chain" });
   }
 };

@@ -12,7 +12,7 @@ import {
 
 import { productCategories } from "../../categories/productCategories";
 import appConfig from "../../config/appConfig";
-
+import { Link } from "react-router-dom";
 export default function PriceChecker() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] =
@@ -39,6 +39,7 @@ export default function PriceChecker() {
         [];
 
       setProducts(data);
+      console.log(data)
       setFilteredProducts(data);
     } catch (error) {
       console.log(error);
@@ -142,6 +143,7 @@ export default function PriceChecker() {
                     <option
                       key={category.id}
                       value={category.name}
+
                     >
                       {category.name}
                     </option>
@@ -193,156 +195,124 @@ export default function PriceChecker() {
           ) : (
             /* PRODUCTS GRID */
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="group bg-white rounded-[30px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300"
-                >
-                  {/* IMAGE */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={
-                        product?.images?.[0]
-                          ?.url ||
-                        "https://via.placeholder.com/500"
-                      }
-                      alt={product?.name}
-                      className="w-full h-64 object-cover group-hover:scale-105 transition duration-500"
-                    />
+            
 
-                    {/* CATEGORY */}
-                    <div className="absolute top-4 left-4">
-                      <div className="bg-black/70 backdrop-blur text-white px-4 py-2 rounded-full text-xs font-bold">
-                        {product?.category}
-                      </div>
-                    </div>
-                  </div>
+                {filteredProducts.map((product) => (
+    <Link
+      key={product._id}
+      to={`/product/${product.slug || product._id}`} // Use slug if available, fallback to _id
+      className="group bg-white rounded-[30px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 block"
+    >
+      {/* IMAGE */}
+      <div className="relative overflow-hidden">
+        <img
+          src={
+            product?.images?.[0]?.url ||
+            "https://via.placeholder.com/500"
+          }
+          alt={product?.name}
+          className="w-full h-64 object-cover group-hover:scale-105 transition duration-500"
+        />
+        {/* CATEGORY */}
+        <div className="absolute top-4 left-4">
+          <div className="bg-black/70 backdrop-blur text-white px-4 py-2 rounded-full text-xs font-bold">
+            {product?.category}
+          </div>
+        </div>
+      </div>
 
-                  {/* CONTENT */}
-                  <div className="p-5">
-                    {/* PRODUCT NAME */}
-                    <h3 className="text-xl font-black text-gray-900 line-clamp-2 min-h-[60px]">
-                      {product?.name}
-                    </h3>
+      {/* CONTENT */}
+      <div className="p-5">
+        {/* PRODUCT NAME */}
+        <h3 className="text-xl font-black text-gray-900 line-clamp-2 min-h-[60px]">
+          {product?.name}
+        </h3>
 
-                    {/* PRICE */}
-                    <div className="mt-4 flex items-center justify-between">
-                      <div>
-                        <h2
-                          className="text-3xl font-black"
-                          style={{
-                            color:
-                              appConfig.colors
-                                .primary,
-                          }}
-                        >
-                          ₦
-                          {(
-                            product?.salePrice ||
-                            product?.price
-                          )?.toLocaleString()}
-                        </h2>
+        {/* PRICE */}
+        <div className="mt-4 flex items-center justify-between">
+          <div>
+            <h2
+              className="text-3xl font-black"
+              style={{
+                color: appConfig.colors.primary,
+              }}
+            >
+              ₦
+              {(
+                product?.salePrice ||
+                product?.price
+              )?.toLocaleString()}
+            </h2>
+            {product?.salePrice && (
+              <p className="text-gray-400 line-through text-sm mt-1">
+                ₦
+                {product?.price?.toLocaleString()}
+              </p>
+            )}
+          </div>
 
-                        {product?.salePrice && (
-                          <p className="text-gray-400 line-through text-sm mt-1">
-                            ₦
-                            {product?.price?.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
+          {/* STOCK */}
+          <div
+            className={`px-3 py-2 rounded-full text-xs font-bold ${
+              product?.stockQuantity > 0
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {product?.stockQuantity > 0
+              ? `${product?.stockQuantity} Left`
+              : "Out Of Stock"}
+          </div>
+        </div>
 
-                      {/* STOCK */}
-                      <div
-                        className={`px-3 py-2 rounded-full text-xs font-bold ${
-                          product?.stockQuantity >
-                          0
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {product?.stockQuantity >
-                        0
-                          ? `${product?.stockQuantity} Left`
-                          : "Out Of Stock"}
-                      </div>
-                    </div>
+        {/* SELLER */}
+        <div className="mt-6 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div className="flex items-start gap-3">
+            <img
+              src={
+                product?.seller?.profilePicture ||
+                "https://ui-avatars.com/api/?name=Seller"
+              }
+              alt=""
+              className="w-14 h-14 rounded-2xl object-cover"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="font-black text-gray-900 line-clamp-1">
+                  {product?.seller?.businessProfile?.businessName ||
+                    product?.seller?.sellerProfile?.shopName ||
+                    `${product?.seller?.firstName} ${product?.seller?.lastName}`}
+                </h4>
+                {product?.seller?.businessProfile?.verified && (
+                  <BadgeCheck size={18} className="text-sky-500" />
+                )}
+              </div>
 
-                    {/* SELLER */}
-                    <div className="mt-6 rounded-2xl bg-gray-50 p-4 border border-gray-100">
-                      {/* TOP */}
-                      <div className="flex items-start gap-3">
-                        {/* AVATAR */}
-                        <img
-                          src={
-                            product?.seller
-                              ?.profilePicture ||
-                            "https://ui-avatars.com/api/?name=Seller"
-                          }
-                          alt=""
-                          className="w-14 h-14 rounded-2xl object-cover"
-                        />
+              <div className="flex items-center gap-2 mt-2 text-gray-500 text-sm">
+                <MapPin size={15} />
+                <span className="line-clamp-1">
+                  {product?.seller?.businessProfile?.businessAddress ||
+                    `${product?.seller?.state || ""} ${product?.seller?.lga || ""}`}
+                </span>
+              </div>
+            </div>
+          </div>
 
-                        <div className="flex-1">
-                          {/* BUSINESS NAME */}
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-black text-gray-900 line-clamp-1">
-                              {product?.seller
-                                ?.businessProfile
-                                ?.businessName ||
-                                product?.seller
-                                  ?.sellerProfile
-                                  ?.shopName ||
-                                `${product?.seller?.firstName} ${product?.seller?.lastName}`}
-                            </h4>
-
-                            {product?.seller
-                              ?.businessProfile
-                              ?.verified && (
-                              <BadgeCheck
-                                size={18}
-                                className="text-sky-500"
-                              />
-                            )}
-                          </div>
-
-                          {/* ADDRESS */}
-                          <div className="flex items-center gap-2 mt-2 text-gray-500 text-sm">
-                            <MapPin
-                              size={15}
-                            />
-
-                            <span className="line-clamp-1">
-                              {product?.seller
-                                ?.businessProfile
-                                ?.businessAddress ||
-                                `${product?.seller?.state || ""} ${product?.seller?.lga || ""}`}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* FOOTER */}
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <Star
-                            fill="currentColor"
-                            size={16}
-                          />
-
-                          <span className="text-sm font-bold text-gray-700">
-                            {product?.ratings ||
-                              0}
-                          </span>
-                        </div>
-
-                        <button className="px-4 py-2 rounded-xl bg-black text-white text-sm font-bold hover:opacity-90 transition">
-                          View Product
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-1 text-amber-500">
+              <Star fill="currentColor" size={16} />
+              <span className="text-sm font-bold text-gray-700">
+                {product?.ratings || 0}
+              </span>
+            </div>
+            <button className="px-4 py-2 rounded-xl bg-black text-white text-sm font-bold hover:opacity-90 transition pointer-events-none">
+              View Product
+            </button>
+          </div>
+        </div>
+      </div>
+    </Link>
+  ))}
             </div>
           )}
         </div>
@@ -350,3 +320,67 @@ export default function PriceChecker() {
     </section>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

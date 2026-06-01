@@ -13,6 +13,8 @@ import ProtectedRoute from "./config/protectedRoute";
 import DistributionChainView from "./pages/vendor/DistributionChainView";
 import FeedPage from "./pages/post/FeedPage";
 import ProductsGrid from "./components/home/ProductByCategory";
+import SearchResults from "./components/home/SearchResult";
+import AdVerifyPage from "./pages/ads/AdVerify";
 const App =()=>  {
   return (
     <>
@@ -26,6 +28,13 @@ const App =()=>  {
         <Route
           path="/product/:slug"
           element={
+               <ProtectedRoute>
+                <ProductDetails />
+                </ProtectedRoute>}
+        />
+        <Route
+          path="/product/:slug/:id"
+             element={
                <ProtectedRoute>
                 <ProductDetails />
                 </ProtectedRoute>}
@@ -56,6 +65,8 @@ const App =()=>  {
                             <Route path="/dashboard/*" element={<Dashboard />} />
                             <Route path="/business/*" element={<FeedPage />} />
                             <Route path="/category/:categorySlug"  element={<ProductsGrid />} />
+                            <Route path="/search" element={<SearchResults />} />
+                            <Route path="/dashboard/ads/verify" element={<AdVerifyPage/>} />
         </Routes>
       </div>
     </>

@@ -460,7 +460,9 @@ import InventoryDashboard from '../inventory/InventoryDashboard';
 import ProductList from '../inventory/ProductsList';
 import CreatePostModal from '../post/CreatePost';
 import FeedPage from '../post/FeedPage';
-
+import AdVerifyPage from './../ads/AdVerify';
+import AdPlansPage from '../ads/AdplanPage';
+import MySubscriptionsPage from '../ads/MySubscriptionPage';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -501,11 +503,16 @@ const pages = {
   sellerProfile: SellerProfileSetup,
   inventory: InventoryDashboard,
   products: ProductList,
+  subscribe: AdPlansPage,
+  ads: MySubscriptionsPage,
+  verify: AdVerifyPage
 };
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: Home },
   { id: 'post', label: 'Feed', icon: Rss },
+  { id: 'ads', label: 'my ads', icon: Rss },
+  { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
 ];
@@ -812,3 +819,18 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+// // Routes
+// <Route path="/dashboard/ads/subscribe" element={<AdPlansPage currentUser={currentUser} />} />
+// <Route path="/dashboard/ads" element={<MySubscriptionsPage />} />
+// <Route path="/dashboard/ads/verify" element={<AdVerifyPage />} />

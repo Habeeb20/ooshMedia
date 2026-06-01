@@ -49,7 +49,7 @@ export default function ProductsGrid() {
       );
 
       let allProducts = response.data?.products || response.data || [];
-
+console.log(allProducts)
       // Filter products by category if categorySlug exists
       if (categorySlug) {
         const filteredProducts = allProducts.filter((product) => {

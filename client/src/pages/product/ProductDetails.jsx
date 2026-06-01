@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+
+import { Users, ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useUserLocation, getDistanceKm } from './../../location/UserLocation';
@@ -22,7 +24,9 @@ import appConfig from "../../config/appConfig";
 import { MapPin } from "lucide-react";
 export default function ProductDetails() {
   const { slug } = useParams();
-
+const [upstream, setUpstream] = useState([]);
+const [downstream, setDownstream] = useState([]);
+const [chainLoading, setChainLoading] = useState(false);
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,36 +42,32 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
       ?.replace(/ +/g, "-");
   };
 
-  // FETCH PRODUCT
-//   const fetchProduct = async () => {
-//     try {
-//       const response = await axios.get(
-//         `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
-//       );
 
-//       const products =
-//         response.data?.products ||
-//         response.data ||
-//         [];
 
-//       // FIND PRODUCT USING SLUG
-//       const foundProduct = products.find(
-//         (item) => slugify(item.name) === slug
-//       );
+  // FETCH SELLER DISTRIBUTION CHAIN
+const fetchSellerChain = async (seller) => {
+  if (!seller) return;
 
-//       setProduct(foundProduct);
+  setChainLoading(true);
+  try {
+    const identifier = seller.businessProfile?.businessName ||
+                       seller.email ||
+                       seller.username;
 
-//       if (foundProduct?.images?.length > 0) {
-//         setMainImage(
-//           foundProduct.images[0].url
-//         );
-//       }
-//     } catch (error) {
-//       console.log("PRODUCT ERROR:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/chain/search?type=seller&query=${encodeURIComponent(identifier)}`
+    );
+
+    if (response.data?.success) {
+      setUpstream(response.data.data.upstream || []);
+      setDownstream(response.data.data.downstream || []);
+    }
+  } catch (error) {
+    console.error("Failed to fetch seller chain:", error);
+  } finally {
+    setChainLoading(false);
+  }
+};
 
 
   const fetchProduct = async () => {
@@ -81,7 +81,7 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
       response.data?.products ||
       response.data ||
       [];
-
+console.log(products)
     // FIND CURRENT PRODUCT
     const foundProduct = products.find(
       (item) => slugify(item.name) === slug
@@ -112,9 +112,53 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
   }
 };
 
+
+  // Effects
   useEffect(() => {
     fetchProduct();
   }, [slug]);
+
+  useEffect(() => {
+    if (product?.seller) {
+      fetchSellerChain(product.seller);
+    }
+  }, [product?.seller]);
+
+    // Recursive Downstream Tree Component
+  const DownstreamTree = ({ data, level = 0 }) => {
+    return (
+      <div className={`space-y-3 ${level > 0 ? 'ml-6 border-l border-dashed border-gray-300 pl-6' : ''}`}>
+        {data.map((partner, index) => (
+          <div key={index} className="bg-amber-50/70 border border-amber-100 rounded-2xl p-4">
+            <div className="flex items-center gap-3">
+              <img
+                src={partner.profilePicture || "https://ui-avatars.com/api/?name=Partner"}
+                alt=""
+                className="w-11 h-11 rounded-xl object-cover"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">
+                  {partner.businessName || `${partner.firstName || ''} ${partner.lastName || ''}`}
+                </p>
+                <p className="text-sm text-gray-500">@{partner.username}</p>
+              </div>
+            </div>
+
+            {partner.downstreamCount > 0 && (
+              <p className="text-xs text-amber-600 mt-2">
+                ↓ {partner.downstreamCount} partners below
+              </p>
+            )}
+
+            {partner.downstream?.length > 0 && (
+              <DownstreamTree data={partner.downstream} level={level + 1} />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
 
   // LOADING
   if (loading) {
@@ -128,6 +172,9 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
       </div>
     );
   }
+
+
+
 
   // PRODUCT NOT FOUND
   if (!product) {
@@ -143,6 +190,7 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
       </div>
     );
   }
+
 
   return (
     <section className="bg-[#f5f5f7] min-h-screen py-6">
@@ -557,6 +605,76 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
     </div>
   </div>
 </div>
+
+
+{/* DISTRIBUTION CHAIN SECTION */}
+<div className="mt-12 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+  <div className="flex items-center gap-3 mb-8">
+    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+      <Users className="text-white" size={24} />
+    </div>
+    <div>
+      <h2 className="text-2xl font-black text-gray-900">Distribution Chain</h2>
+      <p className="text-gray-500">Upstream suppliers & downstream partners</p>
+    </div>
+  </div>
+
+  <div className="grid md:grid-cols-2 gap-8">
+    {/* UPSTREAM SUPPLIERS */}
+    <div>
+      <div className="flex items-center gap-2 mb-4">
+        <ArrowUp className="text-emerald-600" size={22} />
+        <h3 className="font-bold text-lg text-emerald-700">Upstream Suppliers</h3>
+      </div>
+
+      {chainLoading ? (
+        <div className="text-center py-8 text-gray-500">Loading upstream chain...</div>
+      ) : upstream.length > 0 ? (
+        <div className="space-y-4">
+          {upstream.map((supplier, index) => (
+            <div key={index} className="border border-emerald-100 bg-emerald-50/50 rounded-2xl p-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src={supplier.profilePicture || "https://ui-avatars.com/api/?name=Supplier"}
+                  alt=""
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">
+                    {supplier.businessProfile?.businessName || `${supplier.firstName} ${supplier.lastName}`}
+                  </p>
+                  <p className="text-sm text-gray-500">@{supplier.username}</p>
+                </div>
+              </div>
+              {supplier.upstreamCount > 0 && (
+                <p className="text-xs text-emerald-600 mt-2">+ {supplier.upstreamCount} more upstream</p>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500 italic py-6">No upstream suppliers found.</p>
+      )}
+    </div>
+
+    {/* DOWNSTREAM PARTNERS */}
+    <div>
+      <div className="flex items-center gap-2 mb-4">
+        <ArrowDown className="text-amber-600" size={22} />
+        <h3 className="font-bold text-lg text-amber-700">Downstream Partners</h3>
+      </div>
+
+      {chainLoading ? (
+        <div className="text-center py-8 text-gray-500">Loading downstream chain...</div>
+      ) : downstream.length > 0 ? (
+        <DownstreamTree data={downstream} />
+      ) : (
+        <p className="text-gray-500 italic py-6">No downstream partners found.</p>
+      )}
+    </div>
+  </div>
+</div>
+
         {/* RELATED PRODUCTS */}
 {relatedProducts.length > 0 && (
   <div className="mt-12">
@@ -738,3 +856,58 @@ const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocatio
     </section>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
