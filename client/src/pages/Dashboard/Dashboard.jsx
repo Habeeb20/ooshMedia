@@ -450,7 +450,7 @@ import {
   Home, Briefcase, Store, PlaySquare, User, LogOut,
   Package, BarChart3, ChevronDown, ChevronRight, Sparkles, Rss
 } from 'lucide-react';
-
+import POSPage from "../order/POSPage"
 import BottomNav from '../../components/dashboard/BottomNav';
 import DashboardHome from '../../components/dashboard/DashboardHome';
 import BusinessProfileUpdate from '../../components/dashboard/Profile';
@@ -463,6 +463,7 @@ import FeedPage from '../post/FeedPage';
 import AdVerifyPage from './../ads/AdVerify';
 import AdPlansPage from '../ads/AdplanPage';
 import MySubscriptionsPage from '../ads/MySubscriptionPage';
+import SellerDashboard from '../order/SellerDashboard';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -505,7 +506,9 @@ const pages = {
   products: ProductList,
   subscribe: AdPlansPage,
   ads: MySubscriptionsPage,
-  verify: AdVerifyPage
+  verify: AdVerifyPage,
+  stock : SellerDashboard,
+  POS: POSPage
 };
 
 const navItems = [
@@ -624,7 +627,9 @@ export default function Dashboard() {
             {openDropdown === 'inventory' && (
               <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
                 {[
+                  { label: 'Stock', page: 'stock' },
                   { label: 'Stock Management', page: 'inventory' },
+                  { label: 'POS', page: 'POS' },
                   { label: 'Products', page: 'products' },
                   { label: 'Orders', page: null },
                 ].map(sub => (
@@ -634,11 +639,11 @@ export default function Dashboard() {
                       if (sub.page) { setActivePage(sub.page); setOpenDropdown(null); if (mobile) setSidebarOpen(false); }
                     }}
                     className={`block w-full text-left py-2 px-3 text-sm rounded-lg transition-colors ${
-                      activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-gray-500 hover:text-[#8B1E3F] hover:bg-rose-50'
+                      activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
                     } ${!sub.page ? 'opacity-40 cursor-not-allowed' : ''}`}
                   >
                     {sub.label}
-                    {!sub.page && <span className="ml-2 text-[10px] font-medium bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">Soon</span>}
+                    {!sub.page && <span className="ml-2 text-[10px] font-medium bg-gray-100 text-black px-1.5 py-0.5 rounded">Soon</span>}
                   </button>
                 ))}
               </div>

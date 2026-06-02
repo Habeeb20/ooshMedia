@@ -1,4 +1,5 @@
 
+import { CompanyAdDisplay } from "../../pages/ads/EcommerceAdsBanner";
 import CategoryDropdown from "./CtageoryDropdown";
 import HeroSwiper from "./HeroSwiper";
 import PromoCards from "./Promocard";
@@ -31,6 +32,7 @@ export default function HeroSection() {
         {/* Promo cards - right */}
         <div className="hidden lg:block lg:col-span-3">
           <PromoCards />
+          <CompanyAdDisplay/>
         </div>
       </div>
     </section>

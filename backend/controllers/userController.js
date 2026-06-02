@@ -211,7 +211,7 @@ export const getDashboard = async (req, res) => {
   try {
     const userId = req.user._id;   // Make sure you're using req.user._id (not userId)
 
-    console.log("User from token:", req.user); // For debugging
+ // For debugging
 
     const user = await User.findById(userId).select(
       'firstName lastName username email phoneNumber profilePicture isSeller role state lga dateOfBirth createdAt businessProfile sellerProfile'

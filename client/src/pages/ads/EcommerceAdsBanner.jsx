@@ -597,7 +597,7 @@ const ca = {
   sidebar: { width: 220, flexShrink: 0 },
   sidebarInner: { background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', position: 'sticky', top: 80 },
   sidebarSponsored: { display: 'block', textAlign: 'center', fontSize: 10, color: '#94a3b8', fontWeight: 600, letterSpacing: 0.5, padding: '6px 0', background: '#f8fafc', borderBottom: '1px solid #f1f5f9' },
-  sidebarImg: { width: '100%', aspectRatio: '4/3', objectFit: 'cover' },
+  sidebarImg: { width: '200%', aspectRatio: '4/3', objectFit: 'cover' },
   sidebarBody: { padding: '12px' },
   sidebarTitle: { margin: '0 0 5px', fontSize: 14, fontWeight: 700, color: '#1e293b' },
   sidebarDesc: { margin: '0 0 10px', fontSize: 12, color: '#64748b', lineHeight: 1.5 },

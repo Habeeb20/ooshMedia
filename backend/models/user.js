@@ -116,6 +116,39 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
       }
     }],
 
+     acceptedPaymentMethods: {
+    type: String,
+    enum: ['online_only', 'on_delivery_only', 'both'],
+    default: 'both',
+  },
+
+bankDetails: {
+      bankName: { 
+        type: String, 
+        required: false 
+      },
+      accountNumber: { 
+        type: String, 
+        required: false,
+    
+      },
+      accountName: { 
+        type: String, 
+        required: false 
+      },
+
+        bankCode: String,  
+           recipientCode: String, 
+      // Optional: For future verification
+      isVerified: { 
+        type: Boolean, 
+        default: false 
+      },
+      verifiedAt: { 
+        type: Date 
+      }
+    },
+  
     // Product Categories (Multiple selection)
     productCategories: [{ type: String }],   // Will match your product categories JSON
 

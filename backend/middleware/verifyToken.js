@@ -52,3 +52,12 @@ export const adminOnly = async (req, res, next) => {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
+
+
+
+export const sellerOnly = (req, res, next) => {
+  if (req.user.role !== 'entity') {
+    return res.status(403).json({ message: 'Sellers only' });
+  }
+  next();
+};

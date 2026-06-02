@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import axios from 'axios';
 import Product from '../models/sellers/product.js';
 // ====================== CREATE / UPDATE SELLER PROFILE ======================
 export const updateSellerProfile = async (req, res) => {
@@ -10,7 +11,7 @@ export const updateSellerProfile = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only entities can become sellers" });
     }
 
-    const { sellerTypes, productCategories, shopName, shopDescription } = req.body;
+    const { sellerTypes, productCategories, shopName, shopDescription,    bankDetails  } = req.body;
 
     user.isSeller = true;
     user.sellerProfile.shopName = user.bussinessProfile?.businessName || shopName;
@@ -20,6 +21,14 @@ export const updateSellerProfile = async (req, res) => {
       productCategories: productCategories || user.sellerProfile?.productCategories || [],
     //   shopName: shopName || user.sellerProfile?.shopName,
       shopDescription: shopDescription || user.sellerProfile?.shopDescription,
+
+       bankDetails: {
+        bankName: bankDetails?.bankName || user.sellerProfile.bankDetails?.bankName || "",
+        accountNumber: bankDetails?.accountNumber || user.sellerProfile.bankDetails?.accountNumber || "",
+        accountName: bankDetails?.accountName || user.sellerProfile.bankDetails?.accountName || "",
+        isVerified: user.sellerProfile.bankDetails?.isVerified || false,
+        verifiedAt: user.sellerProfile.bankDetails?.verifiedAt
+      }
     };
 
     await user.save();
@@ -35,6 +44,9 @@ export const updateSellerProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update seller profile" });
   }
 };
+
+
+
 
 // ====================== ADD TO SELLER CHAIN ======================
 export const addSellerChain = async (req, res) => {
@@ -488,5 +500,111 @@ export const getSellerDistributors = async (req, res) => {
       success: false,
       message: "Failed to fetch distributors"
     });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add these fields to your existing userSchema in User.js:
+
+/*
+  // Seller-specific fields (add to your existing schema)
+  role: { type: String, enum: ['buyer', 'seller', 'admin'], default: 'buyer' },
+  shopName: String,
+  
+  // Payment preferences
+  acceptedPaymentMethods: {
+    type: String,
+    enum: ['online_only', 'on_delivery_only', 'both'],
+    default: 'both',
+  },
+  
+  // Bank details for Paystack transfers
+  bankDetails: {
+    bankName: String,
+    bankCode: String,          // Paystack bank code
+    accountNumber: String,
+    accountName: String,
+    recipientCode: String,     // Paystack transfer recipient code
+  },
+*/
+
+// Controller to save bank details and create Paystack transfer recipient:
+
+
+export const updateBankDetails = async (req, res) => {
+  try {
+    const { bankName, bankCode, accountNumber, accountName } = req.body;
+
+    // Create Paystack transfer recipient
+    const paystackRes = await axios.post(
+      'https://api.paystack.co/transferrecipient',
+      {
+        type: 'nuban',
+        name: accountName,
+        account_number: accountNumber,
+        bank_code: bankCode,
+        currency: 'NGN',
+      },
+      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+    );
+
+    const recipientCode = paystackRes.data.data.recipient_code;
+
+    await User.findByIdAndUpdate(req.user._id, {
+      'sellerProfile.bankDetails': { bankName, bankCode, accountNumber, accountName, recipientCode },
+    });
+
+    res.json({ message: 'Bank details saved', recipientCode });
+  } catch (err) {
+    res.status(500).json({ message: err.response?.data?.message || err.message });
+  }
+};
+
+export const getBanks = async (req, res) => {
+  try {
+    const { data } = await axios.get('https://api.paystack.co/bank', {
+      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+    });
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const updatePaymentPreferences = async (req, res) => {
+  try {
+    const { acceptedPaymentMethods } = req.body;
+    await User.findByIdAndUpdate(req.user._id, { acceptedPaymentMethods });
+    res.json({ message: 'Preferences updated' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

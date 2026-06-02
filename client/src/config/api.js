@@ -41,3 +41,88 @@ export const uploadToCloudinary = async (file) => {
   const data = await res.json();
   return { url: data.secure_url, publicId: data.public_id };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api',
+ 
+});
+
+// Attach token automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Global 401 handler
+api.interceptors.response.use(
+  res => res,
+  err => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(err);
+  }
+);
+
+export default api;
+
+// ─────────────────────────────────────────────
+// src/App.jsx — Router setup (add to your existing App.jsx)
+// ─────────────────────────────────────────────
+/*
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import PaymentVerifyPage from './pages/PaymentVerifyPage';
+import SellerDashboard from './pages/SellerDashboard';
+import BuyerDashboard from './pages/BuyerDashboard';
+import POSPage from './pages/POSPage';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <CartProvider>
+        <Routes>
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order/:orderId" element={<OrderDetailPage />} />
+          <Route path="/payment/verify" element={<PaymentVerifyPage />} />
+          <Route path="/dashboard/seller" element={<SellerDashboard />} />
+          <Route path="/dashboard/buyer" element={<BuyerDashboard />} />
+          <Route path="/pos" element={<POSPage />} />
+        </Routes>
+      </CartProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+*/

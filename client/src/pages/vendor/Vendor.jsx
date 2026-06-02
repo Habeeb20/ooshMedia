@@ -60,7 +60,7 @@ const Vendors = () => {
     }
   };
 
-  const visibleCategories = entityCategories.slice(0, 6);
+  const visibleCategories = entityCategories.slice(0, 12);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
@@ -80,7 +80,7 @@ const Vendors = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-4">
             {visibleCategories.map((cat, index) => (
               <div
                 key={cat.id}

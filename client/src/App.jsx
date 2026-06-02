@@ -15,6 +15,13 @@ import FeedPage from "./pages/post/FeedPage";
 import ProductsGrid from "./components/home/ProductByCategory";
 import SearchResults from "./components/home/SearchResult";
 import AdVerifyPage from "./pages/ads/AdVerify";
+import CartPage from "./pages/order/CartPage";
+import CheckoutPage from "./pages/order/CheckoutPage";
+import SellerDashboard from "./pages/order/SellerDashboard";
+import BuyerDashboard from "./pages/order/BuyerDashboard";
+import OrderDetailPage from "./pages/order/OrderDetailPage";
+import PaymentVerifyPage from "./pages/order/PaymentVerifyPage";
+import POSPage from "./pages/order/POSPage";
 const App =()=>  {
   return (
     <>
@@ -31,6 +38,37 @@ const App =()=>  {
                <ProtectedRoute>
                 <ProductDetails />
                 </ProtectedRoute>}
+        />
+
+
+        <Route path="/cart" 
+        element={
+          <ProtectedRoute>
+            <CartPage />
+            </ProtectedRoute>
+        }
+        />
+        <Route path="/checkout"
+        element={
+          <ProtectedRoute>
+            <CheckoutPage />
+            </ProtectedRoute>
+        }
+        />
+        <Route path="/order/:orderId" 
+        element={
+          <ProtectedRoute>
+            <OrderDetailPage />
+            </ProtectedRoute>
+        }
+        />
+
+        <Route path="/order/verify-payment"
+        element={
+          <ProtectedRoute>
+            <PaymentVerifyPage />
+            </ProtectedRoute>
+        }
         />
         <Route
           path="/product/:slug/:id"

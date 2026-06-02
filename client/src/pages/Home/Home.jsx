@@ -14,6 +14,8 @@ import { FlashSaleSection,
   TopSellersSection, TopProductsSection, AnniversaryDealsSection,
   CompanyAdDisplay
  } from "../ads/EcommerceAdsBanner";
+import Food from "../../components/home/Food";
+import Footer from "../../components/Footer";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "Same day in Lagos" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% protected" },
@@ -66,6 +68,7 @@ export default function Home() {
       {/* Fashion deals */}
       <FashionDeals />
 
+<Food/>
         <FlashSaleSection />
     <DiscountDealsSection />
     <TrendingNowSection />
@@ -74,9 +77,7 @@ export default function Home() {
     <AnniversaryDealsSection />
 
       {/* Footer strip */}
-      <div className="text-white text-center py-4 text-xs mt-8" style={{ background: appConfig.colors.primary }}>
-        <p>© {new Date().getFullYear()} {appConfig.name}. All rights reserved.</p>
-      </div>
+   <Footer />
     </div>
   );
 }
