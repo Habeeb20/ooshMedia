@@ -123,47 +123,49 @@
 
 
 import { useState, useEffect } from 'react';
-import { useCart } from '../../context/CartContext';
+import {useCart} from '../../context/cartContext'
 import { useNavigate } from 'react-router-dom';
-import api from "../../config/api";
+
+import api from "../../config/api"
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, loading: cartLoading } = useCart();
+  const cartHook = useCart();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect if cart is empty — but only after the initial fetch finishes
+  const cart = cartHook?.cart || null;
+  const cartTotal = cartHook?.cartTotal || 0;
+
+  // Redirect if cart is empty
   useEffect(() => {
-    if (!cartLoading && (!cart || cart.items?.length === 0)) {
-      navigate('/cart', { replace: true });
+    if (cartHook && (!cart || cart.items?.length === 0)) {
+      const timer = setTimeout(() => {
+        navigate('/cart', { replace: true });
+      }, 800);
+      return () => clearTimeout(timer);
     }
-  }, [cartLoading, cart, navigate]);
+  }, [cartHook, cart, navigate]);
 
   const handleCheckout = async () => {
-    if (!cart?.items?.length) return;
+    if (!cart || cart.items?.length === 0) return;
 
     setError('');
     setLoading(true);
-
     try {
-      const { data } = await api.post('/api/orders/checkout', {
-        deliveryInfo: cart.deliveryInfo,
-        paymentMethod: cart.paymentMethod,
-      });
-      const { order, paymentUrl } = data;
+      const { data } = await api.post('/api/orders/checkout');
+      const { order, paymentUrl, deliveryCode } = data;
 
-      if (order?.deliveryInfo?.deliveryCode) {
-        sessionStorage.setItem('deliveryCode', order.deliveryInfo.deliveryCode);
+      if (deliveryCode) {
+        sessionStorage.setItem('deliveryCode', deliveryCode);
         sessionStorage.setItem('orderId', order._id);
       }
 
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        navigate(`/order/${order._id}`, {
-          state: { deliveryCode: order.deliveryInfo?.deliveryCode, order },
-        });
+        navigate(`/order/${order._id}`, { state: { deliveryCode, order } });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Checkout failed. Please try again.');
@@ -172,23 +174,28 @@ export default function CheckoutPage() {
     }
   };
 
-  // Spinner only during initial cart fetch
-  if (cartLoading) {
+  if (!cartHook) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600">Loading checkout...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Safety net — useEffect above handles the redirect
-  if (!cart?.items?.length) return null;
+  if (!cart || cart.items?.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecting to cart...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const fulfillmentType = cart.fulfillmentType || cart.deliveryInfo?.type || 'delivery';
-  const fulfillmentLabel = fulfillmentType === 'delivery' ? 'Delivery' : 'Pickup';
+  const fulfillmentLabel = cart.fulfillmentType === 'delivery' ? 'Delivery' : 'Pickup';
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -199,57 +206,33 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">Items ({cart.items.length})</h2>
           {cart.items.map(item => (
-            <div
-              key={item.product?._id || item.product}
-              className="flex justify-between text-sm py-2 border-b last:border-b-0"
-            >
+            <div key={item.product} className="flex justify-between text-sm py-2 border-b last:border-b-0">
               <span className="text-gray-700">{item.name} × {item.quantity}</span>
               <span className="font-semibold">₦{(item.price * item.quantity).toLocaleString()}</span>
             </div>
           ))}
         </div>
 
-        {/* Fulfillment */}
+        {/* Fulfillment & Payment sections same as before */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-2">Fulfillment</h2>
-          <p className="text-sm text-gray-600">
-            Method: <span className="font-medium">{fulfillmentLabel}</span>
-          </p>
-
-          {fulfillmentType === 'delivery' && (cart.delivery?.address || cart.deliveryInfo?.deliveryAddress) && (
-            <p className="text-sm text-gray-600">
-              Address:{' '}
-              <span className="font-medium">
-                {cart.delivery?.address || cart.deliveryInfo?.deliveryAddress}
-              </span>
-            </p>
+          <p className="text-sm text-gray-600">Method: <span className="font-medium">{fulfillmentLabel}</span></p>
+          {cart.fulfillmentType === 'delivery' && cart.delivery?.address && (
+            <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
           )}
-
-          {fulfillmentType === 'pickup' &&
-            (cart.pickup?.pickedUpBy === 'agent' || cart.deliveryInfo?.pickupBy === 'someone') && (
-            <p className="text-sm text-gray-600">
-              Pickup phone:{' '}
-              <span className="font-medium">
-                {cart.pickup?.agentPhone || cart.deliveryInfo?.pickupPersonPhone}
-              </span>
-            </p>
-          )}
-
-          {fulfillmentType === 'delivery' && (
+          {cart.fulfillmentType === 'delivery' && (
             <div className="mt-3 bg-indigo-50 rounded-xl p-3">
               <p className="text-xs text-indigo-700 font-semibold">
-                📦 A 4-digit delivery code will be shown after checkout. Share it only with your rider.
+                📦 A 4-digit delivery code will be displayed after checkout.
               </p>
             </div>
           )}
         </div>
 
-        {/* Payment */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-2">Payment</h2>
           <p className="text-sm text-gray-600">
-            Method:{' '}
-            <span className="font-medium">
+            Method: <span className="font-medium capitalize">
               {cart.paymentMethod === 'online' ? 'Online (Paystack)' : 'Pay on Delivery'}
             </span>
           </p>
@@ -265,26 +248,17 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>
-        )}
+        {error && <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>}
 
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
+          className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 disabled:opacity-50"
         >
-          {loading
-            ? 'Processing...'
-            : cart.paymentMethod === 'online'
-            ? 'Pay Now →'
-            : 'Place Order →'}
+          {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
         </button>
 
-        <button
-          onClick={() => navigate('/cart')}
-          className="w-full text-gray-500 text-sm text-center py-2"
-        >
+        <button onClick={() => navigate('/cart')} className="w-full text-gray-500 text-sm text-center py-2">
           ← Back to Cart
         </button>
       </div>

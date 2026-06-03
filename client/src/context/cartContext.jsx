@@ -115,6 +115,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 // import api from '../utils/api';
 import api from '../config/api';
 import axios from 'axios';
+import {toast} from 'sonner'
 const defaultValue = {
   cart: null,
   loading: false,
@@ -150,8 +151,10 @@ export const CartProvider = ({ children }) => {
     try {
       const { data } = await api.post('/api/cart/add', { productId, quantity });
       setCart(data.cart);
+      toast.success('Item added to cart');
       return { success: true };
     } catch (err) {
+      toast.error( err.response?.data?.message || 'Failed to add item to cart');
       return { success: false, message: err.response?.data?.message };
     } finally {
       setLoading(false);
@@ -162,7 +165,9 @@ export const CartProvider = ({ children }) => {
     try {
       const { data } = await api.put(`/api/cart/item/${productId}`, { quantity });
       setCart(data.cart);
+      toast.success('Cart updated');
     } catch (err) {
+      toast.error( err.response?.data?.message || 'Failed to update cart');
       console.error(err);
     }
   };
@@ -171,7 +176,9 @@ export const CartProvider = ({ children }) => {
     try {
       const { data } = await api.delete(`/api/cart/item/${productId}`);
       setCart(data.cart);
+      toast.success('Item removed from cart');
     } catch (err) {
+      toast.error( err.response?.data?.message || 'Failed to remove item from cart');
       console.error(err);
     }
   };
@@ -180,13 +187,16 @@ export const CartProvider = ({ children }) => {
     try {
       const { data } = await api.put('/api/cart/fulfillment', options);
       setCart(data.cart);
+      toast.success('Fulfillment updated');
     } catch (err) {
+      toast.error( err.response?.data?.message || 'Failed to update fulfillment');
       console.error(err);
     }
   };
 
   const clearCart = async () => {
     await api.delete('/cart');
+    toast.success('Cart cleared');
     setCart(null);
   };
 

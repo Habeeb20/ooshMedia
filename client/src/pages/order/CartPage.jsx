@@ -7,7 +7,7 @@ import { Truck, Package, User, Users, Minus, Plus, Trash2, ShoppingBag } from 'l
 export default function CartPage() {
   const { cart, cartTotal, updateItem, removeItem, updateFulfillment } = useCart();
   const navigate = useNavigate();
-
+console.log(cart);
   const fulfillmentType = cart?.fulfillmentType || 'delivery';
   const pickup = cart?.pickup || { pickedUpBy: 'self' };
   const paymentMethod = cart?.paymentMethod || 'online';
@@ -63,14 +63,14 @@ export default function CartPage() {
                 <p className="text-indigo-600 font-bold">₦{item.price.toLocaleString()}</p>
                 <div className="flex items-center gap-3 mt-2">
                   <button
-                    onClick={() => updateItem(item.product, item.quantity - 1)}
+                    onClick={() => updateItem(item.product?._id, item.quantity - 1)}
                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"
                   >
                     <Minus size={14} />
                   </button>
                   <span className="font-semibold w-6 text-center">{item.quantity}</span>
                   <button
-                    onClick={() => updateItem(item.product, item.quantity + 1)}
+                    onClick={() => updateItem(item.product?._id, item.quantity + 1)}
                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"
                   >
                     <Plus size={14} />

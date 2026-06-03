@@ -17,7 +17,7 @@ export default function PaymentVerifyPage() {
       setStatus('failed');
       return;
     }
-    api.get(`/orders/verify-payment/${reference}`)
+    api.get(`/api/orders/verify-payment/${reference}`)
       .then(({ data }) => {
         setOrder(data.order);
         if (data.order.fulfillmentType === 'delivery') {

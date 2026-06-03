@@ -10,7 +10,7 @@ import User from "../../models/user.js"
 
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
-const PLATFORM_FEE_RATE = 0.10; // 10%
+const PLATFORM_FEE_RATE = 0.01; // 1%
 
 const generateDeliveryCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
@@ -90,10 +90,11 @@ export const checkout = async (req, res) => {
     // If paying online, initialize Paystack
     if (cart.paymentMethod === 'online') {
       const buyer = await User.findById(req.user._id);
+
       const paystackRes = await axios.post(
         'https://api.paystack.co/transaction/initialize',
         {
-          email: buyer.email,
+          email: buyer.email || buyer.alternateContact,
           amount: Math.round(totalAmount * 100), // kobo
           reference: `ORD-${order._id}-${Date.now()}`,
           metadata: { orderId: order._id.toString() },
@@ -131,6 +132,7 @@ export const checkout = async (req, res) => {
       deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
     });
   } catch (err) {
+    console.error('Checkout error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -391,3 +393,209 @@ async function initiateSellerTransfers(order) {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useEffect } from 'react';
+// import { useCart } from '../../context/CartContext';
+// import { useNavigate } from 'react-router-dom';
+// import api from "../../config/api";
+
+// const PLATFORM_FEE_RATE = 0.01; // 1%
+
+// export default function CheckoutPage() {
+//   const cartHook = useCart();
+//   const navigate = useNavigate();
+
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+
+//   const cart = cartHook?.cart || null;
+//   const cartTotal = cartHook?.cartTotal || 0;
+
+//   // Calculate Platform Fee (1%)
+//   const platformFee = +(cartTotal * PLATFORM_FEE_RATE).toFixed(2);
+//   const finalTotal = cartTotal + platformFee;
+
+//   // Redirect if cart is empty
+//   useEffect(() => {
+//     if (cartHook && (!cart || cart.items?.length === 0)) {
+//       const timer = setTimeout(() => {
+//         navigate('/cart', { replace: true });
+//       }, 800);
+//       return () => clearTimeout(timer);
+//     }
+//   }, [cartHook, cart, navigate]);
+
+//   const handleCheckout = async () => {
+//     if (!cart || cart.items?.length === 0) return;
+
+//     setError('');
+//     setLoading(true);
+//     try {
+//       const { data } = await api.post('/api/orders/checkout');
+//       const { order, paymentUrl, deliveryCode } = data;
+
+//       if (deliveryCode) {
+//         sessionStorage.setItem('deliveryCode', deliveryCode);
+//         sessionStorage.setItem('orderId', order._id);
+//       }
+
+//       if (paymentUrl) {
+//         window.location.href = paymentUrl;
+//       } else {
+//         navigate(`/order/${order._id}`, { state: { deliveryCode, order } });
+//       }
+//     } catch (err) {
+//       setError(err.response?.data?.message || 'Checkout failed. Please try again.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   if (!cartHook) {
+//     return (
+//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//         <div className="text-center">
+//           <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+//           <p className="mt-4 text-gray-600">Loading...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (!cart || cart.items?.length === 0) {
+//     return (
+//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//         <div className="text-center">
+//           <p className="text-gray-600">Redirecting to cart...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const fulfillmentLabel = cart.fulfillmentType === 'delivery' ? 'Delivery' : 'Pickup';
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h1>
+
+//       <div className="max-w-lg mx-auto space-y-4">
+//         {/* Items */}
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-3">Items ({cart.items.length})</h2>
+//           {cart.items.map(item => (
+//             <div key={item.product} className="flex justify-between text-sm py-2 border-b last:border-b-0">
+//               <span className="text-gray-700">{item.name} × {item.quantity}</span>
+//               <span className="font-semibold">₦{(item.price * item.quantity).toLocaleString()}</span>
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Fulfillment */}
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-2">Fulfillment</h2>
+//           <p className="text-sm text-gray-600">Method: <span className="font-medium">{fulfillmentLabel}</span></p>
+          
+//           {cart.fulfillmentType === 'delivery' && cart.delivery?.address && (
+//             <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
+//           )}
+
+//           {cart.fulfillmentType === 'delivery' && (
+//             <div className="mt-3 bg-indigo-50 rounded-xl p-3">
+//               <p className="text-xs text-indigo-700 font-semibold">
+//                 📦 A 4-digit delivery code will be displayed after checkout. Share it only with the delivery rider.
+//               </p>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Payment */}
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-2">Payment</h2>
+//           <p className="text-sm text-gray-600">
+//             Method: <span className="font-medium capitalize">
+//               {cart.paymentMethod === 'online' ? 'Online (Paystack)' : 'Pay on Delivery'}
+//             </span>
+//           </p>
+
+//           <div className="mt-4 space-y-2 text-sm">
+//             <div className="flex justify-between text-gray-600">
+//               <span>Subtotal</span>
+//               <span>₦{cartTotal.toLocaleString()}</span>
+//             </div>
+
+//             <div className="flex justify-between text-gray-600">
+//               <span>Platform Fee (1%)</span>
+//               <span>₦{platformFee.toLocaleString()}</span>
+//             </div>
+
+//             <div className="flex justify-between font-bold text-gray-800 text-base border-t pt-3 mt-2">
+//               <span>Total</span>
+//               <span>₦{finalTotal.toLocaleString()}</span>
+//             </div>
+//           </div>
+//         </div>
+
+//         {error && (
+//           <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>
+//         )}
+
+//         <button
+//           onClick={handleCheckout}
+//           disabled={loading}
+//           className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
+//         >
+//           {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
+//         </button>
+
+//         <button 
+//           onClick={() => navigate('/cart')} 
+//           className="w-full text-gray-500 text-sm text-center py-2"
+//         >
+//           ← Back to Cart
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
