@@ -2,9 +2,9 @@ import { Home, Briefcase, Store, PlaySquare, User } from "lucide-react";
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: Home },
-  { id: 'jobs', label: 'Jobs', icon: Briefcase },
-  { id: 'marketplace', label: 'Marketplace', icon: Store },
-  { id: 'media', label: 'Media Hub', icon: PlaySquare },
+  { id: 'post', label: 'Job Feed', icon: Briefcase },
+  { id: 'products', label: 'Marketplace', icon: Store },
+  { id: 'ads', label: 'My ads', icon: PlaySquare },
   { id: 'profile', label: 'Profile', icon: User },
 ];
 

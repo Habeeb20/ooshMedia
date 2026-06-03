@@ -464,6 +464,9 @@ import AdVerifyPage from './../ads/AdVerify';
 import AdPlansPage from '../ads/AdplanPage';
 import MySubscriptionsPage from '../ads/MySubscriptionPage';
 import SellerDashboard from '../order/SellerDashboard';
+import CartPage from "../order/CartPage"
+import ProductsGrid from '../product/ProductGrid';
+import BuyerDashboard from '../order/BuyerDashboard';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -508,14 +511,20 @@ const pages = {
   ads: MySubscriptionsPage,
   verify: AdVerifyPage,
   stock : SellerDashboard,
-  POS: POSPage
+  POS: POSPage,
+  cart: CartPage,
+  products: ProductsGrid,
+  orderBreakdown: BuyerDashboard
 };
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: Home },
   { id: 'post', label: 'Feed', icon: Rss },
+  { id: 'products', label: 'Marketplace', icon: BarChart3 },
+  {id:'cart', label:'Cart', icon: Sparkles},
   { id: 'ads', label: 'my ads', icon: Rss },
   { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
+  {id:'orderBreakdown', label:'Orders', icon: Package},
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
 ];
