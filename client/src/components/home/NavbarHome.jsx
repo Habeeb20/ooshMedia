@@ -4,11 +4,12 @@ import { useState } from "react";
 import { Search, ShoppingCart, User, Heart, Menu, X, MapPin, ChevronDown } from "lucide-react";
 import appConfig from "../../config/appConfig";
 import { productCategories } from "../../categories/productCategories";
-
+import { useCart } from "../../context/cartContext";
+import { Link, useNavigate } from "react-router-dom";
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
-
+  const { addToCart, cart, cartCount } = useCart();
     // SLUGIFY FUNCTION
   const slugify = (text) => {
     if (!text) return "";
@@ -105,16 +106,26 @@ export default function Navbar() {
               </button>
 
               <button className="flex flex-col items-center p-2 rounded-xl hover:bg-gray-50 group relative">
-                <div className="relative">
-                  <ShoppingCart size={22} className="text-gray-600 group-hover:text-[#8B1E3F]" />
-                  <span 
-                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
-                    style={{ background: appConfig.colors.primary }}
-                  >
-                    3
-                  </span>
-                </div>
-                <span className="text-[10px] text-gray-500 mt-0.5 hidden md:block">Cart</span>
+                 {cartCount > 0 && (
+                      <button
+                        onClick={() => navigate("/cart")}
+                        className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl text-white font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                        style={{ background: appConfig.colors.primary }}
+                      >
+                        <ShoppingCart size={22} />
+                        <span>View Cart</span>
+                        <span className="bg-white text-xs font-black px-2 py-0.5 rounded-full" style={{ color: appConfig.colors.primary }}>
+                          {cartCount}
+                        </span>
+                      </button>
+                    )}
+                    <Link to="/cart" className="flex flex-col items-center p-2 rounded-xl hover:bg-gray-50 group relative">
+                      <ShoppingCart size={22} className="text-gray-600 group-hover:text-[#8B1E3F]" />
+                   <span className="bg-white text-xs font-black px-2 py-0.5 rounded-full" style={{ color: appConfig.colors.primary }}>
+                          {cartCount}
+                        </span>
+                    </Link>
+              
               </button>
             </div>
           </div>

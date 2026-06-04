@@ -14,6 +14,7 @@ import adRoutes from './routes/adRoutes.js';
 import cartRoutes from "./routes/order/cartRoutes.js"
 import orderRoutes from "./routes/order/orderRoutes.js"
 import { posRouter, analyticsRouter } from "./routes/order/extraRoutes.js";
+import dealsRoutes from "./routes/deals/dealsRoute.js"
 dotenv.config();
 connectDb()
 
@@ -61,6 +62,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/pos', posRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/deals', dealsRoutes);
 // Start server
 const port = process.env.PORT || 2020;
 

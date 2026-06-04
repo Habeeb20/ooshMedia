@@ -84,7 +84,7 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+     
     }
     return Promise.reject(err);
   }
@@ -92,37 +92,63 @@ api.interceptors.response.use(
 
 export default api;
 
-// ─────────────────────────────────────────────
-// src/App.jsx — Router setup (add to your existing App.jsx)
-// ─────────────────────────────────────────────
-/*
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { CartProvider } from './context/CartContext';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderDetailPage from './pages/OrderDetailPage';
-import PaymentVerifyPage from './pages/PaymentVerifyPage';
-import SellerDashboard from './pages/SellerDashboard';
-import BuyerDashboard from './pages/BuyerDashboard';
-import POSPage from './pages/POSPage';
 
-function App() {
-  return (
-    <BrowserRouter>
-      <CartProvider>
-        <Routes>
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order/:orderId" element={<OrderDetailPage />} />
-          <Route path="/payment/verify" element={<PaymentVerifyPage />} />
-          <Route path="/dashboard/seller" element={<SellerDashboard />} />
-          <Route path="/dashboard/buyer" element={<BuyerDashboard />} />
-          <Route path="/pos" element={<POSPage />} />
-        </Routes>
-      </CartProvider>
-    </BrowserRouter>
-  );
+
+
+
+
+
+// config/api.js
+// Extend your existing api.js with these deal + subscription methods
+
+const BASE = `${import.meta.env.VITE_BACKEND_URL}/api`;
+
+async function request(path, opts = {}) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${BASE}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(opts.headers || {}),
+    },
+    ...opts,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const e = new Error(err.message || `HTTP ${res.status}`);
+    e.status = res.status;
+    throw e;
+  }
+  return res.json();
 }
 
-export default App;
-*/
+export const dealsAPI = {
+  getAll: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/deals?${qs}`);
+  },
+  getOne: (id) => request(`/deals/${id}`),
+  create: (body) => request('/deals', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id, body) => request(`/deals/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  delete: (id) => request(`/deals/${id}`, { method: 'DELETE' }),
+  updateStatus: (id, status) => request(`/deals/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+  like: (id) => request(`/deals/${id}/like`, { method: 'POST' }),
+  repost: (id) => request(`/deals/${id}/repost`, { method: 'POST' }),
+  share: (id) => request(`/deals/${id}/share`, { method: 'POST' }),
+
+  addComment: (id, text) => request(`/deals/${id}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
+  deleteComment: (id, commentId) => request(`/deals/${id}/comments/${commentId}`, { method: 'DELETE' }),
+
+  addReview: (id, body) => request(`/deals/${id}/reviews`, { method: 'POST', body: JSON.stringify(body) }),
+
+  sendMessage: (id, text) => request(`/deals/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
+  getMessages: (id) => request(`/deals/${id}/messages`),
+};
+
+export const subscriptionAPI = {
+  getBalance: () => request('/deals/subscription/balance'),
+  initiate: () => request('/deals/subscription/initiate', { method: 'POST' }),
+  verify: (reference) => request(`/deals/subscription/verify?reference=${reference}`),
+};
+
