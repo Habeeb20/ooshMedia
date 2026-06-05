@@ -351,7 +351,7 @@ function JobDistance({ userLocation, lga, state }) {
     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
       📍 {lga}{state ? `, ${state}` : ''}
       {distanceKm != null && (
-        <span className="ml-2 text-emerald-600 font-medium">
+        <span className="ml-2 text-rose-900 font-medium">
           · {distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)} km`} away
           · ~{driveMinutes} min drive
         </span>
@@ -380,14 +380,14 @@ function JobDistance({ userLocation, lga, state }) {
                   placeholder="Search by job title..."
                   value={jobTitleSearch}
                   onChange={(e) => setJobTitleSearch(e.target.value)}
-                  className="w-full pl-12 pr-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                  className="w-full pl-12 pr-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
                 />
               </div>
 
               <select
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
-                className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
               >
                 <option value="">All Categories</option>
                 {SERVICE_CATEGORIES?.map(cat => (
@@ -400,7 +400,7 @@ function JobDistance({ userLocation, lga, state }) {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium"
+                className="flex items-center gap-2 text-rose-900 hover:text-rose-900 font-medium"
               >
                 <Filter size={18} />
                 {showAdvancedSearch ? 'Hide Advanced Filters' : 'Advanced Search'}
@@ -415,7 +415,7 @@ function JobDistance({ userLocation, lga, state }) {
                   <select
                     value={modeFilter}
                     onChange={(e) => setModeFilter(e.target.value)}
-                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
                   >
                     <option value="">Any Mode</option>
                     <option value="remote">Remote</option>
@@ -434,7 +434,7 @@ function JobDistance({ userLocation, lga, state }) {
                     placeholder="e.g Lagos"
                     value={stateFilter}
                     onChange={(e) => setStateFilter(e.target.value)}
-                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
                   />
                 </div>
 
@@ -445,7 +445,7 @@ function JobDistance({ userLocation, lga, state }) {
                     placeholder="e.g Eti-Osa"
                     value={lgaFilter}
                     onChange={(e) => setLgaFilter(e.target.value)}
-                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
                   />
                 </div>
 
@@ -456,7 +456,7 @@ function JobDistance({ userLocation, lga, state }) {
                     placeholder="Maximum budget"
                     value={maxBudget}
                     onChange={(e) => setMaxBudget(e.target.value)}
-                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-emerald-600 outline-none"
+                    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:border-rose-900 outline-none"
                   />
                 </div>
               </div>
@@ -476,7 +476,7 @@ function JobDistance({ userLocation, lga, state }) {
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 py-5 text-lg font-semibold transition-all capitalize
                   ${activeTab === tab
-                    ? 'text-emerald-700 border-b-4 border-emerald-600 bg-gray-50'
+                    ? 'text-rose-900 border-b-4 border-rose-900 bg-gray-50'
                     : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {tab === 'best' ? 'Best Matches' : tab === 'recent' ? 'Recent' : 'Saved Jobs'}
@@ -502,7 +502,7 @@ function JobDistance({ userLocation, lga, state }) {
           {displayedJobs.map((job) => (
             <div
               key={job._id}
-              className="bg-white border border-gray-200 hover:border-emerald-500 rounded-3xl p-6 transition-all hover:shadow-xl"
+              className="bg-white border border-gray-200 hover:border-rose-500 rounded-3xl p-6 transition-all hover:shadow-xl"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 {/* Job Title */}
@@ -517,16 +517,16 @@ function JobDistance({ userLocation, lga, state }) {
                   {job.mode && (
                     <div className={`px-4 py-1.5 rounded-2xl text-sm font-medium capitalize flex items-center gap-1.5
                       ${job.mode === 'remote' ? 'bg-blue-100 text-blue-700' :
-                        job.mode === 'onsite' ? 'bg-emerald-100 text-emerald-700' :
+                        job.mode === 'onsite' ? 'bg-rose-100 text-rose-900' :
                         job.mode === 'hybrid' ? 'bg-purple-100 text-purple-700' :
                         job.mode === 'contract' ? 'bg-amber-100 text-amber-700' :
-                        job.mode === 'temporary' ? 'bg-rose-100 text-rose-700' :
+                        job.mode === 'temporary' ? 'bg-rose-100 text-rose-900' :
                         'bg-gray-100 text-gray-700'}`}
                     >
                       {job.mode}
                     </div>
                   )}
-                  <div className="font-bold text-2xl text-emerald-600 whitespace-nowrap">
+                  <div className="font-bold text-2xl text-rose-900 whitespace-nowrap">
                     ₦{job.budget?.toLocaleString() ?? '—'}
                   </div>
                 </div>
@@ -591,7 +591,7 @@ function JobDistance({ userLocation, lga, state }) {
                         setSelectedJobForRefer(job);
                         setShowReferModal(true);
                       }}
-                      className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition"
+                      className="flex items-center gap-2 text-rose-900 hover:text-rose-900 font-medium transition"
                     >
                       <Share2 size={18} />
                       Refer Job
@@ -610,7 +610,7 @@ function JobDistance({ userLocation, lga, state }) {
                       </button>
                       <button
                         onClick={() => openMessageModal(job)}
-                        className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 transition"
+                        className="flex items-center gap-1.5 text-rose-900 hover:text-rose-900 transition"
                         title="Send Message"
                       >
                         <MessageSquare size={18} />
@@ -635,7 +635,7 @@ function JobDistance({ userLocation, lga, state }) {
                   recordView(job._id);
                   setSelectedJob(job);
                 }}
-                className="w-full mt-5 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-medium"
+                className="w-full mt-5 bg-rose-900 hover:bg-rose-900 text-white py-3 rounded-2xl font-medium"
               >
                 View Details
               </button>

@@ -104,6 +104,13 @@ const App =()=>  {
                 <PaymentVerifyPage />
               }
         />
+        <Route
+          path="/subscription/verify/"
+             element={
+           
+                <PaymentVerifyPage />
+              }
+        />
 
 
     

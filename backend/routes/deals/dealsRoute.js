@@ -233,27 +233,42 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════
-//  SUBSCRIPTIONS & PAYMENTS (Paystack)
+//  dRIPTIONS & PAYMENTS (Paystack)
 // ════════════════════════════════════════════════════════
 
 const POINTS_PER_PURCHASE = 10;
 const AMOUNT_KOBO = 1000000; // ₦10,000 in kobo
 
 /** POST /api/deals/subscription/initiate — start Paystack payment */
+
 router.post('/subscription/initiate', verifyToken, async (req, res) => {
+  console.log('req.body:', req.body); // ← check your server terminal for this
   try {
+    // ✅ Accept the reference generated client-side
+    const { reference } = req.body;
+
+    if (!reference) {
+      return res.status(400).json({ message: 'Transaction reference is required.' });
+    }
+
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
       {
-        email: req.user.email,
+        email: req.user.email || req.user.alternateContact,
         amount: AMOUNT_KOBO,
-        metadata: { userId: req.user._id.toString(), points: POINTS_PER_PURCHASE },
+        reference, // ✅ pass it to Paystack so both sides agree on the same ref
+        metadata: {
+          userId: req.user._id.toString(),
+          points: POINTS_PER_PURCHASE,
+        },
         callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
       },
       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
     );
+
     res.json(response.data);
   } catch (err) {
+    console.log(err.response?.data?.message || err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -406,3 +421,86 @@ export default router;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.post('/subscription/initiate', verifyToken, async (req, res) => {
+  try {
+    // ✅ Accept the reference generated client-side
+    const { reference } = req.body;
+
+    if (!reference) {
+      return res.status(400).json({ message: 'Transaction reference is required.' });
+    }
+
+    const response = await axios.post(
+      'https://api.paystack.co/transaction/initialize',
+      {
+        email: req.user.email || req.user.alternateContact,
+        amount: AMOUNT_KOBO,
+        reference, // ✅ pass it to Paystack so both sides agree on the same ref
+        metadata: {
+          userId: req.user._id.toString(),
+          points: POINTS_PER_PURCHASE,
+        },
+        callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
+      },
+      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+    );
+
+    res.json(response.data);
+  } catch (err) {
+    console.log(err.response?.data?.message || err.message);
+    res.status(500).json({ message: err.message });
+  }
+});

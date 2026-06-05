@@ -148,7 +148,86 @@ export const dealsAPI = {
 
 export const subscriptionAPI = {
   getBalance: () => request('/deals/subscription/balance'),
-  initiate: () => request('/deals/subscription/initiate', { method: 'POST' }),
+  initiate: (payload) => request('/deals/subscription/initiate', { method: 'POST', body: JSON.stringify(payload) }),
   verify: (reference) => request(`/deals/subscription/verify?reference=${reference}`),
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Add this temporary debug log to confirm what's arriving
+// router.post('/subscription/initiate', verifyToken, async (req, res) => {
+//   console.log('req.body:', req.body); // ← check your server terminal for this
+
+//   try {
+//     const { reference } = req.body;
+
+//     if (!reference) {
+//       return res.status(400).json({ message: 'Transaction reference is required.' });
+//     }
+
+//     const response = await axios.post(
+//       'https://api.paystack.co/transaction/initialize',
+//       {
+//         email: req.user.email || req.user.alternateContact,
+//         amount: AMOUNT_KOBO,
+//         reference,
+//         metadata: {
+//           userId: req.user._id.toString(),
+//           points: POINTS_PER_PURCHASE,
+//         },
+//         callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
+//       },
+//       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+//     );
+
+//     res.json(response.data);
+//   } catch (err) {
+//     console.log(err.response?.data?.message || err.message);
+//     res.status(500).json({ message: err.message });
+//   }
+// });
