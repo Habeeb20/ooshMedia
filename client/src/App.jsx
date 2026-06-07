@@ -23,6 +23,7 @@ import OrderDetailPage from "./pages/order/OrderDetailPage";
 import PaymentVerifyPage from "./pages/order/PaymentVerifyPage";
 import POSPage from "./pages/order/POSPage";
 import {CartProvider} from "./context/cartContext"
+import SubscriptionVerify from "./pages/Deal/SubscriptionVerify";
 
 const App =()=>  {
   return (
@@ -104,13 +105,7 @@ const App =()=>  {
                 <PaymentVerifyPage />
               }
         />
-        <Route
-          path="/subscription/verify/"
-             element={
-           
-                <PaymentVerifyPage />
-              }
-        />
+     <Route path="/subscription/verify" element={<SubscriptionVerify />} />
 
 
     

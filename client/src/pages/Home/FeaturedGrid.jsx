@@ -163,7 +163,7 @@ import appConfig from "../../config/appConfig";
 
 const features = [
   {
-    title: "Browse Vendors",
+    title: "Vendors",
     description:
       "Discover trusted vendors and premium business stores.",
     icon: Store,
@@ -199,7 +199,7 @@ const features = [
   },
 
   {
-    title: "Discount Deals",
+    title: "edrivers",
     description:
       "Get access to daily flash sales and massive discounts.",
     icon: Tags,
@@ -208,12 +208,28 @@ const features = [
   },
 
   {
-    title: "Top Services",
+    title: "efixit",
     description:
       "Connect with verified professionals and service providers.",
     icon: Users,
     gradient: "from-[#7C3AED] to-[#9333EA]",
     link: "/top-services",
+  },
+  {
+    title: "Edrive",
+    description:
+      "Connect with verified professionals and service providers.",
+    icon: Users,
+    gradient: "from-[#7C3AED] to-[#9333EA]",
+    link: "/edrive",
+  },
+  {
+    title: "E hotels",
+    description:
+      "Connect with verified professionals and service providers.",
+    icon: Users,
+    gradient: "from-[#7C3AED] to-[#9333EA]",
+    link: "/e-hotels",
   },
 ];
 
@@ -221,7 +237,7 @@ export default function FeatureGrid() {
   return (
     <section className="max-w-7xl mx-auto px-4 mt-10">
       {/* GRID */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-8 gap-6">
         {features.map((item, index) => {
           const Icon = item.icon;
 

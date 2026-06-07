@@ -5,7 +5,7 @@ import {Conversation} from "../../models/deals/conversation.js"
 import {sendEmail} from "../../utills/sendEmail.js"
 import  {verifyToken} from "../../middleware/verifyToken.js"
 import axios from 'axios';
-
+import Paystack from 'paystack';
 const router = express.Router();
 
 
@@ -241,71 +241,163 @@ const AMOUNT_KOBO = 1000000; // ₦10,000 in kobo
 
 /** POST /api/deals/subscription/initiate — start Paystack payment */
 
-router.post('/subscription/initiate', verifyToken, async (req, res) => {
-  console.log('req.body:', req.body); // ← check your server terminal for this
-  try {
-    // ✅ Accept the reference generated client-side
-    const { reference } = req.body;
+// router.post('/subscription/initiate', verifyToken, async (req, res) => {
+//   console.log('req.body:', req.body); // ← check your server terminal for this
+//   try {
+//     // ✅ Accept the reference generated client-side
+//     const { reference } = req.body;
 
-    if (!reference) {
-      return res.status(400).json({ message: 'Transaction reference is required.' });
-    }
+//     if (!reference) {
+//       return res.status(400).json({ message: 'Transaction reference is required.' });
+//     }
+
+//     const response = await axios.post(
+//       'https://api.paystack.co/transaction/initialize',
+//       {
+//         email: req.user.email || req.user.alternateContact,
+//         amount: AMOUNT_KOBO,
+//         reference, // ✅ pass it to Paystack so both sides agree on the same ref
+//         metadata: {
+//           userId: req.user._id.toString(),
+//           points: POINTS_PER_PURCHASE,
+//         },
+//         callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
+//       },
+//       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+//     );
+
+//     res.json(response.data);
+//   } catch (err) {
+//     console.log(err.response?.data?.message || err.message);
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+// /** GET /api/deals/subscription/verify?reference=xxx — verify after redirect */
+// router.get('/subscription/verify', verifyToken, async (req, res) => {
+//   try {
+//     const { reference } = req.query;
+//     const response = await axios.get(
+//       `https://api.paystack.co/transaction/verify/${reference}`,
+//       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+//     );
+
+//     if (response.data.data.status === 'success') {
+//       await Subscription.findOneAndUpdate(
+//         { user: req.user._id },
+//         {
+//           $inc: { points: POINTS_PER_PURCHASE, totalPurchased: POINTS_PER_PURCHASE },
+//           $push: {
+//             transactions: {
+//               reference,
+//               amount: AMOUNT_KOBO,
+//               pointsAdded: POINTS_PER_PURCHASE,
+//               status: 'success',
+//             },
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//       res.json({ message: 'Subscription successful', points: POINTS_PER_PURCHASE });
+//     } else {
+//       res.status(400).json({ message: 'Payment not successful' });
+//     }
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+
+
+
+
+// POST /api/deals/subscription/initiate
+router.post('/subscription/initiate', verifyToken, async (req, res) => {
+  try {
+    const reference = `sub-${req.user._id}-${Date.now()}`;
 
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
       {
         email: req.user.email || req.user.alternateContact,
         amount: AMOUNT_KOBO,
-        reference, // ✅ pass it to Paystack so both sides agree on the same ref
+        reference,
+        callback_url: `${process.env.BACKEND_URL}/deals/subscription/verify`,
         metadata: {
           userId: req.user._id.toString(),
           points: POINTS_PER_PURCHASE,
         },
-        callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
       },
       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
     );
 
-    res.json(response.data);
+    // Return the authorization_url — frontend will redirect to it
+    res.json({
+      success: true,
+      data: {
+        authorization_url: response.data.data.authorization_url,
+        reference: response.data.data.reference,
+      },
+    });
   } catch (err) {
-    console.log(err.response?.data?.message || err.message);
+    console.error(err.response?.data || err.message);
     res.status(500).json({ message: err.message });
   }
 });
 
-/** GET /api/deals/subscription/verify?reference=xxx — verify after redirect */
-router.get('/subscription/verify', verifyToken, async (req, res) => {
+
+// GET /api/deals/subscription/verify  ← Paystack redirects here (no verifyToken — no user session)
+router.get('/subscription/verify', async (req, res) => {
+  const { reference } = req.query;
+
   try {
-    const { reference } = req.query;
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
     );
 
-    if (response.data.data.status === 'success') {
-      await Subscription.findOneAndUpdate(
-        { user: req.user._id },
-        {
-          $inc: { points: POINTS_PER_PURCHASE, totalPurchased: POINTS_PER_PURCHASE },
-          $push: {
-            transactions: {
-              reference,
-              amount: AMOUNT_KOBO,
-              pointsAdded: POINTS_PER_PURCHASE,
-              status: 'success',
-            },
+    const data = response.data.data;
+
+    if (data.status !== 'success') {
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/subscription/verify?status=failed&message=${encodeURIComponent(
+          data.gateway_response || 'Payment failed'
+        )}`
+      );
+    }
+
+    const { userId, points } = data.metadata;
+
+    await Subscription.findOneAndUpdate(
+      { user: userId },
+      {
+        $inc: { points: POINTS_PER_PURCHASE, totalPurchased: POINTS_PER_PURCHASE },
+        $push: {
+          transactions: {
+            reference,
+            amount: AMOUNT_KOBO,
+            pointsAdded: POINTS_PER_PURCHASE,
+            status: 'success',
           },
         },
-        { upsert: true, new: true }
-      );
-      res.json({ message: 'Subscription successful', points: POINTS_PER_PURCHASE });
-    } else {
-      res.status(400).json({ message: 'Payment not successful' });
-    }
+      },
+      { upsert: true, new: true }
+    );
+
+    // Redirect to frontend result page
+    res.redirect(
+      `${process.env.FRONTEND_URL}/subscription/verify?status=success&reference=${reference}`
+    );
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Verify error:', err.message);
+    res.redirect(`${process.env.FRONTEND_URL}/subscription/verify?status=error`);
   }
 });
+
+
+
+
+
 
 /** GET /api/deals/subscription/balance */
 router.get('/subscription/balance', verifyToken, async (req, res) => {
@@ -383,7 +475,7 @@ router.get('/:id/messages', verifyToken, async (req, res) => {
     const conversations = await Conversation.find(filter)
       .populate('participants', 'firstName lastName username avatar')
       .sort({ lastMessage: -1 });
-
+console.log('Fetched conversations:', conversations);
     res.json(conversations);
   } catch (err) {
     res.status(500).json({ message: err.message });
