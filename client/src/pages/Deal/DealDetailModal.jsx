@@ -84,12 +84,49 @@ function ReviewItem({ review }) {
   );
 }
 
+// function ConversationItem({ conv, currentUserId }) {
+//   const [open, setOpen] = useState(false);
+//   const other = conv.participants?.find(p => p._id !== currentUserId);
+//   const otherName = other
+//     ? `${other.firstName || ''} ${other.lastName || ''}`.trim() || other.username
+//     : 'User';
+//   return (
+//     <div className="bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
+//       <button
+//         className="flex items-center gap-2.5 p-3 w-full text-left hover:bg-gray-100 transition-colors"
+//         onClick={() => setOpen(v => !v)}
+//       >
+//         <Avatar src={other?.avatar} name={otherName} />
+//         <span className="text-xs font-bold text-gray-800 flex-1">{otherName}</span>
+//         <span className="text-[10px] text-gray-400">{conv.messages?.length} msg{conv.messages?.length !== 1 ? 's' : ''}</span>
+//         <span className="text-[10px] text-gray-400 ml-1">{open ? '▲' : '▼'}</span>
+//       </button>
+//       {open && (
+//         <div className="border-t border-gray-100 p-3 flex flex-col gap-2">
+//           {conv.messages?.map((m, i) => (
+//             <div key={i} className={`max-w-[80%] ${m.sender === currentUserId ? 'self-end' : 'self-start'}`}>
+//               <p className={`text-xs px-3 py-2 rounded-xl leading-relaxed
+//                 ${m.sender === currentUserId
+//                   ? 'bg-[#8B1E3F]/10 text-gray-800'
+//                   : 'bg-white border border-gray-100 text-gray-700'}`}
+//               >{m.text}</p>
+//               <span className="text-[10px] text-gray-400 block mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
 function ConversationItem({ conv, currentUserId }) {
   const [open, setOpen] = useState(false);
   const other = conv.participants?.find(p => p._id !== currentUserId);
   const otherName = other
     ? `${other.firstName || ''} ${other.lastName || ''}`.trim() || other.username
     : 'User';
+
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
       <button
@@ -104,13 +141,20 @@ function ConversationItem({ conv, currentUserId }) {
       {open && (
         <div className="border-t border-gray-100 p-3 flex flex-col gap-2">
           {conv.messages?.map((m, i) => (
-            <div key={i} className={`max-w-[80%] ${m.sender === currentUserId ? 'self-end' : 'self-start'}`}>
-              <p className={`text-xs px-3 py-2 rounded-xl leading-relaxed
-                ${m.sender === currentUserId
+            <div
+              key={i}
+              className={`max-w-[80%] flex flex-col ${
+                String(m.sender) === String(currentUserId) ? 'self-end items-end' : 'self-start items-start'
+              }`}
+            >
+              <p className={`text-xs px-3 py-2 rounded-xl leading-relaxed ${
+                String(m.sender) === String(currentUserId)
                   ? 'bg-[#8B1E3F]/10 text-gray-800'
-                  : 'bg-white border border-gray-100 text-gray-700'}`}
-              >{m.text}</p>
-              <span className="text-[10px] text-gray-400 block mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
+                  : 'bg-white border border-gray-100 text-gray-700'
+              }`}>
+                {m.text}
+              </p>
+              <span className="text-[10px] text-gray-400 mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
             </div>
           ))}
         </div>
@@ -118,7 +162,6 @@ function ConversationItem({ conv, currentUserId }) {
     </div>
   );
 }
-
 // ─── main ──────────────────────────────────────────────────────────────────────
 
 export default function DealDetailModal({ dealId, onClose, onUpdated }) {
@@ -140,7 +183,9 @@ export default function DealDetailModal({ dealId, onClose, onUpdated }) {
   const [showSubscription, setShowSubscription] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
-  const isAuthor = deal && currentUser && deal.author?._id === currentUser._id;
+  const isAuthor = deal && currentUser && deal.author?._id === currentUser.id;
+  console.log('Current user:', isAuthor);
+  console.log(currentUser);
 
   useEffect(() => { loadDeal(); loadPoints(); }, [dealId]); // eslint-disable-line
 
@@ -158,12 +203,14 @@ export default function DealDetailModal({ dealId, onClose, onUpdated }) {
     try { const data = await subscriptionAPI.getBalance(); setPoints(data.points); } catch {}
   };
 
-  const loadMessages = async () => {
-    try { const data = await dealsAPI.getMessages(dealId);
-      console.log(data)
-       setConversations(data.messages); } catch {}
-  };
-
+ 
+const loadMessages = async () => {
+  try {
+    const data = await dealsAPI.getMessages(dealId);
+    console.log(data);
+    setConversations(Array.isArray(data) ? data : data.messages || []);
+  } catch {}
+};
   useEffect(() => { if (tab === 'Messages') loadMessages(); }, [tab]); // eslint-disable-line
 
   const handleLike = async () => {
@@ -589,3 +636,25 @@ export default function DealDetailModal({ dealId, onClose, onUpdated }) {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

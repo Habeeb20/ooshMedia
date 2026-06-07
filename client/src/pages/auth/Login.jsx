@@ -46,6 +46,7 @@ export default function Login() {
         
         // Redirect to dashboard
         login(data.token, data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
         const from = location.state?.from || '/dashboard';
         navigate(from, { replace: true });
       } else {
