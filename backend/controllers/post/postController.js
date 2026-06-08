@@ -65,7 +65,8 @@ export const getFeed = async (req, res) => {
     const cached = cache.get(cacheKey);
     if (cached) return res.status(200).json({ success: true, ...cached, fromCache: true });
 
-    const filter = { status: 'active' };
+    const filter = { };
+    // const filter = { status: 'active' };
     if (postType) filter.postType = postType;
     if (category) filter.category = category;
 
@@ -428,6 +429,27 @@ export const getUserPosts = async (req, res) => {
       data: posts,
       pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / parseInt(limit)) }
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
+
+
+
+
+export const finalizePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+    post.status = 'closed';
+    await post.save();
+    res.status(200).json({ success: true, data: post });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

@@ -214,6 +214,43 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getAllPartProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ part: true })
+      .populate({
+        path: "seller",
+        select: `
+          firstName
+          lastName
+          username
+          email
+          phoneNumber
+          alternateContact
+          state
+          lga
+          profilePicture
+          role
+          isSeller
+          sellerProfile
+          businessProfile
+          createdAt
+        `,
+      });
+
+    res.json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch products",
+    });
+  }
+};
+
 
 
 // Like a Product

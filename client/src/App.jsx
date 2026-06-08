@@ -24,6 +24,7 @@ import PaymentVerifyPage from "./pages/order/PaymentVerifyPage";
 import POSPage from "./pages/order/POSPage";
 import {CartProvider} from "./context/cartContext"
 import SubscriptionVerify from "./pages/Deal/SubscriptionVerify";
+import Eparts from "./pages/others/Eparts";
 
 const App =()=>  {
   return (
@@ -127,6 +128,14 @@ const App =()=>  {
                             <Route path="/category/:categorySlug"  element={<ProductsGrid />} />
                             <Route path="/search" element={<SearchResults />} />
                             <Route path="/dashboard/ads/verify" element={<AdVerifyPage/>} />
+
+
+
+                            <Route path="/eparts" element={
+                       
+                                <Eparts />
+                           
+                            } />
         </Routes>
       </div>
            </CartProvider>

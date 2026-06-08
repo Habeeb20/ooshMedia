@@ -8,6 +8,7 @@ import FashionDeals from "../../components/home/FashionDeals";
 import FeatureGrid from "./FeaturedGrid";
 import ProductsGrid from "../product/ProductGrid";
 import appConfig from "../../config/appConfig";
+import CarParts from "../../components/home/CarParts";
 import { Truck, ShieldCheck, RefreshCw, Headphones } from "lucide-react";
 import { FlashSaleSection,
    DiscountDealsSection, TrendingNowSection,
@@ -69,6 +70,7 @@ export default function Home() {
       <FashionDeals />
 
 <Food/>
+<CarParts/>
         <FlashSaleSection />
     <DiscountDealsSection />
     <TrendingNowSection />

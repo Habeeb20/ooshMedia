@@ -1,8 +1,14 @@
+
+
+
+
+
+
 // import { useState } from 'react';
 // import appConfig from '../../config/AppConfig';
 // import CloudinaryUpload from '../../config/CloudinaryUpload';
 // import { productCategories } from '../../categories/productCategories';
-
+// import {partCategories} from "../../categories/partCategories"
 // import { toast } from 'sonner';
 // import { X } from 'lucide-react';
 
@@ -16,7 +22,7 @@
 //     lowStockThreshold: 10,
 //   });
 
-//   const [images, setImages] = useState([]);
+//   const [images, setImages] = useState([]); // Array to hold multiple images
 //   const [loading, setLoading] = useState(false);
 
 //   const handleChange = (e) => {
@@ -27,8 +33,17 @@
 //     setImages(prev => [...prev, url]);
 //   };
 
+//   const removeImage = (index) => {
+//     setImages(prev => prev.filter((_, i) => i !== index));
+//   };
+
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
+//     if (images.length === 0) {
+//       toast.error("Please upload at least one product image");
+//       return;
+//     }
+
 //     setLoading(true);
 
 //     try {
@@ -40,7 +55,10 @@
 //         },
 //         body: JSON.stringify({
 //           ...formData,
-//           images: images.map(url => ({ url, isPrimary: false })),
+//           images: images.map((url, index) => ({ 
+//             url, 
+//             isPrimary: index === 0 
+//           })),
 //           price: Number(formData.price),
 //           stockQuantity: Number(formData.stockQuantity),
 //         }),
@@ -74,11 +92,39 @@
 //           </div>
 
 //           <form onSubmit={handleSubmit} className="space-y-6">
-//             <CloudinaryUpload
-//               onUploadComplete={handleImageUpload}
-//               folder="products"
-//               label="Product Images"
-//             />
+//             {/* Multiple Images Upload */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-3">
+//                 Product Images <span className="text-red-500">*</span>
+//               </label>
+//               <CloudinaryUpload
+//                 onUploadComplete={handleImageUpload}
+//                 folder="products"
+//                 label="Upload Product Images (Multiple allowed)"
+//               />
+
+//               {/* Preview Selected Images */}
+//               {images.length > 0 && (
+//                 <div className="mt-4 grid grid-cols-4 gap-3">
+//                   {images.map((url, index) => (
+//                     <div key={index} className="relative group">
+//                       <img 
+//                         src={url} 
+//                         alt={`preview-${index}`}
+//                         className="w-full h-20 object-cover rounded-xl border"
+//                       />
+//                       <button
+//                         type="button"
+//                         onClick={() => removeImage(index)}
+//                         className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+//                       >
+//                         ✕
+//                       </button>
+//                     </div>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
 
 //             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 //               <div>
@@ -176,13 +222,17 @@
 
 
 
+
+
+
+
+
 import { useState } from 'react';
-import appConfig from '../../config/AppConfig';
+import { X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { toast } from 'sonner';
 import CloudinaryUpload from '../../config/CloudinaryUpload';
 import { productCategories } from '../../categories/productCategories';
-
-import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { partCategories } from "../../categories/partCategories";
 
 export default function AddProductModal({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -190,19 +240,37 @@ export default function AddProductModal({ onClose, onSuccess }) {
     description: '',
     price: '',
     category: '',
+    subCategory: '',
     stockQuantity: '',
     lowStockThreshold: 10,
+    part: false,
+    whatPart: '',
+    subCategoryPart: '',
   });
 
-  const [images, setImages] = useState([]); // Array to hold multiple images
+  const [images, setImages] = useState([]); // Array of {url, publicId}
   const [loading, setLoading] = useState(false);
 
+  const selectedCategory = productCategories.find(cat => cat.id === formData.category);
+  const selectedPartCategory = partCategories.find(cat => cat.id === formData.whatPart);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (url) => {
-    setImages(prev => [...prev, url]);
+  const handleTogglePart = () => {
+    setFormData(prev => ({ 
+      ...prev, 
+      part: !prev.part,
+      // Reset part fields when toggled off
+      whatPart: !prev.part ? prev.whatPart : '',
+      subCategoryPart: !prev.part ? prev.subCategoryPart : ''
+    }));
+  };
+
+  const handleImageUpload = (url, publicId) => {
+    setImages(prev => [...prev, { url, publicId }]);
   };
 
   const removeImage = (index) => {
@@ -211,8 +279,13 @@ export default function AddProductModal({ onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (images.length === 0) {
       toast.error("Please upload at least one product image");
+      return;
+    }
+    if (!formData.category) {
+      toast.error("Please select a category");
       return;
     }
 
@@ -227,12 +300,13 @@ export default function AddProductModal({ onClose, onSuccess }) {
         },
         body: JSON.stringify({
           ...formData,
-          images: images.map((url, index) => ({ 
-            url, 
-            isPrimary: index === 0 
-          })),
           price: Number(formData.price),
           stockQuantity: Number(formData.stockQuantity),
+          images: images.map((img, index) => ({ 
+            url: img.url, 
+            publicId: img.publicId,
+            isPrimary: index === 0 
+          })),
         }),
       });
 
@@ -247,6 +321,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
       }
     } catch (err) {
       toast.error("Something went wrong");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -264,7 +339,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Multiple Images Upload */}
+            {/* Images */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Product Images <span className="text-red-500">*</span>
@@ -272,16 +347,15 @@ export default function AddProductModal({ onClose, onSuccess }) {
               <CloudinaryUpload
                 onUploadComplete={handleImageUpload}
                 folder="products"
-                label="Upload Product Images (Multiple allowed)"
+                label="Upload Product Images"
               />
 
-              {/* Preview Selected Images */}
               {images.length > 0 && (
                 <div className="mt-4 grid grid-cols-4 gap-3">
-                  {images.map((url, index) => (
+                  {images.map((img, index) => (
                     <div key={index} className="relative group">
                       <img 
-                        src={url} 
+                        src={img.url} 
                         alt={`preview-${index}`}
                         className="w-full h-20 object-cover rounded-xl border"
                       />
@@ -298,9 +372,10 @@ export default function AddProductModal({ onClose, onSuccess }) {
               )}
             </div>
 
+            {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
                 <input
                   type="text"
                   name="name"
@@ -312,7 +387,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price (₦)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price (₦) *</label>
                 <input
                   type="number"
                   name="price"
@@ -324,24 +399,97 @@ export default function AddProductModal({ onClose, onSuccess }) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select
-                name="category"
-                required
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
-              >
-                <option value="">Select Category</option>
-                {productCategories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
-                ))}
-              </select>
+            {/* Category & Subcategory */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                <select
+                  name="category"
+                  required
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                >
+                  <option value="">Select Category</option>
+                  {productCategories.map(cat => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.icon} {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedCategory && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
+                  <input
+                    type="text"
+                    name="subCategory"
+                    value={formData.subCategory}
+                    onChange={handleChange}
+                    placeholder="e.g. Smartphones, Brake Pads, etc."
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                  />
+                </div>
+              )}
             </div>
 
+            {/* Is Spare Part Toggle */}
+            <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl">
+              <button
+                type="button"
+                onClick={handleTogglePart}
+                className="flex items-center gap-2 text-sm font-medium"
+              >
+                {formData.part ? (
+                  <ToggleRight size={28} className="text-green-600" />
+                ) : (
+                  <ToggleLeft size={28} className="text-gray-400" />
+                )}
+                <span>This is a Spare Part</span>
+              </button>
+            </div>
+
+            {/* Spare Part Fields */}
+            {formData.part && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-orange-50 p-6 rounded-2xl border border-orange-100">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Part Category *</label>
+                  <select
+                    name="whatPart"
+                    required={formData.part}
+                    value={formData.whatPart}
+                    onChange={handleChange}
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                  >
+                    <option value="">Select Part Category</option>
+                    {partCategories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedPartCategory && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Part Subcategory</label>
+                    <input
+                      type="text"
+                      name="subCategoryPart"
+                      value={formData.subCategoryPart}
+                      onChange={handleChange}
+                      placeholder="e.g. Engine Piston, iPhone Screen, etc."
+                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
               <textarea
                 name="description"
                 required
@@ -351,9 +499,10 @@ export default function AddProductModal({ onClose, onSuccess }) {
               />
             </div>
 
+            {/* Stock Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Stock Quantity</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stock Quantity *</label>
                 <input
                   type="number"
                   name="stockQuantity"

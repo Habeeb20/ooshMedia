@@ -5,7 +5,7 @@ import {
   createPost, getFeed, getPost, updatePost, deletePost,
   toggleLike, repostPost, sharePost, addReview,
   applyToPost, getMyApplications, getPostApplications,
-  updateApplicationStatus, withdrawApplication, getUserPosts
+  updateApplicationStatus, withdrawApplication, getUserPosts, finalizePost
 } from '../../controllers/post/postController.js';
 
 const router = express.Router();
@@ -27,7 +27,7 @@ router.post('/:id/review', verifyToken, addReview);
 
 router.post('/:id/apply', verifyToken, applyToPost);
 router.get('/:id/applications', verifyToken, getPostApplications);
-router.patch('/:id/applications/:applicationId/status', verifyToken, updateApplicationStatus);
+router.put('/:id/applications/:applicationId/status', verifyToken, updateApplicationStatus);
 router.delete('/:id/applications/:applicationId/withdraw', verifyToken, withdrawApplication);
-
+router.put('/:id/finalize', verifyToken, finalizePost);
 export default router;

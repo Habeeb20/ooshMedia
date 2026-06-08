@@ -467,6 +467,7 @@ import SellerDashboard from '../order/SellerDashboard';
 import CartPage from "../order/CartPage"
 import ProductsGrid from '../product/ProductGrid';
 import BuyerDashboard from '../order/BuyerDashboard';
+import PostDashboard from '../post/PostDashboard';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -514,12 +515,14 @@ const pages = {
   POS: POSPage,
   cart: CartPage,
   products: ProductsGrid,
-  orderBreakdown: BuyerDashboard
+  orderBreakdown: BuyerDashboard,
+  postFeedbacks: PostDashboard
 };
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: Home },
   { id: 'post', label: 'Feed', icon: Rss },
+  { id: 'postFeedbacks', label: 'Post Feedbacks', icon: Rss },
   { id: 'products', label: 'Marketplace', icon: BarChart3 },
   {id:'cart', label:'Cart', icon: Sparkles},
   { id: 'ads', label: 'my ads', icon: Rss },

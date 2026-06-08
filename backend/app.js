@@ -15,6 +15,7 @@ import cartRoutes from "./routes/order/cartRoutes.js"
 import orderRoutes from "./routes/order/orderRoutes.js"
 import { posRouter, analyticsRouter } from "./routes/order/extraRoutes.js";
 import dealsRoutes from "./routes/deals/dealsRoute.js"
+import chatpostRoutes from "./routes/post/chatRoutes.js"
 dotenv.config();
 connectDb()
 
@@ -55,6 +56,7 @@ app.use('/api/products', productRoutes);
 
 app.use('/api/chain', chainRoutes)
 app.use('/api/posts', postRoutes)
+app.use('/api/chatposts', chatpostRoutes);
 
 app.use('/api/ads', adRoutes);
 

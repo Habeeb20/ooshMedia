@@ -9,12 +9,15 @@ import { createProduct,  getSellerProducts,
   rateProduct} from '../../controllers/sellers/productController.js';
 import { verifyToken } from '../../middleware/verifyToken.js';
 import { upload } from '../../middleware/multer.js';
-import { getAllProducts } from '../../controllers/sellers/productController.js';
+import { getAllProducts, getAllPartProducts } from '../../controllers/sellers/productController.js';
+
 const router = express.Router();
 
 // Product Management
 router.post('/', verifyToken, createProduct);
 router.get('/all', getAllProducts);
+router.get("/parts", getAllPartProducts);
+
 router.get('/', verifyToken, getSellerProducts);
 router.put('/:id', verifyToken, updateProduct);
 router.delete('/:id', verifyToken, deleteProduct);

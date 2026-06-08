@@ -247,6 +247,17 @@ export default function PostCard({ post, currentUser, onUpdate }) {
               Manage ({post.applicationCount || 0})
             </button>
           )}
+
+        <button
+  className={`px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors ${
+    post.status === "closed" 
+      ? "bg-red-100 text-red-700 border border-red-200" 
+      : "bg-green-100 text-green-700 border border-green-200"
+  }`}
+>
+  {post.status}
+</button>
+
           {canApply && (
             <button style={{ ...styles.applyBtn, background: typeConfig.color }} onClick={() => setShowApply(true)}>
               Apply Now
