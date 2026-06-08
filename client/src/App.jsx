@@ -25,7 +25,7 @@ import POSPage from "./pages/order/POSPage";
 import {CartProvider} from "./context/cartContext"
 import SubscriptionVerify from "./pages/Deal/SubscriptionVerify";
 import Eparts from "./pages/others/Eparts";
-
+import AdminLogin from "./pages/adminDashboard/AdminLogin"
 const App =()=>  {
   return (
     <>
@@ -118,6 +118,7 @@ const App =()=>  {
              </ProtectedRoute>
         } 
         />
+                             <Route path="/admin/login" element={<AdminLogin />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/price-checker" element={<PriceChecker />} />
                             <Route path="/vendors" element={<VendorsPage />} />

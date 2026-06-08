@@ -16,6 +16,8 @@ import orderRoutes from "./routes/order/orderRoutes.js"
 import { posRouter, analyticsRouter } from "./routes/order/extraRoutes.js";
 import dealsRoutes from "./routes/deals/dealsRoute.js"
 import chatpostRoutes from "./routes/post/chatRoutes.js"
+import User from "./models/user.js"
+import adminRouter from "./routes/adminRoute.js";
 dotenv.config();
 connectDb()
 
@@ -59,12 +61,26 @@ app.use('/api/posts', postRoutes)
 app.use('/api/chatposts', chatpostRoutes);
 
 app.use('/api/ads', adRoutes);
-
+app.use('/api/admin', adminRouter);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/pos', posRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/deals', dealsRoutes);
+
+
+// await User.create({
+//   firstName: 'Admin',
+//   lastName: 'Boss',
+//   email: 'ooshmedia@gmail.com',
+//   password: 'essential01',
+//   username: "admin43",
+//   role: 'admin'
+// });
+
+// console.log('Superadmin created!');
+
+
 // Start server
 const port = process.env.PORT || 2020;
 

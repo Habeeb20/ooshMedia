@@ -255,7 +255,7 @@ export default function PostCard({ post, currentUser, onUpdate }) {
       : "bg-green-100 text-green-700 border border-green-200"
   }`}
 >
-  {post.status}
+  {post.status === "closed" ? "Finalized" : "Open"}
 </button>
 
           {canApply && (

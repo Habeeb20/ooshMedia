@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   state: String,
   lga: String,
   dateOfBirth: Date,
-  role: { type: String, enum: ['user', 'entity'], default: 'user' },
+  role: { type: String, enum: ['user', 'entity', 'admin'], default: 'user' },
   profilePicture: String,
   password: { type: String, required: true },
 
