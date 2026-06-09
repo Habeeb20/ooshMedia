@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -103,7 +104,7 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
       type: String,
       enum: ['manufacturer', 'wholesaler', 'retailer', 'distributor', "agent"]
     }],
-
+  market: { type: String },
     // Seller Chain (especially for Manufacturers)
     sellerChain: [{
       businessName: String,

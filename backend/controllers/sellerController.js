@@ -11,13 +11,14 @@ export const updateSellerProfile = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only entities can become sellers" });
     }
 
-    const { sellerTypes, productCategories, shopName, shopDescription,    bankDetails  } = req.body;
+    const { sellerTypes, productCategories, shopName, shopDescription, market,    bankDetails  } = req.body;
 
     user.isSeller = true;
     user.sellerProfile.shopName = user.bussinessProfile?.businessName || shopName;
     user.sellerProfile = {
       ...user.sellerProfile,
       sellerTypes: sellerTypes || user.sellerProfile?.sellerTypes || [],
+      market: market || user.sellerProfile?.market || [],
       productCategories: productCategories || user.sellerProfile?.productCategories || [],
     //   shopName: shopName || user.sellerProfile?.shopName,
       shopDescription: shopDescription || user.sellerProfile?.shopDescription,

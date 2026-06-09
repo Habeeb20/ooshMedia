@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import appConfig from '../../config/AppConfig';
 import Loading from '../../config/Loading';
+import {lagosMarkets} from "../../categories/locationCategories"
 import { toast } from 'sonner';
 import {
   Users, Save, Edit2, Trash2, Plus, Building2,
@@ -54,12 +55,12 @@ export default function SellerProfileSetup() {
     productCategories: [],
     shopName: '',
     shopDescription: '',
-
-      bankDetails: {
-    bankName: '',
-    accountNumber: '',
-    accountName: '',
-  }
+    market: '',
+    bankDetails: {  
+      bankName: '',
+      accountNumber: '',
+      accountName: '',
+    }
   });
   const [sellerChain, setSellerChain] = useState([]);
   const [editingChainIndex, setEditingChainIndex] = useState(null);
@@ -75,13 +76,14 @@ export default function SellerProfileSetup() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
+        console.log("Seller Profile Data:", data);
         if (data.success && data.sellerProfile) {
           setFormData({
             sellerTypes: data.sellerProfile.sellerTypes || [],
             productCategories: data.sellerProfile.productCategories || [],
             shopName: data.sellerProfile.shopName || '',
             shopDescription: data.sellerProfile.shopDescription || '',
-
+            market: data.sellerProfile.market || '',
               bankDetails: {
       bankName: data.sellerProfile.bankDetails?.bankName || '',
       accountNumber: data.sellerProfile.bankDetails?.accountNumber || '',
@@ -226,6 +228,28 @@ export default function SellerProfileSetup() {
             })}
           </div>
         </SectionCard>
+
+        {/* Market Location Dropdown */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+        Market Location
+      </label>
+      <select
+        value={formData.market}
+        onChange={(e) => setFormData({ ...formData, market: e.target.value })}
+        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all bg-white"
+      >
+        <option value="">Select Market (Optional)</option>
+        {lagosMarkets.map((market) => (
+          <option key={market.id} value={market.name}>
+            {market.name} — {market.location}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-gray-400 mt-1.5">
+        Where is your shop located? (Ladipo, Computer Village, Alaba, etc.)
+      </p>
+    </div>
 
         {/* Shop Description */}
         <SectionCard title="Shop Information" subtitle="Tell buyers about your business">

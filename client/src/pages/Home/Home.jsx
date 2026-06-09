@@ -20,8 +20,7 @@ import Footer from "../../components/Footer";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "Same day in Lagos" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% protected" },
-  { icon: RefreshCw, label: "Easy Returns", desc: "7-day returns" },
-  { icon: Headphones, label: "24/7 Support", desc: "Always available" },
+
 ];
 
 function TrustBar() {

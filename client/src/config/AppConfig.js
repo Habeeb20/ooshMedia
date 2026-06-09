@@ -2,7 +2,7 @@
 
 const appConfig = {
   // Project Name - Change once, updates everywhere
-  name: "MediaPulse",
+  name: "Estores",
   tagline: "Your Business Media Hub",
   description: "Professional media platform for businesses",
 

@@ -26,6 +26,7 @@ import {CartProvider} from "./context/cartContext"
 import SubscriptionVerify from "./pages/Deal/SubscriptionVerify";
 import Eparts from "./pages/others/Eparts";
 import AdminLogin from "./pages/adminDashboard/AdminLogin"
+import MarketPlace from "./pages/Home/MarketPlace"
 const App =()=>  {
   return (
     <>
@@ -119,6 +120,8 @@ const App =()=>  {
         } 
         />
                              <Route path="/admin/login" element={<AdminLogin />} />
+
+                            <Route path="/marketplace" element={<MarketPlace />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/price-checker" element={<PriceChecker />} />
                             <Route path="/vendors" element={<VendorsPage />} />
