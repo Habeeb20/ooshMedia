@@ -161,7 +161,7 @@ export const getSellerProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId).select('isSeller sellerProfile');
-
+console.log(user.sellerProfile.sellerChain)
     res.json({
       success: true,
       isSeller: user.isSeller,
@@ -533,31 +533,6 @@ export const getSellerDistributors = async (req, res) => {
 
 
 
-// Add these fields to your existing userSchema in User.js:
-
-/*
-  // Seller-specific fields (add to your existing schema)
-  role: { type: String, enum: ['buyer', 'seller', 'admin'], default: 'buyer' },
-  shopName: String,
-  
-  // Payment preferences
-  acceptedPaymentMethods: {
-    type: String,
-    enum: ['online_only', 'on_delivery_only', 'both'],
-    default: 'both',
-  },
-  
-  // Bank details for Paystack transfers
-  bankDetails: {
-    bankName: String,
-    bankCode: String,          // Paystack bank code
-    accountNumber: String,
-    accountName: String,
-    recipientCode: String,     // Paystack transfer recipient code
-  },
-*/
-
-// Controller to save bank details and create Paystack transfer recipient:
 
 
 export const updateBankDetails = async (req, res) => {
@@ -607,5 +582,214 @@ export const updatePaymentPreferences = async (req, res) => {
     res.json({ message: 'Preferences updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////// purchase history for seller chain ///////////////////
+
+
+export const createPurchaseHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { chainId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const sellerChain = user.sellerProfile.sellerChain.id(chainId);
+
+    if (!sellerChain) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller chain not found",
+      });
+    }
+
+    sellerChain.purchaseHistory.push(req.body);
+
+    await user.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Purchase history created successfully",
+      data: sellerChain.purchaseHistory[
+        sellerChain.purchaseHistory.length - 1
+      ],
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
+
+
+export const updatePurchaseHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { chainId, historyId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const sellerChain = user.sellerProfile.sellerChain.id(chainId);
+
+    if (!sellerChain) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller chain not found",
+      });
+    }
+
+    const history = sellerChain.purchaseHistory.id(historyId);
+
+    if (!history) {
+      return res.status(404).json({
+        success: false,
+        message: "Purchase history not found",
+      });
+    }
+
+    Object.keys(req.body).forEach((key) => {
+      history[key] = req.body[key];
+    });
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Purchase history updated successfully",
+      data: history,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
+
+
+export const deletePurchaseHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { chainId, historyId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const sellerChain = user.sellerProfile.sellerChain.id(chainId);
+
+    if (!sellerChain) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller chain not found",
+      });
+    }
+
+    const history = sellerChain.purchaseHistory.id(historyId);
+
+    if (!history) {
+      return res.status(404).json({
+        success: false,
+        message: "Purchase history not found",
+      });
+    }
+
+    history.deleteOne();
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Purchase history deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
+
+
+
+export const getPurchaseHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { chainId } = req.params;
+
+    const user = await User.findById(userId);
+
+    const sellerChain = user?.sellerProfile?.sellerChain?.id(chainId);
+
+    if (!sellerChain) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller chain not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: sellerChain.purchaseHistory.length,
+      data: sellerChain.purchaseHistory.sort(
+        (a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate)
+      ),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

@@ -76,15 +76,18 @@ const features = [
 const otherServices = [
   {
     title: "Edrivers",
-    link: "/edrive",
+    link: "https://edrivers.ng",
+    description: "looking to hire drivers ",
   },
   {
     title: "Efixit",
-    link: "/top-services",
+    link: "https://efixit.ng",
+    description: "looking for service providers to fix render services",
   },
   {
     title: "E Hotels",
     link: "/e-hotels",
+    description: "looking to get an hotel ",
   },
 ];
 
@@ -116,22 +119,26 @@ export default function FeatureGrid() {
                   background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
                 }}
               >
-                <div className="bg-white rounded-[2rem] p-3 h-full relative overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500">
+                <div className="bg-white rounded-[2rem] p-3 h-full relative overflow-hidden  shadow-sm hover:shadow-2xl transition-all duration-500">
                   <div
                     className={`absolute top-0 right-0 w-40 h-10 rounded-full blur-3xl opacity-10 bg-gradient-to-br ${item.gradient}`}
                   />
 
                   <div
-                    className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white shadow-lg`}
+                    className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center ml-10 justify-center  text-white shadow-lg`}
                   >
                     <Icon size={30} />
                   </div>
 
                   <div className="mt-1 relative z-10">
-                    <h3 className="text-sm font-black text-gray-900">
+                    <h3 className="text-sm text-center font-black text-gray-900">
                       {item.title}
                     </h3>
+               
                   </div>
+                       <h3 className="text-1xl font-light font-black text-gray-900">
+                      {item.description}
+                    </h3>
 
                   <div
                     className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
@@ -161,7 +168,7 @@ export default function FeatureGrid() {
 
               <div className="mt-1 relative z-10">
                 <h3 className="text-sm font-black text-gray-900">Other Services</h3>
-                {/* <p className="text-xs text-gray-500 mt-0.5">Edrivers, Efixit, E Hotels</p> */}
+                <p className="text-xs text-gray-500 mt-0.5">Edrivers, Efixit, E Hotels</p>
               </div>
 
               <div
@@ -187,7 +194,8 @@ export default function FeatureGrid() {
                   onClick={() => setShowOtherModal(false)}
                   className="block w-full text-left px-6 py-5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors"
                 >
-                  <span className="font-semibold text-lg">{service.title}</span>
+                  <span className="font-semibold text-lg">{service.title}</span> <br/>
+                  <span className=" text-lg">{service.description}</span>
                 </Link>
               ))}
             </div>

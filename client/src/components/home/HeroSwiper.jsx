@@ -1,80 +1,3 @@
-// import { Swiper, SwiperSlide } from "swiper/react";
-// import { Autoplay, Pagination } from "swiper/modules";
-
-// import "swiper/css";
-// import "swiper/css/pagination";
-
-// import appConfig from "../../config/appConfig";
-
-// const slides = [
-//   {
-//     image:
-//       "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1400&auto=format&fit=crop",
-//     title: "Massive Discounts",
-//     subtitle: "Up to 70% OFF premium products",
-//   },
-//   {
-//     image:
-//       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1400&auto=format&fit=crop",
-//     title: "Latest Gadgets",
-//     subtitle: "Modern devices for smart living",
-//   },
-//   {
-//     image:
-//       "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=1400&auto=format&fit=crop",
-//     title: "Luxury Experience",
-//     subtitle: "Premium shopping for professionals",
-//   },
-// ];
-
-// export default function HeroSwiper() {
-//   return (
-//     <Swiper
-//       modules={[Autoplay, Pagination]}
-//       autoplay={{
-//         delay: 2000,
-//         disableOnInteraction: false,
-//       }}
-//       pagination={{ clickable: true }}
-//       loop={true}
-//       className="rounded-3xl overflow-hidden h-[450px]"
-//     >
-//       {slides.map((slide, index) => (
-//         <SwiperSlide key={index}>
-//           <div className="relative h-full">
-//             <img
-//               src={slide.image}
-//               className="w-full h-full object-cover"
-//             />
-
-//             <div className="absolute inset-0 bg-black/45 flex items-center">
-//               <div className="px-10 text-white max-w-lg">
-//                 <h1 className="text-5xl font-black leading-tight">
-//                   {slide.title}
-//                 </h1>
-
-//                 <p className="mt-4 text-lg text-gray-200">
-//                   {slide.subtitle}
-//                 </p>
-
-//                 <button
-//                   className="mt-7 px-8 py-4 rounded-xl font-bold text-lg text-white"
-//                   style={{
-//                     background: appConfig.colors.primary,
-//                   }}
-//                 >
-//                   Shop Now
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </SwiperSlide>
-//       ))}
-//     </Swiper>
-//   );
-// }
-
-
 
 
 
@@ -123,12 +46,12 @@ export default function HeroSwiper() {
     >
       {slides.map((slide, index) => (
         <SwiperSlide key={index}>
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full md: w-80">
             {/* Background Image */}
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover md: w-[80vh]"
             />
 
             {/* Overlay */}
@@ -158,3 +81,103 @@ export default function HeroSwiper() {
     </Swiper>
   );
 }
+
+
+
+
+
+
+// import { Swiper, SwiperSlide } from "swiper/react";
+// import { Autoplay, Pagination } from "swiper/modules";
+// import "swiper/css";
+// import "swiper/css/pagination";
+// import appConfig from "../../config/appConfig";
+
+// const slides = [
+//   {
+//     image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1400&auto=format&fit=crop",
+//     title: "Massive Discounts",
+//     subtitle: "Up to 70% OFF premium products",
+//     tag: "🔥 Limited Time",
+//   },
+//   {
+//     image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1400&auto=format&fit=crop",
+//     title: "Latest Gadgets",
+//     subtitle: "Modern devices for smart living",
+//     tag: "✨ New Arrivals",
+//   },
+// ];
+
+// export default function HeroSwiper() {
+//   return (
+//     <div className="w-full px-0">
+//       <Swiper
+//         modules={[Autoplay, Pagination]}
+//         autoplay={{ delay: 3500, disableOnInteraction: false }}
+//         pagination={{
+//           clickable: true,
+//           bulletClass: "swiper-pagination-bullet custom-bullet",
+//           bulletActiveClass: "custom-bullet-active",
+//         }}
+//         loop={true}
+//         className="w-full rounded-2xl md:rounded-3xl overflow-hidden"
+//         style={{ height: "clamp(200px, 38vw, 520px)" }}
+//       >
+//         {slides.map((slide, index) => (
+//           <SwiperSlide key={index}>
+//             <div className="relative w-full h-full">
+//               <img
+//                 src={slide.image}
+//                 alt={slide.title}
+//                 className="w-full h-full object-cover object-center"
+//               />
+
+//               {/* Overlay */}
+//               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+
+//               {/* Content */}
+//               <div className="absolute inset-0 flex items-center">
+//                 <div className="px-5 sm:px-8 md:px-12 lg:px-16 text-white max-w-xl">
+//                   <span className="inline-block text-xs sm:text-sm font-semibold bg-white/20 backdrop-blur-sm border border-white/30 px-3 py-1 rounded-full mb-3">
+//                     {slide.tag}
+//                   </span>
+
+//                   <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+//                     {slide.title}
+//                   </h1>
+
+//                   <p className="mt-2 sm:mt-4 text-sm sm:text-base md:text-lg text-gray-200 font-medium">
+//                     {slide.subtitle}
+//                   </p>
+
+//                   <button
+//                     className="mt-4 sm:mt-7 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all hover:scale-105 active:scale-95 shadow-lg"
+//                     style={{ background: appConfig.colors.primary }}
+//                   >
+//                     Shop Now
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </SwiperSlide>
+//         ))}
+//       </Swiper>
+
+//       <style>{`
+//         .custom-bullet {
+//           width: 6px;
+//           height: 6px;
+//           background: rgba(255,255,255,0.5);
+//           opacity: 1;
+//           transition: all 0.3s;
+//         }
+//         .custom-bullet-active {
+//           width: 20px;
+//           border-radius: 4px;
+//           background: white !important;
+//           opacity: 1;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }

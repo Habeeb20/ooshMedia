@@ -122,6 +122,7 @@ const App =()=>  {
                              <Route path="/admin/login" element={<AdminLogin />} />
 
                             <Route path="/marketplace" element={<MarketPlace />} />
+                            <Route path="/products" element={<MarketPlace />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/price-checker" element={<PriceChecker />} />
                             <Route path="/vendors" element={<VendorsPage />} />

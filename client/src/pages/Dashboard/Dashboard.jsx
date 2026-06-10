@@ -468,6 +468,7 @@ import CartPage from "../order/CartPage"
 import ProductsGrid from '../product/ProductGrid';
 import BuyerDashboard from '../order/BuyerDashboard';
 import PostDashboard from '../post/PostDashboard';
+import PurchaseHistoryManager from '../../components/dashboard/PurchaseHistory';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -516,7 +517,8 @@ const pages = {
   cart: CartPage,
   products: ProductsGrid,
   orderBreakdown: BuyerDashboard,
-  postFeedbacks: PostDashboard
+  postFeedbacks: PostDashboard,
+  sellerChain: PurchaseHistoryManager
 };
 
 const navItems = [
@@ -642,6 +644,7 @@ export default function Dashboard() {
                   { label: 'Stock', page: 'stock' },
                   { label: 'Stock Management', page: 'inventory' },
                   { label: 'POS', page: 'POS' },
+                  { label: 'seller Chain History', page: 'sellerChain' },
                   { label: 'Products', page: 'products' },
                   { label: 'Orders', page: null },
                 ].map(sub => (

@@ -50,7 +50,10 @@
 
 
 import { useEffect, useState } from "react";
-import { Users, ArrowUp, ArrowDown } from "lucide-react";
+import { Users, Eye, ArrowUp, ArrowDown, X, Wallet } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useUserLocation } from './../../location/UserLocation';
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -100,7 +103,9 @@ export default function ProductDetails() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart, cart, cartCount } = useCart();
-
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPartnerName, setSelectedPartnerName] = useState("");
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [upstream, setUpstream] = useState([]);
   const [downstream, setDownstream] = useState([]);
   const [chainLoading, setChainLoading] = useState(false);
@@ -129,6 +134,45 @@ export default function ProductDetails() {
   );
   const isInCart = !!cartItem;
 
+const openPurchaseHistory = (partner) => {
+  console.log("Full Partner Object:", partner);
+
+  let allHistory = [];
+
+  // ✅ Direct fix: purchaseHistory is already the array of purchases
+  if (partner.purchaseHistory?.length > 0) {
+    allHistory = [...partner.purchaseHistory];
+    console.log("Found purchaseHistory directly on partner:", allHistory);
+  } 
+  // Fallbacks in case structure differs
+  else if (partner.sellerProfile?.sellerChain?.length > 0) {
+    partner.sellerProfile.sellerChain.forEach(chain => {
+      if (chain.purchaseHistory?.length > 0) {
+        allHistory = [...allHistory, ...chain.purchaseHistory];
+      }
+    });
+  } 
+  else if (partner.sellerChain?.length > 0) {
+    partner.sellerChain.forEach(chain => {
+      if (chain.purchaseHistory?.length > 0) {
+        allHistory = [...allHistory, ...chain.purchaseHistory];
+      }
+    });
+  }
+
+  // Sort by newest purchase first
+  allHistory.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+
+  console.log("Final Purchase History to show:", allHistory);
+
+  setPurchaseHistory(allHistory);
+  setSelectedPartnerName(
+    partner.businessName || 
+    `${partner.firstName || ""} ${partner.lastName || ""}`.trim() ||
+    "Unknown Partner"
+  );
+  setShowModal(true);
+};
   // Slugify
   const slugify = (text) =>
     text?.toLowerCase()?.replace(/[^\w ]+/g, "")?.replace(/ +/g, "-");
@@ -145,7 +189,9 @@ export default function ProductDetails() {
       );
       if (response.data?.success) {
         setUpstream(response.data.data.upstream || []);
+        
         setDownstream(response.data.data.downstream || []);
+     console.log(response.data.data.downstream)
       }
     } catch (error) {
       console.error("Failed to fetch seller chain:", error);
@@ -236,31 +282,160 @@ const fetchProduct = async () => {
 
   // ── Downstream tree ──────────────────────────────────────────────────────
   const DownstreamTree = ({ data, level = 0 }) => (
-    <div className={`space-y-3 ${level > 0 ? "ml-6 border-l border-dashed border-gray-300 pl-6" : ""}`}>
-      {data.map((partner, index) => (
-        <div key={index} className="bg-amber-50/70 border border-amber-100 rounded-2xl p-4">
-          <div className="flex items-center gap-3">
-            <img
-              src={partner.profilePicture || "https://ui-avatars.com/api/?name=Partner"}
-              alt=""
-              className="w-11 h-11 rounded-xl object-cover"
-            />
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900">
-                {partner.businessName || `${partner.firstName || ""} ${partner.lastName || ""}`}
-              </p>
-              <p className="text-sm text-gray-500">@{partner.username}</p>
-            </div>
+    <>
+       <div className={`space-y-3 ${level > 0 ? "ml-6 border-l border-dashed border-gray-300 pl-6" : ""}`}>
+            {data.map((partner, index) => (
+              <div 
+                key={index} 
+                className="bg-amber-50/70 border border-amber-100 rounded-2xl p-5 hover:shadow-md transition-all group"
+              >
+                <div className="flex items-start gap-4">
+                  <img
+                    src={partner.profilePicture || "https://ui-avatars.com/api/?name=Partner"}
+                    alt=""
+                    className="w-12 h-12 rounded-2xl object-cover flex-shrink-0"
+                  />
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-lg leading-tight">
+                      {partner.businessName || `${partner.firstName || ""} ${partner.lastName || ""}`}
+                    </p>
+                    <p className="text-sm text-gray-500">@{partner.username}</p>
+                    <p className="text-sm text-gray-500">{partner.phoneNumber}</p>
+    
+                    {partner.downstreamCount > 0 && (
+                      <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                        ↓ {partner.downstreamCount} downstream partners
+                      </p>
+                    )}
+                  </div>
+    
+                  {/* View Purchase History Button */}
+                  <button
+                    onClick={() => openPurchaseHistory(partner)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-indigo-300 hover:text-indigo-600 rounded-xl text-sm font-medium transition-all opacity-80 group-hover:opacity-100"
+                  >
+                    <Eye size={16} />
+                    Purchases
+                  </button>
+                </div>
+    
+                {partner.downstream?.length > 0 && (
+                  <DownstreamTree data={partner.downstream} level={level + 1} />
+                )}
+              </div>
+            ))}
           </div>
-          {partner.downstreamCount > 0 && (
-            <p className="text-xs text-amber-600 mt-2">↓ {partner.downstreamCount} partners below</p>
-          )}
-          {partner.downstream?.length > 0 && (
-            <DownstreamTree data={partner.downstream} level={level + 1} />
-          )}
-        </div>
-      ))}
-    </div>
+    
+          {/* Purchase History Modal */}
+          <AnimatePresence>
+            {showModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between border-b px-8 py-5 bg-gray-50 rounded-t-3xl">
+                    <div>
+                      <h2 className="text-2xl font-semibold text-gray-900">
+                        Purchase History
+                      </h2>
+                      <p className="text-gray-500 mt-1">
+                        {selectedPartnerName}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+    
+                  {/* Modal Content */}
+                  <div className="overflow-auto flex-1 p-6">
+                    {purchaseHistory.length > 0 ? (
+                      <div className="space-y-4">
+                        {purchaseHistory.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-all"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center gap-3">
+                                  <Package className="text-indigo-600" />
+                                  <h4 className="font-semibold text-lg text-gray-900">
+                                    {item.productName}
+                                  </h4>
+                                </div>
+                                <p className="text-gray-500 mt-1">{item.category}</p>
+                              </div>
+    
+                              <div className="text-right">
+                                <p className="text-2xl font-bold text-emerald-600">
+                                  ₦{Number(item.totalAmount).toLocaleString()}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                  {item.quantity} {item.unit}
+                                </p>
+                              </div>
+                            </div>
+    
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-sm">
+                              <div>
+                                <p className="text-gray-400">Purchase Date</p>
+                                <p className="font-medium flex items-center gap-1 mt-1">
+                                  <Calendar size={16} />
+                                  {new Date(item.purchaseDate).toLocaleDateString('en-NG')}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400">Payment</p>
+                                <p className="font-medium capitalize">{item.paymentMethod?.replace('_', ' ')} • {item.paymentStatus}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400">Delivery</p>
+                                <p className="font-medium capitalize">{item.deliveryStatus}</p>
+                              </div>
+                              {item.invoiceNumber && (
+                                <div>
+                                  <p className="text-gray-400">Invoice</p>
+                                  <p className="font-medium">{item.invoiceNumber}</p>
+                                </div>
+                              )}
+                            </div>
+    
+                            {item.notes && (
+                              <p className="mt-4 text-sm text-gray-600 border-t pt-4">
+                                {item.notes}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-20">
+                        <Wallet className="mx-auto w-16 h-16 text-gray-300 mb-4" />
+                        <p className="text-gray-500 text-lg">No purchase history available</p>
+                        <p className="text-gray-400 mt-1">This partner hasn't recorded any purchases yet.</p>
+                      </div>
+                    )}
+                  </div>
+    
+                  {/* Modal Footer */}
+                  <div className="border-t px-8 py-4 text-sm text-gray-500 bg-gray-50 rounded-b-3xl">
+                    Total Records: <span className="font-medium text-gray-700">{purchaseHistory.length}</span>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+    </>
+
   );
 
   // ── Loading ──────────────────────────────────────────────────────────────

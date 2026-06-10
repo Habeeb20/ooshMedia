@@ -13,7 +13,11 @@ import {
   getSellerById,
   getSellerProducts,
   getSellerReviews,
-  getSellerDistributors
+  getSellerDistributors,
+  createPurchaseHistory,
+  updatePurchaseHistory,
+  deletePurchaseHistory,
+  getPurchaseHistory
 
 } from '../controllers/sellerController.js';
 import { verifyToken } from '../middleware/verifyToken.js';
@@ -39,5 +43,28 @@ router.post('/:sellerId/review', verifyToken, reviewSeller);
 router.get('/products/:id', getSellerProducts);
 router.get('/:id/reviews', getSellerReviews);
 router.get('/:sellerId/distributors', getSellerDistributors);
+
+router.post(
+  "/seller-chain/:chainId/purchase-history",
+  verifyToken,
+  createPurchaseHistory
+);
+
+router.put(
+  "/seller-chain/:chainId/purchase-history/:historyId",
+  verifyToken,
+  updatePurchaseHistory
+);
+
+router.delete(
+  "/seller-chain/:chainId/purchase-history/:historyId",
+  verifyToken,
+  deletePurchaseHistory
+);
+
+router.get(
+  "/seller-chain/:chainId/purchase-history",
+  verifyToken,
+  getPurchaseHistory);
 export default router;
 

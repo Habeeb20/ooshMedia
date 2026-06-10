@@ -114,7 +114,92 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
       relationship: { 
         type: String, 
         enum: ['wholesaler', 'retailer', 'distributor',  "agent"] 
-      }
+      },
+
+        // Purchase history from this supplier/distributor
+  purchaseHistory: [{
+    productName: {
+      type: String,
+      required: true
+    },
+
+    category: String,
+
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+
+    unit: {
+      type: String, // pcs, cartons, bags, kg, litres, etc.
+    },
+
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+
+    currency: {
+      type: String,
+      default: 'NGN'
+    },
+
+    purchaseDate: {
+      type: Date,
+      required: true
+    },
+
+    invoiceNumber: String,
+
+    paymentMethod: {
+      type: String,
+      enum: [
+        'cash',
+        'bank_transfer',
+        'card',
+        'pos',
+        'mobile_money',
+        'credit'
+      ]
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'partial', 'paid'],
+      default: 'paid'
+    },
+
+    deliveryDate: Date,
+
+    deliveryStatus: {
+      type: String,
+      enum: [
+        'pending',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled'
+      ],
+      default: 'delivered'
+    },
+
+    notes: String,
+
+    receiptUrl: String, // Cloudinary/S3 receipt upload
+
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
     }],
 
      acceptedPaymentMethods: {
@@ -179,6 +264,81 @@ bankDetails: {
 userSchema.index({ "businessProfile.businessName": "text" });
 
 export default mongoose.model('User', userSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
