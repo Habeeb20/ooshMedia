@@ -43,7 +43,8 @@ export default function SellerDashboard() {
     setLoading(true);
     Promise.all([
       api.get(`/api/analytics/seller?period=${period}`),
-      api.get('/api/orders/seller?status=pending'),
+      api.get('/api/orders/seller'),
+      // api.get('/api/orders/seller?status=pending'),
       api.get('/api/analytics/customers'),
     ]).then(([a, o, c]) => {
       setAnalytics(a.data);

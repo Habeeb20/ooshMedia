@@ -16,6 +16,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   orderNumber: { type: String, unique: true },
   items: [orderItemSchema],
 
@@ -33,6 +34,9 @@ const orderSchema = new mongoose.Schema({
     address: { type: String },
     deliveryCode: { type: String },         // 4-digit code
     isCodeVerified: { type: Boolean, default: false },
+      assignedRider: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },        // ← ADD
+  agreedDeliveryFee: { type: Number },                                          // ← ADD
+  deliveryRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryRequest' }, // ← ADD
   },
 
   paymentMethod: { type: String, enum: ['online', 'on_delivery'], required: true },
@@ -70,3 +74,7 @@ orderSchema.pre('save', async function (next) {
 });
 
 export default mongoose.model('Order', orderSchema);
+
+
+
+

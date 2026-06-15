@@ -103,7 +103,7 @@ export default function FeatureGrid() {
   return (
     <section className="max-w-7xl mx-auto px-4 mt-10">
       {/* GRID */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-8 gap-3">
         {visibleFeatures.map((item, index) => {
           const Icon = item.icon;
 
@@ -130,16 +130,20 @@ export default function FeatureGrid() {
                     <Icon size={30} />
                   </div>
 
-                  <div className="mt-1 relative z-10">
+                  <div className="mt-1  z-10">
                     <h3 className="text-sm text-center font-black text-gray-900">
                       {item.title}
                     </h3>
                
                   </div>
-                       <h3 className="text-1xl font-light font-black text-gray-900">
+                       <h3 className="text-xs font-light font-black text-gray-900">
                       {item.description}
                     </h3>
 
+
+   <h3 className="text-sm text-center font-black pt-5 text-rose-900">
+                      Explore now
+                    </h3>
                   <div
                     className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
                     style={{ background: appConfig.colors.primary }}

@@ -138,6 +138,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = useCallback(async () => {
     try {
       const { data } = await api.get('/api/cart');
+      console.log(data)
       setCart(data);
     } catch (err) {
       console.error(err);

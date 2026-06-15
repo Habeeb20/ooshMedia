@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import {useCart} from "../../context/cartContext"
-
+import Autocomplete from 'react-google-autocomplete';
 import { useNavigate } from 'react-router-dom';
 import { Truck, Package, User, Users, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 
 export default function CartPage() {
   const { cart, cartTotal, updateItem, removeItem, updateFulfillment } = useCart();
+  const [deliveryAddress, setDeliveryAddress] = useState(cart?.delivery?.address || '');
+
+// Inside the component, after other state
   const navigate = useNavigate();
 console.log(cart);
   const fulfillmentType = cart?.fulfillmentType || 'delivery';
   const pickup = cart?.pickup || { pickedUpBy: 'self' };
   const paymentMethod = cart?.paymentMethod || 'online';
 
+    const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const handleFulfillment = async (type) => {
     await updateFulfillment({ fulfillmentType: type });
   };
@@ -122,6 +126,21 @@ console.log(cart);
             {fulfillmentType === 'delivery' && (
               <div className="mt-3">
                 <label className="text-sm text-gray-600 font-medium">Delivery Address</label>
+{/* <Autocomplete
+      apiKey={mapsApiKey}
+      onPlaceSelected={(place) => {
+        if (place?.formatted_address) {
+          handleDeliveryAddress(place.formatted_address);
+        }
+      }}
+      options={{
+        types: ['geocode'],
+        componentRestrictions: { country: 'ng' },
+      }}
+      defaultValue={cart.delivery?.address || ''}
+      className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      placeholder="Enter your delivery address"
+    /> */}
                 <input
                   defaultValue={cart.delivery?.address}
                   onBlur={e => handleDeliveryAddress(e.target.value)}

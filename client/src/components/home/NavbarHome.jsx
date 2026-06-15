@@ -8,6 +8,7 @@ import { useCart } from "../../context/cartContext";
 import { Link, useNavigate } from "react-router-dom";
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate()
   const [query, setQuery] = useState("");
   const { addToCart, cart, cartCount } = useCart();
     // SLUGIFY FUNCTION

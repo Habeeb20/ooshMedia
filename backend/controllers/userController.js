@@ -214,7 +214,7 @@ export const getDashboard = async (req, res) => {
  // For debugging
 
     const user = await User.findById(userId).select(
-      'firstName lastName username email phoneNumber profilePicture isSeller role state lga dateOfBirth createdAt businessProfile sellerProfile'
+      'firstName lastName username email phoneNumber profilePicture isSeller role state lga isRider dateOfBirth createdAt businessProfile sellerProfile'
     );
 
     if (!user) {
@@ -240,6 +240,7 @@ export const getDashboard = async (req, res) => {
         phoneNumber: user.phoneNumber,
         profilePicture: user.profilePicture,
         role: user.role,
+        isRider:user.isRider,
         state: user.state,
         lga: user.lga,
         isSeller: user.isSeller,
@@ -432,6 +433,7 @@ export const updateBusinessProfile = async (req, res) => {
       state,
       lga,
       profilePicture,
+      isRider,
 
       // Business Profile Fields
       businessName,
@@ -448,6 +450,7 @@ export const updateBusinessProfile = async (req, res) => {
     if (lastName) user.lastName = lastName;
     if (state) user.state = state;
     if (lga) user.lga = lga;
+    if (isRider) user.isRider = isRider;
     if (profilePicture) user.profilePicture = profilePicture;
 
     // ==================== HANDLE GALLERY (Existing Logic) ====================
@@ -503,6 +506,7 @@ export const updateBusinessProfile = async (req, res) => {
         state: user.state,
         lga: user.lga,
         profilePicture: user.profilePicture,
+        isRider: user.isRider
       },
       businessProfile: user.businessProfile,
       completionPercentage,
@@ -510,7 +514,7 @@ export const updateBusinessProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Business Profile Update Error:", error);
+    console.error("Business Profile Update Error:", error.message);
     res.status(500).json({
       success: false,
       message: "Failed to update profile",

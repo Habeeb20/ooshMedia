@@ -18,6 +18,11 @@ import dealsRoutes from "./routes/deals/dealsRoute.js"
 import chatpostRoutes from "./routes/post/chatRoutes.js"
 import User from "./models/user.js"
 import adminRouter from "./routes/adminRoute.js";
+import riderRouter from "./routes/riderRoute.js";
+import deliveryRoutes from "./routes/deliveryRoute.js"
+import { createServer } from 'http';
+import { initSocket } from "./socket.js";
+
 dotenv.config();
 connectDb()
 
@@ -47,6 +52,9 @@ app.get("/", (req, res) => {
   res.send("oosh media backend is listening on port....");
 });
 
+const httpServer = createServer(app);
+initSocket(httpServer); 
+
 
 app.use("/api/auth", authRoutes)
 
@@ -67,8 +75,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/pos', posRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/deals', dealsRoutes);
-
-
+app.use('/api/rider', riderRouter);
+app.use('/api/delivery', deliveryRoutes);
 // await User.create({
 //   firstName: 'Admin',
 //   lastName: 'Boss',
@@ -88,3 +96,53 @@ app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import express from 'express';
+// import { createServer } from 'http';
+// import dotenv from 'dotenv';
+// import mongoose from 'mongoose';
+// import cors from 'cors';
+
+// import { initSocket } from './socket.js';
+// import deliveryRoutes from './routes/deliveryRoutes.js';
+// // ...your other route imports
+
+// dotenv.config();
+
+// const app = express();
+
+// app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+// app.use(express.json());
+
+// // ── Routes ────────────────────────────────────────────────────────
+// app.use('/api/delivery', deliveryRoutes);
+// // app.use('/api/orders', orderRoutes);
+// // app.use('/api/auth', authRoutes);
+// // ...rest of your routes
+
+// // ── HTTP server + Socket.io ───────────────────────────────────────
+// // IMPORTANT: wrap app in createServer BEFORE calling initSocket
+// const httpServer = createServer(app);
+// initSocket(httpServer);  // must come before httpServer.listen
+
+// // ── DB + Start ────────────────────────────────────────────────────
+// const PORT = process.env.PORT || 5000;
+
+// mongoose
+//   .connect(process.env.MONGO_URI)
+//   .then(() => {
+//     httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//   })
+//   .catch((err) => console.error('DB connection failed:', err));

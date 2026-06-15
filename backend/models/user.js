@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   email: { type: String, sparse: true },
+    isRider: { type: Boolean, default: false },
   phoneNumber: { type: String, sparse: true },
   alternateContact: String,
   state: String,
@@ -94,6 +95,57 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
     type: Number, 
     default: 0 
   },
+  },
+
+
+    // ==================== RIDER PROFILE ====================
+
+  riderProfile: {
+    vehicleType: {
+      type: String,
+      enum: ['bike', 'car', 'van', 'truck', 'bicycle'],
+      // required: function() { return this.isRider; }
+    },
+    vehicleBrand: String,
+    vehicleModel: String,
+    vehicleYear: Number,
+    vehicleColor: String,
+    licensePlate: { type: String, unique: true, sparse: true },
+
+    // Documents
+    ridersLicense: {
+      url: String,
+      publicId: String
+    },
+    vehicleImage: {
+      url: String,
+      publicId: String
+    },
+    insuranceDocument: {
+      url: String,
+      publicId: String
+    },
+
+    // Availability & Stats
+    isAvailable: { type: Boolean, default: true },
+  
+    rating: { type: Number, default: 0 },
+    totalDeliveries: { type: Number, default: 0 },
+    completedDeliveries: { type: Number, default: 0 },
+
+    // Bank Details for Payouts
+ 
+      bankName: String,
+      accountNumber: String,
+      accountName: String,
+      bankCode: String,
+      recipientCode: String,
+    
+
+
+    verified: { type: Boolean, default: false },
+    verificationRequestedAt: Date,
+    verifiedAt: Date
   },
 
 
@@ -262,104 +314,9 @@ bankDetails: {
 
 // Index for better performance
 userSchema.index({ "businessProfile.businessName": "text" });
-
+userSchema.index({ "riderProfile.currentLocation": "2dsphere" });
+// userSchema.index({ "riderProfile.licensePlate": 1 });
 export default mongoose.model('User', userSchema);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -69,6 +69,7 @@ export const checkout = async (req, res) => {
     // Create order
     const order = new Order({
       buyer: req.user._id,
+      seller:seller?._id,
       items: orderItems,
       fulfillmentType: cart.fulfillmentType,
       pickup: cart.pickup,
@@ -271,10 +272,46 @@ export const getOrderById = async (req, res) => {
 };
 
 // ── SELLER ORDER MANAGEMENT ───────────────────────────────
+// export const getSellerOrders = async (req, res) => {
+//   try {
+//     const { status, paymentMethod, from, to } = req.query;
+//     const match = { 'items.seller': req.user._id };
+//     if (status) match.status = status;
+//     if (paymentMethod) match.paymentMethod = paymentMethod;
+//     if (from || to) {
+//       match.createdAt = {};
+//       if (from) match.createdAt.$gte = new Date(from);
+//       if (to) match.createdAt.$lte = new Date(to);
+//     }
+
+//     const orders = await Order.find(match)
+//       .populate('buyer', 'firstName lastName email phoneNumber')
+//       .populate('items.product', 'name images')
+//       .populate('items.seller', 'firstName lastName email phoneNumber businessName state lga businessAddress')
+//       .sort({ createdAt: -1 });
+// console.log(orders.items?.seller)
+//     // Only include items that belong to this seller
+//     const filtered = orders.map(o => ({
+//       ...o.toObject(),
+//       items: o.items.filter(i => i.seller.toString() === req.user._id.toString()),
+//     }));
+
+//     res.json(filtered);
+//   } catch (err) {
+//     console.log(err)
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// ── SELLER ORDER MANAGEMENT ───────────────────────────────
 export const getSellerOrders = async (req, res) => {
   try {
     const { status, paymentMethod, from, to } = req.query;
-    const match = { 'items.seller': req.user._id };
+
+    const match = { 
+      'items.seller': req.user._id 
+    };
+
     if (status) match.status = status;
     if (paymentMethod) match.paymentMethod = paymentMethod;
     if (from || to) {
@@ -285,17 +322,41 @@ export const getSellerOrders = async (req, res) => {
 
     const orders = await Order.find(match)
       .populate('buyer', 'firstName lastName email phoneNumber')
-      .populate('items.product', 'name images')
+      .populate({
+        path: 'items.seller',                    // ← This is the key
+        select: 'firstName lastName email phoneNumber businessName state lga businessAddress phoneNumber'
+      })
+      .populate('items.product', 'name images price')
+      .populate('delivery.assignedRider', 'firstName lastName phoneNumber')
       .sort({ createdAt: -1 });
 
-    // Only include items that belong to this seller
-    const filtered = orders.map(o => ({
-      ...o.toObject(),
-      items: o.items.filter(i => i.seller.toString() === req.user._id.toString()),
-    }));
+    // Filter to only this seller's items and clean up response
+    const filteredOrders = orders.map(order => {
+      const orderObj = order.toObject({ getters: true });
 
-    res.json(filtered);
+      const sellerItems = orderObj.items.filter(item => 
+        item.seller && 
+        (typeof item.seller === 'string' 
+          ? item.seller === req.user._id.toString()
+          : item.seller._id.toString() === req.user._id.toString())
+      );
+
+      return {
+        ...orderObj,
+        items: sellerItems.map(item => ({
+          ...item,
+          seller: item.seller   // Now this should be the full populated object
+        })),
+        // Optional: Attach seller info at order level
+        sellerInfo: sellerItems[0]?.seller || null
+      };
+    });
+
+    // console.log("Populated Orders:", JSON.stringify(filteredOrders, null, 2)); // For debugging
+    res.json(filteredOrders);
+
   } catch (err) {
+    console.error("Error fetching seller orders:", err);
     res.status(500).json({ message: err.message });
   }
 };
