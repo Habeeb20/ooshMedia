@@ -1,59 +1,80 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import { Loader2, Package, Phone, Copy, Check } from 'lucide-react';
-import DeliveryTrackingMap from './DeliveryTrackingMap';
-import { useSocket } from '../config/UsesSocket';
+import { Loader2, Package, Copy, Check, ArrowLeft, ChevronRight } from 'lucide-react';
+import DeliveryTrackingMap from '../DeliverytrackingMap';
+import { useSocket } from '../../config/UsesSocket';
 
+import api from '../../config/api';
 
-export default function BuyerOrderTracking() {
-  const { orderId } = useParams();
+const STATUS_COLORS = {
+  pending: 'bg-amber-100 text-amber-700',
+  confirmed: 'bg-blue-100 text-blue-700',
+  processing: 'bg-purple-100 text-purple-700',
+  shipped: 'bg-indigo-100 text-indigo-700',
+  delivered: 'bg-green-100 text-green-700',
+  cancelled: 'bg-red-100 text-red-700',
+};
+
+export default function BuyerOrdersDashboard() {
+  const [orders, setOrders] = useState([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+
+  // Detail view state
   const [order, setOrder] = useState(null);
   const [deliveryReq, setDeliveryReq] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [toast, setToast] = useState('');
   const socket = useSocket();
-const token = localStorage.getItem("token")
+
+  // ---- List fetch ----
   useEffect(() => {
-    fetchData();
-  }, [orderId]);
+    const fetchOrders = async () => {
+      try {
+        const { data } = await api.get('/api/orders/my');
+        setOrders(data.orders || data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingList(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  // ---- Detail fetch ----
+  useEffect(() => {
+    if (!selectedOrderId) return;
+    fetchOrderDetail(selectedOrderId);
+  }, [selectedOrderId]);
 
   useEffect(() => {
     if (!socket || !deliveryReq) return;
-    socket.on('delivery:assigned', ({ requestId, agreedAmount, rider }) => {
-      fetchData(); // refresh to get rider details
+    socket.on('delivery:assigned', () => {
+      fetchOrderDetail(selectedOrderId);
       showToast('A rider has been assigned to your order!');
     });
     return () => socket.off('delivery:assigned');
-  }, [socket, deliveryReq]);
+  }, [socket, deliveryReq, selectedOrderId]);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3500); };
 
-  const fetchData = async () => {
+  const fetchOrderDetail = async (id) => {
     try {
-      // fetch order
-      const { data: orderData } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-      });
-      setOrder(orderData.order);
+      setLoadingDetail(true);
+      const { data: orderData } = await api.get(`/api/orders/${id}`);
+      setOrder(orderData);
 
-      // fetch delivery request if exists
-      if (orderData.order.delivery?.deliveryRequestId) {
-        const { data: drData } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${orderData.order.delivery.deliveryRequestId}`, {
-                    headers: {
-            Authorization: `Bearer ${token}`
-        }
-        });
-        console.log(drData.request)
+      if (orderData.delivery?.deliveryRequestId) {
+        const { data: drData } = await api.get(`/api/delivery/${orderData?.delivery.deliveryRequestId}`);
         setDeliveryReq(drData.request);
+      } else {
+        setDeliveryReq(null);
       }
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoadingDetail(false);
     }
   };
 
@@ -63,18 +84,69 @@ const token = localStorage.getItem("token")
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
-  if (loading) {
+  const goBackToList = () => {
+    setSelectedOrderId(null);
+    setOrder(null);
+    setDeliveryReq(null);
+  };
+
+  // ---------------- LIST VIEW ----------------
+  if (!selectedOrderId) {
+    if (loadingList) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <Loader2 size={28} className="animate-spin text-rose-900" />
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Loader2 size={28} className="animate-spin text-rose-900" />
+      <div className="bg-gray-50 min-h-screen">
+        <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
+          <div className="max-w-lg mx-auto px-4 py-4">
+            <h1 className="font-bold text-gray-900 text-lg">Your Orders</h1>
+          </div>
+        </div>
+
+        <div className="max-w-lg mx-auto px-4 py-6">
+          {orders.length === 0 ? (
+            <p className="text-gray-500 text-center mt-10">You haven't placed any orders yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((o) => (
+                <button
+                  key={o._id}
+                  onClick={() => setSelectedOrderId(o._id)}
+                  className="w-full bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 text-left active:scale-[0.99] transition-transform"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                    <Package size={18} className="text-rose-900" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{o.orderNumber}</p>
+                    <p className="text-xs text-gray-500 capitalize mt-0.5">
+                      <span className={`px-1.5 py-0.5 rounded-full mr-1 ${STATUS_COLORS[o.status] || 'bg-gray-100 text-gray-600'}`}>
+                        {o.status}
+                      </span>
+                      · {o.fulfillmentType}
+                    </p>
+                  </div>
+                  <p className="font-bold text-gray-900 text-sm">₦{o.totalAmount?.toLocaleString()}</p>
+                  <ChevronRight size={18} className="text-gray-300 shrink-0" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
 
-  if (!order) {
+  // ---------------- DETAIL VIEW ----------------
+  if (loadingDetail || !order) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-gray-500">Order not found</p>
+        <Loader2 size={28} className="animate-spin text-rose-900" />
       </div>
     );
   }
@@ -84,31 +156,29 @@ const token = localStorage.getItem("token")
   return (
     <div className="bg-gray-50 min-h-screen">
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-5 py-3 rounded-full shadow-lg animate-in fade-in slide-in-from-top-2">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-5 py-3 rounded-full shadow-lg">
           {toast}
         </div>
       )}
 
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
-        <div className="max-w-lg mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center">
-              <Package size={18} className="text-rose-900" />
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-900">{order.orderNumber}</h1>
-              <p className="text-xs text-gray-500 capitalize">{order.status}</p>
-            </div>
+        <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
+          <button onClick={goBackToList} className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+            <ArrowLeft size={18} className="text-gray-700" />
+          </button>
+          <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center">
+            <Package size={18} className="text-rose-900" />
+          </div>
+          <div>
+            <h1 className="font-bold text-gray-900">{order.orderNumber}</h1>
+            <p className="text-xs text-gray-500 capitalize">{order.status}</p>
           </div>
         </div>
       </div>
 
       {isDelivery && deliveryReq ? (
-        /* Has assigned rider — show tracking map */
         <DeliveryTrackingMap requestId={deliveryReq._id} viewerRole="buyer" />
       ) : isDelivery ? (
-        /* Delivery order, rider not yet assigned */
         <div className="max-w-lg mx-auto px-4 py-8 text-center">
           <div className="w-20 h-20 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4">
             <span className="text-4xl">🛵</span>
@@ -129,7 +199,6 @@ const token = localStorage.getItem("token")
           </div>
         </div>
       ) : (
-        /* Pickup order */
         <div className="max-w-lg mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 mb-3">Pickup Order</h2>
@@ -138,7 +207,6 @@ const token = localStorage.getItem("token")
         </div>
       )}
 
-      {/* Delivery Code */}
       {isDelivery && order.delivery?.deliveryCode && deliveryReq?.status === 'accepted' && deliveryReq?.trackingStatus !== 'collected' && (
         <div className="max-w-lg mx-auto px-4 pb-6">
           <div className="bg-rose-900 rounded-2xl p-5 text-white">
@@ -159,7 +227,6 @@ const token = localStorage.getItem("token")
         </div>
       )}
 
-      {/* Order Items */}
       <div className="max-w-lg mx-auto px-4 pb-8">
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-50">

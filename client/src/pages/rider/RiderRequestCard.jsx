@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { MapPin, Package, Clock, CheckCircle, XCircle, MessageSquare, ChevronDown, ChevronUp, Loader2, Navigation } from 'lucide-react';
-
+import api from '../../config/api';
 const STATUS_BADGE = {
   pending: { label: 'Pending', cls: 'bg-amber-100 text-amber-700' },
   accepted: { label: 'Accepted', cls: 'bg-green-100 text-green-700' },
@@ -34,7 +34,7 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
   const respond = async (action, extra = {}) => {
     setLoading(true);
     try {
-      const { data } = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${request._id}/respond`, { action, ...extra });
+      const { data } = await api.put(`/api/delivery/${request._id}/respond`, { action, ...extra });
       setRequest(data.request);
       onUpdate?.(data.request);
       if (action === 'negotiate') { setShowNegotiate(false); showToast('Counter-offer sent!'); }
@@ -50,7 +50,7 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
   const updateTracking = async (status) => {
     setLoading(true);
     try {
-      await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${request._id}/tracking`, { trackingStatus: status });
+      await api.put(`/api/delivery/${request._id}/tracking`, { trackingStatus: status });
       setRequest((r) => ({ ...r, trackingStatus: status }));
       showToast('Status updated!');
     } catch {
@@ -65,7 +65,7 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
     setLoading(true);
     setCodeError('');
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${request._id}/verify-code`, { code: deliveryCode.trim() });
+      await api.post(`/api/delivery/${request._id}/verify-code`, { code: deliveryCode.trim() });
       setRequest((r) => ({ ...r, trackingStatus: 'collected' }));
       showToast('Order delivered successfully! 🎉');
       setShowVerify(false);

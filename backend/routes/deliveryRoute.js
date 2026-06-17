@@ -174,15 +174,15 @@ router.get('/order/:orderId', verifyToken, async (req, res) => {
 });
 
 // ─── RIDER: RESPOND (accept / reject / negotiate) ────────────────────────────
-router.patch('/:requestId/respond', verifyToken, async (req, res) => {
+router.put('/:requestId/respond', verifyToken, async (req, res) => {
   try {
     const { action, counterAmount, message } = req.body;
     // action: 'accept' | 'reject' | 'negotiate'
 
     const request = await DeliveryRequest.findById(req.params.requestId)
-      .populate('seller', 'firstName lastName email')
-      .populate('buyer', 'firstName lastName email phone')
-      .populate('rider', 'firstName lastName email phone profileImage')
+      .populate('seller', 'firstName lastName email  alternateContact')
+      .populate('buyer', 'firstName lastName email  phoneNumber')
+      .populate('rider', 'firstName lastName email  phoneNumber profileImage')
       .populate('order', 'orderNumber delivery items totalAmount');
 
     if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
@@ -204,7 +204,7 @@ router.patch('/:requestId/respond', verifyToken, async (req, res) => {
 
       // Email seller
       await sendEmail({
-        to: request.seller.email,
+        to: request.seller.email || request.seller.alternateContact,
         subject: '✅ Rider Accepted Your Delivery Request',
         html: riderAcceptedEmailHtml(request, finalAmount),
       });
@@ -261,12 +261,13 @@ router.patch('/:requestId/respond', verifyToken, async (req, res) => {
     await request.save();
     res.json({ success: true, request });
   } catch (err) {
+    console.log(err.message)
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
 // ─── SELLER: COUNTER-NEGOTIATE ────────────────────────────────────────────────
-router.patch('/:requestId/counter', verifyToken, async (req, res) => {
+router.put('/:requestId/counter', verifyToken, async (req, res) => {
   try {
     const { counterAmount, message } = req.body;
     const request = await DeliveryRequest.findById(req.params.requestId)
@@ -309,8 +310,8 @@ router.put('/:requestId/tracking', verifyToken, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid status' });
 
     const request = await DeliveryRequest.findById(req.params.requestId)
-      .populate('seller', 'firstName email')
-      .populate('buyer', 'firstName email');
+      .populate('seller', 'firstName lastName email')
+      .populate('buyer', 'firstName lastName email');
 
     if (!request) return res.status(404).json({ success: false, message: 'Not found' });
     if (String(request.rider) !== String(req.user._id))
@@ -327,13 +328,18 @@ router.put('/:requestId/tracking', verifyToken, async (req, res) => {
     // Notify both seller and buyer
     const label = statusLabels[trackingStatus];
     if (label) {
-      [request.seller, request.buyer].forEach(async (person) => {
+      try {
+          [request.seller, request.buyer].forEach(async (person) => {
         await sendEmail({
-          to: person.email,
+          to: person.email || person.alternateContact,
           subject: `📍 Delivery Update: ${label}`,
           html: `<p>Hi ${person.firstName}, your rider is now <strong>${label}</strong>.</p>`,
         });
       });
+      } catch (error) {
+        console.log(error)
+      }
+    
     }
 
     getIO().to(`user_${request.seller._id}`).emit('delivery:tracking_update', { requestId: request._id, trackingStatus });
@@ -387,6 +393,7 @@ router.post('/:requestId/verify-code', verifyToken, async (req, res) => {
     // Mark delivered
     order.delivery.isCodeVerified = true;
     order.status = 'delivered';
+    order.seller = request.seller._id
     await order.save();
 
     request.trackingStatus = 'collected';
@@ -396,20 +403,27 @@ router.post('/:requestId/verify-code', verifyToken, async (req, res) => {
     getIO().to(`user_${request.seller._id}`).emit('delivery:tracking_update', { requestId: request._id, trackingStatus: 'collected' });
     getIO().to(`user_${request.buyer._id}`).emit('delivery:tracking_update', { requestId: request._id, trackingStatus: 'collected' });
 
-    await sendEmail({
-      to: request.buyer.email,
+    try {
+        await sendEmail({
+      to: request.buyer.email || request.buyer.alternateContact,
       subject: '✅ Order Delivered Successfully!',
       html: `<p>Hi ${request.buyer.firstName}, your order <strong>${order.orderNumber}</strong> has been delivered. Thank you for shopping with us!</p>`,
     });
 
     await sendEmail({
-      to: request.seller.email,
+      to: request.seller.email || request.seller.alternateContact ,
       subject: '✅ Order Delivered',
       html: `<p>Hi ${request.seller.firstName}, order <strong>${order.orderNumber}</strong> has been delivered successfully.</p>`,
     });
+    } catch (error) {
+      console.log(error)
+    }
+
+  
 
     res.json({ success: true, message: 'Order marked as delivered!' });
   } catch (err) {
+    console.log(err)
     res.status(500).json({ success: false, message: err.message });
   }
 });

@@ -93,8 +93,9 @@ import PurchaseHistoryManager from '../../components/dashboard/PurchaseHistory';
 import RiderProfile from '../rider/RiderProfile';
 import SellerDeliveryPanel from '../vendor/SellerDeliveryPanel';
 import DeliveryTrackingMap from '../DeliverytrackingMap';
-import BuyerOrderTracking from '../Buyerordertracking';
+import BuyerOrderTracking from '../vendor/SellerOrderTracking';
 import RiderDashboard from '../rider/RiderDashboard';
+import RiderBreakdown from '../rider/RiderBreakdown';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -149,7 +150,8 @@ const pages = {
   sellerDelivery: SellerDeliveryPanel,
   deliveryTracking: BuyerOrderTracking,
   buyerOrderTracking: BuyerOrderTracking,
-  riderDashboard: RiderDashboard
+  riderDashboard: RiderDashboard,
+  riderBreakdown:RiderBreakdown
 };
 
 const navItems = [
@@ -165,7 +167,7 @@ const navItems = [
   
   // { id: 'buyerOrderTracking', label: 'Tracking order(buyer)', icon: User },
   
-  { id: 'riderProfile', label: 'Rider Profile', icon: User },
+
   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
 ];
 
@@ -327,8 +329,9 @@ console.log(dashboardData)
             {openDropdown === 'riderDashboard' && (
               <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
                 {[
+                  { label: 'Rider Dashboard', page: 'riderBreakdown' },
                   { label: 'Rider Breakdown', page: 'riderDashboard' },
-                  { label: 'Stock Management', page: 'inventory' },
+                  { id: 'riderProfile', label: 'Rider Profile', icon: User },
                   // { label: 'POS', page: 'POS' },
                   // { label: 'Delivery Panel', page: 'sellerDelivery' },
                   // { label: 'Delivery Tracking', page: 'deliveryTracking' },

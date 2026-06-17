@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import api from '../../config/api';
-
-import { useNavigate } from 'react-router-dom';
-import { Package, Star, CreditCard, ChevronRight } from 'lucide-react';
+import { Loader2, Package, Star, CreditCard, ChevronRight } from 'lucide-react';
+import BuyerOrderDetail from './BuyerOrderDashboard';
 
 const STATUS_COLORS = {
   pending: 'bg-amber-100 text-amber-700',
@@ -20,21 +19,44 @@ export default function BuyerDashboard() {
   const [orders, setOrders] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [tab, setTab] = useState('orders');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    Promise.all([
-      api.get('/api/orders/my'),
-      api.get('/api/analytics/buyer'),
-    ]).then(([o, a]) => {
-      setOrders(o.data);
-      setAnalytics(a.data);
-    }).catch(console.error);
+    const fetchData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [ordersRes, analyticsRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/my`, { headers }),
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/analytics/buyer`, { headers }),
+        ]);
+        setOrders(ordersRes.data);
+        setAnalytics(analyticsRes.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const catPieData = analytics?.categoryBreakdown
     ? Object.entries(analytics.categoryBreakdown).map(([name, value]) => ({ name, value }))
     : [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 size={28} className="animate-spin text-rose-900" />
+      </div>
+    );
+  }
+
+  if (selectedOrderId) {
+    return <BuyerOrderDetail orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -79,37 +101,43 @@ export default function BuyerDashboard() {
 
       {tab === 'orders' && (
         <div className="space-y-3">
-          {orders.length === 0 && (
+          {orders.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center text-gray-400">
               <Package size={48} className="mx-auto mb-3 text-gray-300" />
               <p>No orders yet</p>
             </div>
-          )}
-          {orders.map(order => (
-            <div
-              key={order._id}
-              onClick={() => navigate(`/order/${order._id}`)}
-              className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all flex justify-between items-center"
-            >
-              <div>
-                <p className="font-bold text-gray-800">{order.orderNumber}</p>
-                <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
-                <p className="text-xs text-gray-400">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
-              </div>
-              <div className="text-right flex flex-col items-end gap-1">
-                <p className="font-bold text-indigo-600">₦{order.totalAmount.toLocaleString()}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-600'}`}>
-                  {order.status}
-                </span>
-                {order.fulfillmentType === 'delivery' && order.delivery?.deliveryCode && order.status !== 'delivered' && (
-                  <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
-                    Code: {order.delivery.deliveryCode}
+          ) : (
+            orders.map(order => (
+              <button
+                key={order._id}
+                onClick={() => setSelectedOrderId(order._id)}
+                className="w-full bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all flex justify-between items-center text-left active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                    <Package size={18} className="text-rose-900" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-800 truncate">{order.orderNumber}</p>
+                    <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-400">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                  <p className="font-bold text-indigo-600">₦{order.totalAmount.toLocaleString()}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-600'}`}>
+                    {order.status}
                   </span>
-                )}
-                <ChevronRight size={16} className="text-gray-400" />
-              </div>
-            </div>
-          ))}
+                  {order.fulfillmentType === 'delivery' && order.delivery?.deliveryCode && order.status !== 'delivered' && (
+                    <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+                      Code: {order.delivery.deliveryCode}
+                    </span>
+                  )}
+                  <ChevronRight size={16} className="text-gray-400" />
+                </div>
+              </button>
+            ))
+          )}
         </div>
       )}
 

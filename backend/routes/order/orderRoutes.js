@@ -18,6 +18,7 @@ router.get('/verify-payment/:reference', verifyPayment);
 router.post('/:orderId/verify-delivery', verifyDeliveryCode);
 router.get('/my', getBuyerOrders);
 router.get('/seller', sellerOnly, getSellerOrders);
+router.post('/:orderId/verify-delivery', verifyDeliveryCode);
 router.get('/:orderId', getOrderById);
 
 export default router;

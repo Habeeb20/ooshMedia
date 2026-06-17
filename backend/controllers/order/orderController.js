@@ -241,17 +241,7 @@ export const verifyDeliveryCode = async (req, res) => {
   }
 };
 
-// ── GET BUYER ORDERS ───────────────────────────────────────
-export const getBuyerOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ buyer: req.user._id })
-      .populate('items.product', 'name images')
-      .sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+
 
 // ── GET SINGLE ORDER ───────────────────────────────────────
 export const getOrderById = async (req, res) => {
@@ -303,6 +293,19 @@ export const getOrderById = async (req, res) => {
 //   }
 // };
 
+
+// ── GET BUYER ORDERS ───────────────────────────────────────
+export const getBuyerOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ buyer: req.user._id })
+       .populate('items.product', 'name images')
+      .populate('delivery.assignedRider', 'firstName lastName phoneNumber')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 // ── SELLER ORDER MANAGEMENT ───────────────────────────────
 export const getSellerOrders = async (req, res) => {
   try {
@@ -454,7 +457,6 @@ async function initiateSellerTransfers(order) {
     }
   }
 }
-
 
 
 
