@@ -1,182 +1,3 @@
-// import { useState, useEffect } from 'react';
-// import appConfig from '../../config/AppConfig';
-// import Loading from '../../config/Loading';
-
-// import { toast } from 'sonner';
-
-// export default function DashboardHome() {
-//   const [dashboardData, setDashboardData] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [currentTime, setCurrentTime] = useState(new Date());
-
-//   // Update time every minute
-//   useEffect(() => {
-//     const timer = setInterval(() => {
-//       setCurrentTime(new Date());
-//     }, 60000);
-
-//     return () => clearInterval(timer);
-//   }, []);
-
-//   // Get greeting based on time
-//   const getGreeting = () => {
-//     const hour = currentTime.getHours();
-//     if (hour < 12) return "Good Morning";
-//     if (hour < 17) return "Good Afternoon";
-//     return "Good Evening";
-//   };
-
-//   // Fetch Dashboard Data
-//   useEffect(() => {
-//     const fetchDashboard = async () => {
-//       try {
-//         const token = localStorage.getItem('token');
-//         if (!token) {
-//           toast.error("Please login again");
-//           return;
-//         }
-
-//         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/dashboard`, {
-//           method: 'GET',
-//           headers: {
-//             'Authorization': `Bearer ${token}`,
-//             'Content-Type': 'application/json',
-//           },
-//         });
-
-//         const data = await res.json();
-// console.log("Dashboard Data:", data);
-//         if (data.success) {
-//           setDashboardData(data);
-//         } else {
-//           toast.error(data.message || "Failed to load dashboard");
-//         }
-//       } catch (err) {
-//         console.error(err);
-//         toast.error("Unable to connect to server");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchDashboard();
-//   }, []);
-
-//   if (loading) {
-//     return <Loading text="Loading your dashboard..." fullScreen={false} />;
-//   }
-
-//   const user = dashboardData?.user;
-
-//   return (
-//     <div className="space-y-10">
-//       {/* Greeting Header */}
-//       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-//         <div>
-//           <h1 className="text-5xl font-bold text-gray-900 tracking-tight">
-//             {getGreeting()}, {user?.firstName} 👋
-//           </h1>
-//           <p className="text-gray-600 mt-2 text-lg">
-//             Welcome back to {appConfig.name}
-//           </p>
-//         </div>
-
-//         {/* Current Date & Time */}
-//         <div className="text-right">
-//           <p className="text-2xl font-semibold text-gray-800">
-//             {currentTime.toLocaleTimeString('en-NG', { 
-//               hour: 'numeric', 
-//               minute: '2-digit' 
-//             })}
-//           </p>
-//           <p className="text-gray-500 text-sm">
-//             {currentTime.toLocaleDateString('en-NG', { 
-//               weekday: 'long', 
-//               month: 'long', 
-//               day: 'numeric',
-//               year: 'numeric'
-//             })}
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* Profile Overview Card */}
-//       <div className="bg-white rounded-3xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
-//         {/* Profile Picture */}
-//         <div className="flex-shrink-0">
-//           <div className="w-28 h-28 rounded-3xl overflow-hidden border-4 border-white shadow-xl">
-//             <img
-//               src={user?.profilePicture || "https://via.placeholder.com/150"}
-//               alt={user?.firstName}
-//               className="w-full h-full object-cover"
-//             />
-//           </div>
-//         </div>
-
-//         {/* User Info */}
-//         <div className="flex-1 text-center md:text-left">
-//           <h2 className="text-3xl font-bold text-gray-900">
-//             {user?.firstName} {user?.lastName}
-//           </h2>
-//           <p className="text-xl text-gray-500 mt-1">@{user?.username}</p>
-
-//           <div className="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-4 mt-6 text-sm">
-//             <div>
-//               <p className="text-gray-500">Email</p>
-//               <p className="font-medium">{user?.email || "Not provided"}</p>
-//             </div>
-//             <div>
-//               <p className="text-gray-500">Phone</p>
-//               <p className="font-medium">{user?.phoneNumber || "Not provided"}</p>
-//             </div>
-//             <div>
-//               <p className="text-gray-500">Location</p>
-//               <p className="font-medium">{user?.state ? `${user.state}, ${user.lga}` : "Not set"}</p>
-//             </div>
-//             <div>
-//               <p className="text-gray-500">Member Since</p>
-//               <p className="font-medium">{user?.memberSince}</p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Profile Completion */}
-//         <div className="text-center md:text-right">
-//           <div className="text-4xl font-bold" style={{ color: appConfig.colors.primary }}>
-//             {dashboardData?.stats?.profileComplete}%
-//           </div>
-//           <p className="text-sm text-gray-500 mt-1">Profile Complete</p>
-//           <div className="w-32 h-2 bg-gray-100 rounded-full mt-3 overflow-hidden">
-//             <div 
-//               className="h-full transition-all"
-//               style={{ 
-//                 width: `${dashboardData?.stats?.profileComplete}%`,
-//                 backgroundColor: appConfig.colors.primary 
-//               }}
-//             />
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Stats Grid */}
-//       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-//         {[
-//           { label: "Total Reach", value: "48.2K", change: "+12%" },
-//           { label: "Active Jobs", value: "24", change: "+3" },
-//           { label: "Revenue This Month", value: "₦2.8M", change: "+18%" },
-//           { label: "Engagement Rate", value: "9.4K", change: "+24%" },
-//         ].map((stat, i) => (
-//           <div key={i} className="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition">
-//             <p className="text-gray-500 text-sm">{stat.label}</p>
-//             <p className="text-4xl font-bold mt-3 text-gray-900">{stat.value}</p>
-//             <p className="text-green-600 text-sm mt-3 font-medium">{stat.change} this month</p>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
 
 
 
@@ -189,6 +10,7 @@ import {
   ArrowUpRight, MapPin, Phone, Mail, Calendar,
   CheckCircle2, ChevronRight, Star, Activity
 } from 'lucide-react';
+import Dashboard from './Dashboard';
 
 const StatCard = ({ label, value, change, icon: Icon, color }) => (
   <div className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-rose-100 hover:shadow-md transition-all duration-300 group">
@@ -292,8 +114,8 @@ export default function DashboardHome() {
       className={`space-y-6 transition-all duration-500 ${animIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
     >
       {/* Hero greeting banner */}
-      <div className="relative bg-[#8B1E3F] rounded-2xl p-6 md:p-8 overflow-hidden">
-        {/* decorative circles */}
+      {/* <div className="relative bg-[#8B1E3F] rounded-2xl p-6 md:p-8 overflow-hidden">
+    
         <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute -bottom-10 -right-4 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute top-1/2 right-24 -translate-y-1/2 w-20 h-20 rounded-full bg-white/5 pointer-events-none" />
@@ -312,7 +134,7 @@ export default function DashboardHome() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Avatar */}
+    
             <div className="relative flex-shrink-0">
               <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg">
                 <img
@@ -324,7 +146,7 @@ export default function DashboardHome() {
               <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-[#8B1E3F]" />
             </div>
 
-            {/* Time */}
+        
             <div className="text-right">
               <p className="text-2xl font-bold text-white">
                 {currentTime.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' })}
@@ -335,10 +157,10 @@ export default function DashboardHome() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s, i) => (
           <div
             key={i}
@@ -348,13 +170,13 @@ export default function DashboardHome() {
             <StatCard {...s} />
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Profile + Completion row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Profile Card - spans 2 cols */}
-        <div className="md:col-span-2 bg-white rounded-2xl p-6 border border-gray-100">
+        {/* <div className="md:col-span-2 bg-white rounded-2xl p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">Profile Overview</h2>
             <span className="flex items-center gap-1 text-xs font-medium text-[#8B1E3F] cursor-pointer hover:underline">
@@ -391,19 +213,19 @@ export default function DashboardHome() {
             <InfoRow icon={Phone} label="Phone" value={user?.phoneNumber} />
             <InfoRow icon={MapPin} label="Location" value={user?.state ? `${user.state}, ${user.lga}` : null} />
           </div>
-        </div>
+        </div> */}
 
-        {/* Profile Completion Card */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col">
-          <div className="flex items-center justify-between mb-5">
+        <div className="">
+        {/* <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col"> */}
+          {/* <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">Profile Health</h2>
             <span className="text-xs font-medium text-gray-400">
               <Activity size={13} className="inline mr-1" />
               Score
             </span>
-          </div>
+          </div> */}
 
-          {/* Circular progress */}
+{/*       
           <div className="flex justify-center my-2">
             <div className="relative w-28 h-28">
               <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
@@ -444,9 +266,10 @@ export default function DashboardHome() {
             <button className="mt-4 w-full py-2.5 rounded-xl border border-[#8B1E3F] text-[#8B1E3F] text-sm font-semibold hover:bg-rose-50 transition-colors">
               Complete Profile
             </button>
-          )}
+          )} */}
         </div>
       </div>
+      <Dashboard/>
     </div>
   );
 }

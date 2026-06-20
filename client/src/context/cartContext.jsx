@@ -150,7 +150,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId, quantity = 1) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/api/cart/add', { productId, quantity });
+      const { data } = await api.post('/add', { productId, quantity });
       setCart(data.cart);
       toast.success('Item added to cart');
       return { success: true };
