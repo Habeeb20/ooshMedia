@@ -192,7 +192,7 @@ export default function SellerDashboard() {
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       order.paymentMethod === 'online' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                     }`}>
-                      {order.paymentMethod === 'online' ? 'Paid Online' : 'Pay on Delivery'}
+                      {order.paymentMethod === 'online' ? 'Paid Online' : order.paymentMethod === 'Pay on Delivery' ? 'Pay on Delivery' : order.paymentMethod === 'pos_cash' ? 'Cash' : order.paymentMethod === 'pos_transfer' ? 'Transfer' : 'POS' }
                     </span>
                     <p className="text-xs text-gray-500 capitalize mt-0.5">{order.fulfillmentType}</p>
                   </div>

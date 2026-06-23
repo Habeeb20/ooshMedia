@@ -22,6 +22,16 @@ const userSchema = new mongoose.Schema({
     referralCount: { type: Number, default: 0 },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
+   // ==================== wallet profile ====================
+    // Inside userSchema
+isWallet: { type: Boolean, default: false },
+walletAccount: {
+  accountNumber: String,
+  bankName: String,
+  providerSlug: String,
+  externalId: String,        // ID from external wallet API
+  createdAt: Date,
+},
 
     // ==================== BUSINESS PROFILE (For Entities) ====================
   businessProfile: {
@@ -317,6 +327,61 @@ userSchema.index({ "businessProfile.businessName": "text" });
 userSchema.index({ "riderProfile.currentLocation": "2dsphere" });
 // userSchema.index({ "riderProfile.licensePlate": 1 });
 export default mongoose.model('User', userSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -124,7 +124,7 @@ export default function POSPage() {
               <span>₦{receipt.amount.toLocaleString()}</span>
             </div>
             <div className="text-center text-xs text-gray-400 mt-3">
-              Payment: {receipt.paymentMethod === 'pos_cash' ? 'Cash' : 'Transfer'}
+              Payment: {receipt.paymentMethod === 'pos_cash' ? 'Cash' : receipt.paymentMethod === 'pos_transfer' ? 'Transfer' : 'POS'}
             </div>
           </div>
 
@@ -256,6 +256,14 @@ export default function POSPage() {
                 }`}
               >
                 🏦 Transfer
+              </button>
+              <button
+                onClick={() => setPaymentMethod('pos_machine')}
+                className={`py-2 rounded-xl  ml-30 text-sm font-medium border-2 transition-all ${
+                  paymentMethod === 'pos_machine' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600'
+                }`}
+              >
+                🏦 POS 
               </button>
             </div>
           </div>

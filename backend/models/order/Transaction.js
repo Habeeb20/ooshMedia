@@ -8,7 +8,7 @@ const transactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   platformFee: { type: Number, default: 0 },
   sellerAmount: { type: Number, default: 0 },
-  paymentMethod: { type: String, enum: ['online', 'on_delivery', 'pos_cash', 'pos_transfer'] },
+  paymentMethod: { type: String, enum: ['online', 'on_delivery', 'pos_cash', 'pos_transfer', 'pos_machine'] },
   paymentStatus: { type: String, enum: ['pending', 'completed', 'failed', 'refunded'], default: 'pending' },
   paystackReference: String,
   paystackTransferCode: String,

@@ -1,54 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 import { Users, Eye, ArrowUp, ArrowDown, X, Wallet } from "lucide-react";
 import { Calendar } from "lucide-react";
@@ -71,7 +22,8 @@ import JobLocationMap from "../../location/JobLocationMap";
 import appConfig from "../../config/appConfig";
 import { MapPin } from "lucide-react";
 import {useCart} from "../../context/cartContext"
-
+import { useCurrencyConverter } from "../../currency/UseCurrencyconverter";
+import CurrencySelector from "../../currency/CurrencySelector";
 // ─── Toast notification ───────────────────────────────────────────────────────
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -120,7 +72,7 @@ export default function ProductDetails() {
   const [activeTab, setActiveTab] = useState("details"); // 'details' | 'history'
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
-
+const { currency, setCurrency, currencies, format, ratesLoading } = useCurrencyConverter();
   const { location: userLocation } = useUserLocation();
   const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(
     userLocation, product?.seller?.lga, product?.seller?.state
@@ -376,9 +328,9 @@ const fetchProduct = async () => {
                               </div>
     
                               <div className="text-right">
-                                <p className="text-2xl font-bold text-emerald-600">
+                                {/* <p className="text-2xl font-bold text-emerald-600">
                                   ₦{Number(item.totalAmount).toLocaleString()}
-                                </p>
+                                </p> */}
                                 <p className="text-sm text-gray-400">
                                   {item.quantity} {item.unit}
                                 </p>
@@ -637,9 +589,13 @@ const fetchProduct = async () => {
                             🏆 +{order.loyaltyPointsAwarded} pts
                           </span>
                         )}
-                        <p className="font-black text-gray-800 text-lg">
+                        {/* <p className="font-black text-gray-800 text-lg">
                           ₦{order.totalAmount?.toLocaleString()}
-                        </p>
+                        </p> */}
+
+                        <p className="font-black text-gray-800 text-lg">
+  {format(order.totalAmount)}
+</p>
                         <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
@@ -729,7 +685,7 @@ const fetchProduct = async () => {
                 </div>
 
                 {/* Price */}
-                <div className="mt-6">
+                {/* <div className="mt-6">
                   <h2
                     className="text-4xl md:text-5xl font-black"
                     style={{ color: appConfig.colors.primary }}
@@ -741,7 +697,34 @@ const fetchProduct = async () => {
                       ₦{product?.price?.toLocaleString()}
                     </p>
                   )}
-                </div>
+                </div> */}
+
+                <div className="mt-6">
+  <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
+    <h2
+      className="text-4xl md:text-5xl font-black"
+      style={{ color: appConfig.colors.primary }}
+    >
+      {format(effectivePrice)}
+    </h2>
+    <CurrencySelector
+      currency={currency}
+      setCurrency={setCurrency}
+      currencies={currencies}
+      loading={ratesLoading}
+    />
+  </div>
+  {product?.salePrice && (
+    <p className="line-through text-gray-400 mt-2 text-xl">
+      {format(product?.price)}
+    </p>
+  )}
+  {currency !== "NGN" && (
+    <p className="text-xs text-gray-400 mt-1">
+      Approximate — actual charge is in NGN at checkout
+    </p>
+  )}
+</div>
 
                 {/* Stock */}
                 <div className="mt-6 flex items-center gap-4">
@@ -802,9 +785,13 @@ const fetchProduct = async () => {
                         </button>
                       </div>
                       <p className="text-sm text-gray-400">Max: {maxQty}</p>
-                      <p className="font-bold text-gray-800 ml-auto text-lg">
+                      {/* <p className="font-bold text-gray-800 ml-auto text-lg">
                         Total: ₦{(effectivePrice * quantity).toLocaleString()}
-                      </p>
+                      </p> */}
+
+                      <p className="font-bold text-gray-800 ml-auto text-lg">
+  Total: {format(effectivePrice * quantity)}
+</p>
                     </div>
                   </div>
                 )}
@@ -1147,14 +1134,23 @@ const relatedSlug = slugify(item.name) + "-" + item._id.slice(-6);
                                 <span className="text-sm text-gray-500">{item?.ratings || 0}</span>
                               </div>
                               <div className="mt-3">
-                                <h3 className="text-2xl font-black" style={{ color: appConfig.colors.primary }}>
+                                {/* <h3 className="text-2xl font-black" style={{ color: appConfig.colors.primary }}>
                                   ₦{(item?.salePrice || item?.price)?.toLocaleString()}
                                 </h3>
                                 {item?.salePrice && (
                                   <p className="line-through text-gray-400 text-sm mt-1">
                                     ₦{item?.price?.toLocaleString()}
                                   </p>
-                                )}
+                                )} */}
+
+                                <h3 className="text-2xl font-black" style={{ color: appConfig.colors.primary }}>
+  {format(item?.salePrice || item?.price)}
+</h3>
+{item?.salePrice && (
+  <p className="line-through text-gray-400 text-sm mt-1">
+    {format(item?.price)}
+  </p>
+)}
                               </div>
                               <div className="mt-3">
                                 <span
@@ -1217,3 +1213,150 @@ const relatedSlug = slugify(item.name) + "-" + item._id.slice(-6);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /* ──────────────────────────────────────────────────────────────────
+//    1) ADD these imports near your other imports in ProductDetails.jsx
+//    ────────────────────────────────────────────────────────────────── */
+// import { useCurrencyConverter } from "../../hooks/useCurrencyConverter";
+// import CurrencySelector from "../../component/CurrencySelector";
+
+// /* ──────────────────────────────────────────────────────────────────
+//    2) ADD this inside the component, alongside your other hooks
+//    ────────────────────────────────────────────────────────────────── */
+// const { currency, setCurrency, currencies, format, ratesLoading } =
+//   useCurrencyConverter();
+
+// /* ──────────────────────────────────────────────────────────────────
+//    3) Main price block — REPLACE:
+
+//      <h2 className="text-4xl md:text-5xl font-black" style={{ color: appConfig.colors.primary }}>
+//        ₦{effectivePrice?.toLocaleString()}
+//      </h2>
+//      {product?.salePrice && (
+//        <p className="line-through text-gray-400 mt-2 text-xl">
+//          ₦{product?.price?.toLocaleString()}
+//        </p>
+//      )}
+
+//    WITH:
+//    ────────────────────────────────────────────────────────────────── */
+// <div className="mt-6">
+//   <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
+//     <h2
+//       className="text-4xl md:text-5xl font-black"
+//       style={{ color: appConfig.colors.primary }}
+//     >
+//       {format(effectivePrice)}
+//     </h2>
+//     <CurrencySelector
+//       currency={currency}
+//       setCurrency={setCurrency}
+//       currencies={currencies}
+//       loading={ratesLoading}
+//     />
+//   </div>
+//   {product?.salePrice && (
+//     <p className="line-through text-gray-400 mt-2 text-xl">
+//       {format(product?.price)}
+//     </p>
+//   )}
+//   {currency !== "NGN" && (
+//     <p className="text-xs text-gray-400 mt-1">
+//       Approximate — actual charge is in NGN at checkout
+//     </p>
+//   )}
+// </div>
+
+// /* ──────────────────────────────────────────────────────────────────
+//    4) Quantity total — REPLACE:
+
+//      <p className="font-bold text-gray-800 ml-auto text-lg">
+//        Total: ₦{(effectivePrice * quantity).toLocaleString()}
+//      </p>
+
+//    WITH:
+//    ────────────────────────────────────────────────────────────────── */
+// <p className="font-bold text-gray-800 ml-auto text-lg">
+//   Total: {format(effectivePrice * quantity)}
+// </p>
+
+// /* ──────────────────────────────────────────────────────────────────
+//    5) Related products card price — REPLACE:
+
+//      <h3 className="text-2xl font-black" style={{ color: appConfig.colors.primary }}>
+//        ₦{(item?.salePrice || item?.price)?.toLocaleString()}
+//      </h3>
+//      {item?.salePrice && (
+//        <p className="line-through text-gray-400 text-sm mt-1">
+//          ₦{item?.price?.toLocaleString()}
+//        </p>
+//      )}
+
+//    WITH:
+//    ────────────────────────────────────────────────────────────────── */
+// <h3 className="text-2xl font-black" style={{ color: appConfig.colors.primary }}>
+//   {format(item?.salePrice || item?.price)}
+// </h3>
+// {item?.salePrice && (
+//   <p className="line-through text-gray-400 text-sm mt-1">
+//     {format(item?.price)}
+//   </p>
+// )}
+
+// /* ──────────────────────────────────────────────────────────────────
+//    6) Order history total (optional, same pattern) — in the orders tab:
+
+//      <p className="font-black text-gray-800 text-lg">
+//        ₦{order.totalAmount?.toLocaleString()}
+//      </p>
+
+//    WITH:
+//    ────────────────────────────────────────────────────────────────── */
+// <p className="font-black text-gray-800 text-lg">
+//   {format(order.totalAmount)}
+// </p>

@@ -96,6 +96,9 @@ import DeliveryTrackingMap from '../DeliverytrackingMap';
 import BuyerOrderTracking from '../vendor/SellerOrderTracking';
 import RiderDashboard from '../rider/RiderDashboard';
 import RiderBreakdown from '../rider/RiderBreakdown';
+// import WalletSetup from '../../components/dashboard/WalletSetup';
+import WalletManager from '../../components/dashboard/WalletSetup';
+import SellerAnalyticsDashboard from '../vendor/SellerAnalyticDashboard';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -138,6 +141,7 @@ const pages = {
   products: ProductList,
   subscribe: AdPlansPage,
   ads: MySubscriptionsPage,
+  wallet:WalletManager,
   verify: AdVerifyPage,
   stock : SellerDashboard,
   POS: POSPage,
@@ -151,7 +155,8 @@ const pages = {
   deliveryTracking: BuyerOrderTracking,
   buyerOrderTracking: BuyerOrderTracking,
   riderDashboard: RiderDashboard,
-  riderBreakdown:RiderBreakdown
+  riderBreakdown:RiderBreakdown,
+  customerAnalytics: SellerAnalyticsDashboard
 };
 
 const navItems = [
@@ -164,6 +169,7 @@ const navItems = [
   { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
   {id:'orderBreakdown', label:'Orders', icon: Package},
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'wallet', label: 'Set up wallet', icon: User },
   
   // { id: 'buyerOrderTracking', label: 'Tracking order(buyer)', icon: User },
   
@@ -286,6 +292,7 @@ console.log(dashboardData)
                   { label: 'Delivery Tracking', page: 'deliveryTracking' },
                   { label: 'seller Chain History', page: 'sellerChain' },
                   { label: 'Products', page: 'products' },
+                  { label: 'Sales analytics', page: 'customerAnalytics' },
                   { label: 'Orders', page: null },
                 ].map(sub => (
                   <button

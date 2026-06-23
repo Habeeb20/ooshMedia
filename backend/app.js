@@ -24,6 +24,7 @@ import { createServer } from 'http';
 import { initSocket } from "./socket.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js"
 import adminRouter from "./routes/adminRoute.js";
+import walletRoutes from "./routes/walletRoute.js"
 dotenv.config();
 connectDb()
 
@@ -79,6 +80,7 @@ app.use('/api/deals', dealsRoutes);
 app.use('/api/rider', riderRouter);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/wallet', walletRoutes)
 app.use('/api', adminRouter)
 // await User.create({
 //   firstName: 'Admin',
