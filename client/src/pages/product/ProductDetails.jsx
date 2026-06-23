@@ -254,6 +254,8 @@ const fetchProduct = async () => {
                     </p>
                     <p className="text-sm text-gray-500">@{partner.username}</p>
                     <p className="text-sm text-gray-500">{partner.phoneNumber}</p>
+                    <p className="text-sm text-gray-500">{partner.address}</p>
+                    <p className="text-sm font-bold text-black">{partner.relationship}</p>
     
                     {partner.downstreamCount > 0 && (
                       <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">

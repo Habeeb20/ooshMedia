@@ -1,5 +1,7 @@
 
 import Product from '../../models/sellers/product.js';
+import mongoose from 'mongoose';
+import User from '../../models/user.js';
 
 // Create Product
 export const createProduct = async (req, res) => {
@@ -329,3 +331,152 @@ export const rateProduct = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+export const getProductsByCategory = async (req, res) => {
+  try {
+    const {
+      category,
+      subCategory,
+      page = 1,
+      limit = 20,
+      sort = 'newest',
+      minPrice,
+      maxPrice,
+      status = 'active',
+    } = req.query;
+
+    if (!category || !category.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'category is required as a query parameter',
+      });
+    }
+
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const limitNum = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build the filter
+    const filter = {
+      category: { $regex: `^${escapeRegex(category.trim())}$`, $options: 'i' },
+    };
+
+    if (subCategory && subCategory.trim()) {
+      filter.subCategory = { $regex: `^${escapeRegex(subCategory.trim())}$`, $options: 'i' };
+    }
+
+    if (status !== 'all') {
+      filter.status = status;
+    }
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // Build the sort
+    const sortMap = {
+      newest: { createdAt: -1 },
+      price_asc: { price: 1 },
+      price_desc: { price: -1 },
+      popular: { sold: -1, likes: -1 },
+    };
+    const sortQuery = sortMap[sort] || sortMap.newest;
+
+    const [products, total] = await Promise.all([
+      Product.find(filter)
+        .sort(sortQuery)
+        .skip(skip)
+        .limit(limitNum)
+        .populate({
+          path: 'seller',
+          select:
+            'firstName lastName username profilePicture state lga role ' +
+            'businessProfile.businessName businessProfile.verified businessProfile.gallery ' +
+            'sellerProfile.shopName sellerProfile.shopDescription sellerProfile.verifiedSeller ' +
+            'sellerProfile.market sellerProfile.acceptedPaymentMethods',
+        })
+        .lean(),
+      Product.countDocuments(filter),
+    ]);
+
+    if (!products.length) {
+      return res.status(200).json({
+        success: true,
+        message: `No products found in category "${category}"`,
+        data: [],
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+    }
+
+    // Shape the response: flatten the seller's "public storefront" identity
+    // so the frontend doesn't have to know about businessProfile/sellerProfile nesting.
+    const data = products.map((product) => ({
+      ...product,
+      seller: shapeSeller(product.seller),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (error) {
+    console.error('getProductsByCategory error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * Picks a display name + storefront-relevant fields from a populated seller,
+ * regardless of whether they're an individual ('user') or a business ('entity').
+ */
+function shapeSeller(seller) {
+  if (!seller) return null;
+
+  const isBusiness = seller.role === 'entity';
+  const businessName = seller.businessProfile?.businessName;
+  const shopName = seller.sellerProfile?.shopName;
+
+  return {
+    _id: seller._id,
+    displayName: shopName || businessName || `${seller.firstName} ${seller.lastName}`.trim(),
+    username: seller.username,
+    avatar: seller.profilePicture || seller.businessProfile?.gallery?.[0]?.url || null,
+    location: [seller.lga, seller.state].filter(Boolean).join(', '),
+    isBusiness,
+    verified: Boolean(seller.businessProfile?.verified || seller.sellerProfile?.verifiedSeller),
+    shopDescription: seller.sellerProfile?.shopDescription || null,
+    market: seller.sellerProfile?.market || null,
+    acceptedPaymentMethods: seller.sellerProfile?.acceptedPaymentMethods || 'both',
+  };
+}
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
