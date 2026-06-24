@@ -59,11 +59,14 @@ export default function Navbar() {
              
               </>
             )}
-            <a href="#pricing" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
+            {/* <a href="#pricing" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               Pricing
-            </a>
+            </a> */}
             <a href="/chain" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               Distribution chain
+            </a>
+            <a href="/price-checker" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
+              Price Checker
             </a>
             <a href="#about" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               About Us
@@ -142,7 +145,7 @@ export default function Navbar() {
              
               </>
             )}
-            <a href="#pricing" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Pricing</a>
+            <a href="#price-checker" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Price Checker</a>
             <a href="/chain" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Distribution Chain</a>
             <a href="#about" className="font-medium text-gray-700 hover:text-[#8B1E3F]">About Us</a>
 

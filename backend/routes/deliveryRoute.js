@@ -202,7 +202,8 @@ router.put('/:requestId/respond', verifyToken, async (req, res) => {
         'delivery.deliveryRequestId': request._id,
       });
 
-      // Email seller
+      try {
+          // Email seller
       await sendEmail({
         to: request.seller.email || request.seller.alternateContact,
         subject: '✅ Rider Accepted Your Delivery Request',
@@ -215,6 +216,11 @@ router.put('/:requestId/respond', verifyToken, async (req, res) => {
         subject: '🚴 Your Order Has Been Assigned to a Rider',
         html: buyerAssignedEmailHtml(request, finalAmount),
       });
+        
+      } catch (error) {
+       console.log(error.message) 
+      }
+    
 
       // Socket notify seller and buyer
       getIO().to(`user_${request.seller._id}`).emit('delivery:accepted', { requestId: request._id, agreedAmount: finalAmount });
@@ -231,20 +237,27 @@ router.put('/:requestId/respond', verifyToken, async (req, res) => {
     } else if (action === 'reject') {
       request.status = 'rejected';
 
-      await sendEmail({
+      try {
+          await sendEmail({
         to: request.seller.email,
         subject: '❌ Rider Rejected Your Delivery Request',
         html: `<p>Hi ${request.seller.firstName}, <strong>${request.rider.firstName} ${request.rider.lastName}</strong> has rejected your delivery request for order <strong>${request.order.orderNumber}</strong>. Please try another rider.</p>`,
       });
 
       getIO().to(`user_${request.seller._id}`).emit('delivery:rejected', { requestId: request._id });
+      } catch (error) {
+        console.log(error.message)
+      }
+
+    
 
     } else if (action === 'negotiate') {
       if (!counterAmount) return res.status(400).json({ success: false, message: 'counterAmount required' });
       request.status = 'negotiating';
       request.negotiations.push({ from: 'rider', amount: counterAmount, message });
 
-      await sendEmail({
+      try {
+          await sendEmail({
         to: request.seller.email,
         subject: '💬 Rider Counter-Offer on Delivery',
         html: `<p>Hi ${request.seller.firstName}, <strong>${request.rider.firstName}</strong> has countered with <strong>₦${counterAmount.toLocaleString()}</strong> for order ${request.order.orderNumber}. ${message ? `Message: "${message}"` : ''} Log in to respond.</p>`,
@@ -256,6 +269,11 @@ router.put('/:requestId/respond', verifyToken, async (req, res) => {
         message,
         from: 'rider',
       });
+      } catch (error) {
+        console.log(error.message)
+      }
+
+    
     }
 
     await request.save();
@@ -282,11 +300,17 @@ router.put('/:requestId/counter', verifyToken, async (req, res) => {
     request.negotiations.push({ from: 'seller', amount: counterAmount, message });
     await request.save();
 
-    await sendEmail({
+    try {
+       await sendEmail({
       to: request.rider.email,
       subject: '💬 New Counter-Offer from Seller',
       html: `<p>Hi ${request.rider.firstName}, <strong>${request.seller.firstName}</strong> has countered with <strong>₦${counterAmount.toLocaleString()}</strong>. ${message ? `Message: "${message}"` : ''} Log in to respond.</p>`,
     });
+    } catch (error) {
+      console.log(error.message)
+    }
+
+   
 
     getIO().to(`user_${request.rider._id}`).emit('delivery:negotiation', {
       requestId: request._id,

@@ -4,7 +4,7 @@ import User from '../models/user.js'
 import { generateAndSendOTP, verifyOTP } from '../utills/sendOtp.js';
 import axios from "axios"
 import { uploadVideoToS3 } from '../utills/s3BucketUpload.js';
-
+import { generateFallbackEmail } from './walletController.js';
 // ==================== SEND OTP ====================
 export const sendOTP = async (req, res) => {
   try {
@@ -542,96 +542,202 @@ const calculateBusinessProfileCompletion = (profile) => {
   return Math.round((score / totalFields) * 100);
 };
 
+const WALLET_BASE = 'https://api-ewallet.eroot.ng/api';
+
+// export const createWallet = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const user = await User.findById(userId);
+
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     if (user.isWallet) {
+//       return res.status(400).json({ success: false, message: "Wallet already created" });
+//     }
+
+//     // ── Validate required fields before calling external API ──────────
+//     const email = user.email;
+//     if (!email) {
+//       return res.status(400).json({ success: false, message: "Account email is required to create a wallet" });
+//     }
+
+//     const rawPhone = user.phoneNumber || user.alternateContact || "";
+
+//     // Normalise phone to 080XXXXXXXX format (strip +234 or 234 prefix)
+//     let phone = rawPhone.replace(/\s+/g, "").replace(/^\+/, "");
+//     if (phone.startsWith("234")) {
+//       phone = "0" + phone.slice(3); // 2348012345678 → 08012345678
+//     }
+//     if (!phone || phone.length < 10) {
+//       return res.status(400).json({ success: false, message: "A valid phone number is required to create a wallet" });
+//     }
+
+//     const payload = {
+//       first_name:      user.firstName,
+//       last_name:       user.lastName,
+//       email:           user.email || user.alternateContact,
+//       password:        "password123",
+//       phone:           phone,               // ← now 080XXXXXXXX
+//       preferred_bank:  "wema-bank",
+//       provider_slug:   "wema-bank",
+//       metadata: [
+//         { key: "user_id",  value: user._id.toString() },
+//         { key: "username", value: user.username }
+//       ]
+//     };
+
+//     console.log("Wallet payload →", payload);
+
+//     // ── Call External Wallet API ──────────────────────────────────────
+//     const walletResponse = await axios.post(
+//       "https://api-ewallet.eroot.ng/api/register",
+//       payload,
+//       { headers: { "Content-Type": "application/json" } }
+//     );
+
+//     const responseData = walletResponse.data;
+//     console.log("Wallet API response →", responseData);
+
+//     // ── Map response correctly from dedicated_account object ──────────
+//     const dedicatedAccount = responseData?.dedicated_account || {};
+
+//     user.isWallet = true;
+//     user.walletAccount = {
+//       accountNumber: dedicatedAccount.account_number || "N/A",
+//       accountName:   dedicatedAccount.account_name   || "N/A",
+//       bankName:      dedicatedAccount.bank_name       || "Wema Bank",
+//       currency:      dedicatedAccount.currency        || "NGN",
+//       providerSlug:  "wema-bank",
+//       customerCode:  responseData?.customer?.customer_code || null,
+//       externalId:    responseData?.user?.id           || null,
+//     };
+
+//     await user.save();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Wallet created successfully",
+//       wallet:  user.walletAccount
+//     });
+
+//   } catch (error) {
+//     // Surface the exact validation errors from the external API
+//     const apiError = error.response?.data;
+//     console.error("Wallet creation error →", apiError || error.message);
+
+//     return res.status(500).json({
+//       success:  false,
+//       message:  apiError?.message || "Failed to create wallet",
+//       details:  apiError || null   // ← helps debug which field failed
+//     });
+//   }
+// };
+
+
+
+
+// Get Wallet Status (for dashboard)
+
+
 
 export const createWallet = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId);
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     if (user.isWallet) {
-      return res.status(400).json({ success: false, message: "Wallet already created" });
+      return res.status(400).json({ success: false, message: 'Wallet already created' });
     }
 
-    // ── Validate required fields before calling external API ──────────
-    const email = user.email;
-    if (!email) {
-      return res.status(400).json({ success: false, message: "Account email is required to create a wallet" });
-    }
+    // ── Resolve email — generate fallback if missing ──────────────
+    const email = user.email
+      || (user.alternateContact?.includes('@') ? user.alternateContact : null)
+      || generateFallbackEmail(user._id, user.username);
 
-    const rawPhone = user.phoneNumber || user.alternateContact || "";
+    // ── Normalise phone to 080XXXXXXXXX ──────────────────────────
+    const rawPhone = user.phoneNumber || user.alternateContact || '';
+    let phone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
+    if (phone.startsWith('234')) phone = '0' + phone.slice(3);
 
-    // Normalise phone to 080XXXXXXXX format (strip +234 or 234 prefix)
-    let phone = rawPhone.replace(/\s+/g, "").replace(/^\+/, "");
-    if (phone.startsWith("234")) {
-      phone = "0" + phone.slice(3); // 2348012345678 → 08012345678
-    }
     if (!phone || phone.length < 10) {
-      return res.status(400).json({ success: false, message: "A valid phone number is required to create a wallet" });
+      return res.status(400).json({ success: false, message: 'A valid phone number is required' });
     }
 
     const payload = {
-      first_name:      user.firstName,
-      last_name:       user.lastName,
-      email:           user.email || user.alternateContact,
-      password:        "password123",
-      phone:           phone,               // ← now 080XXXXXXXX
-      preferred_bank:  "wema-bank",
-      provider_slug:   "wema-bank",
+      first_name:     user.firstName,
+      last_name:      user.lastName,
+      email:          email || user.alternateContact,          // ← real or generated fallback
+      password:       'password123',
+      phone:          phone  || user.alternateContact,          // ← normalised 080XXXXXXXXX
+      preferred_bank: 'wema-bank',
+      provider_slug:  'wema-bank',
       metadata: [
-        { key: "user_id",  value: user._id.toString() },
-        { key: "username", value: user.username }
-      ]
+        { key: 'user_id',  value: user._id.toString() },
+        { key: 'username', value: user.username },
+      ],
     };
 
-    console.log("Wallet payload →", payload);
+    console.log('Wallet create payload →', payload);
 
-    // ── Call External Wallet API ──────────────────────────────────────
-    const walletResponse = await axios.post(
-      "https://api-ewallet.eroot.ng/api/register",
+    const walletRes = await axios.post(
+      `${WALLET_BASE}/register`,
       payload,
-      { headers: { "Content-Type": "application/json" } }
+      { headers: { 'Content-Type': 'application/json' } }
     );
 
-    const responseData = walletResponse.data;
-    console.log("Wallet API response →", responseData);
+    const responseData = walletRes.data;
+    console.log('Wallet API response →', responseData);
 
-    // ── Map response correctly from dedicated_account object ──────────
-    const dedicatedAccount = responseData?.dedicated_account || {};
+    // ── Extract token returned by the API after registration ──────
+    const walletToken =
+      responseData?.token ||
+      responseData?.access_token ||
+      responseData?.data?.token ||
+      responseData?.data?.access_token ||
+      null;
 
-    user.isWallet = true;
-    user.walletAccount = {
-      accountNumber: dedicatedAccount.account_number || "N/A",
-      accountName:   dedicatedAccount.account_name   || "N/A",
-      bankName:      dedicatedAccount.bank_name       || "Wema Bank",
-      currency:      dedicatedAccount.currency        || "NGN",
-      providerSlug:  "wema-bank",
+    // ── Extract dedicated account details ─────────────────────────
+    const dedicated = responseData?.dedicated_account || {};
+
+    // ── Persist to user document ──────────────────────────────────
+    user.isWallet          = true;
+    user.walletAccount     = {
+      accountNumber: dedicated.account_number || 'N/A',
+      accountName:   dedicated.account_name   || `${user.firstName} ${user.lastName}`,
+      bankName:      dedicated.bank_name       || 'Wema Bank',
+      currency:      dedicated.currency        || 'NGN',
+      providerSlug:  'wema-bank',
       customerCode:  responseData?.customer?.customer_code || null,
-      externalId:    responseData?.user?.id           || null,
+      externalId:    responseData?.user?.id?.toString()   || null,
+      walletEmail:   email,       // ← save whichever email was used (real or fallback)
+      walletToken:   walletToken, // ← save token for future API calls
+      createdAt:     new Date(),
     };
 
     await user.save();
 
     return res.status(201).json({
       success: true,
-      message: "Wallet created successfully",
-      wallet:  user.walletAccount
+      message: 'Wallet created successfully',
+      wallet:  user.walletAccount,
     });
 
   } catch (error) {
-    // Surface the exact validation errors from the external API
     const apiError = error.response?.data;
-    console.error("Wallet creation error →", apiError || error.message);
+    console.error('createWallet error →', apiError || error.message);
 
     return res.status(500).json({
-      success:  false,
-      message:  apiError?.message || "Failed to create wallet",
-      details:  apiError || null   // ← helps debug which field failed
+      success: false,
+      message: apiError?.message || 'Failed to create wallet',
+      details: apiError || null,
     });
   }
 };
-// Get Wallet Status (for dashboard)
+
+
+
 export const getWalletStatus = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('isWallet walletAccount firstName lastName email phoneNumber alternateContact');

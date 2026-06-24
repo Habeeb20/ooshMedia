@@ -25,6 +25,7 @@ import { initSocket } from "./socket.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js"
 import adminRouter from "./routes/adminRoute.js";
 import walletRoutes from "./routes/walletRoute.js"
+import priceCheckerRoutes from "./routes/priceCheckerRouter.js"
 dotenv.config();
 connectDb()
 
@@ -69,7 +70,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/chain', chainRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/chatposts', chatpostRoutes);
-
+app.use('/api/price-checker', priceCheckerRoutes)
 app.use('/api/ads', adRoutes);
 app.use('/api/admin', adminRouter);
 app.use('/api/cart', cartRoutes);

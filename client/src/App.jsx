@@ -7,7 +7,7 @@ import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
 import ProductDetails from "./pages/product/ProductDetails";
-import PriceChecker from "./pages/product/PriceChecker";
+// import PriceChecker from "./pages/product/PriceChecker";
 import VendorsPage from "./pages/vendor/Vendor";
 import SellerDetail from "./pages/vendor/vendorDetails"
 import ProtectedRoute from "./config/protectedRoute";
@@ -35,6 +35,7 @@ import { disconnectSocket } from "./config/UsesSocket";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import BuyerOrdersDashboard from "./pages/order/BuyerOrderDashboard";
 import AdminDashboard from "./pages/adminDashboard/AdminDashboard";
+import PriceCheckers from "./pages/Home/PriceChecker";
 const App =()=>  {
 
     useEffect(() => {
@@ -142,7 +143,8 @@ const App =()=>  {
                             <Route path="/marketplace" element={<MarketPlace />} />
                             <Route path="/products" element={<MarketPlace />} />
                             <Route path="/signup" element={<Signup />} />
-                            <Route path="/price-checker" element={<PriceChecker />} />
+                            {/* <Route path="/price-checker" element={<PriceChecker />} /> */}
+                            <Route path="/price-checker" element={<PriceCheckers />} />
                             <Route path="/vendors" element={<VendorsPage />} />
                             <Route path="/chain" element={<DistributionChainView />} />
                             <Route path="/login" element={<Login />} />
