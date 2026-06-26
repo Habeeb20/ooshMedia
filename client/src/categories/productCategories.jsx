@@ -151,6 +151,79 @@ export const productCategories = [
     ]
   },
 
+  {
+  id: "building-materials",
+  name: "Building Materials",
+  icon: "🏗️",
+  subcategories: [
+    "Cement",
+    "Reinforcement Bars (Rebar)",
+    "Corrugated Roofing Sheets",
+    "Aluminium Roofing Sheets",
+    "Stone Coated Tiles",
+    "Ceramic Tiles",
+    "Porcelain Floor Tiles",
+    "Wall Tiles",
+    "Marble & Granite",
+    "Concrete Blocks",
+    "Sandcrete Blocks",
+    "Burnt Bricks",
+    "Plywood",
+    "Hardwood Timber",
+    "Mild Steel Plates",
+    "GI Pipes",
+    "PVC Pipes",
+    "Emulsion Paint",
+    "Waterproofing Materials",
+    "Electrical Cables",
+    "Plumbing Fittings",
+    "POP Ceiling",
+    "Gypsum Board",
+    "Aluminium Windows",
+    "Security Doors",
+    "Precast Concrete",
+    "Ready Mix Concrete",
+    "Roof Trusses",
+    "Wire Mesh",
+    "Vitrified Tiles"
+  ]
+},
+
+
+{
+  id: "hotel-materials",
+  name: "hotel-materials",
+  icon: "🏨",
+  subcategories: [
+    "Bedding & Linens",
+    "Mattresses & Pillows",
+    "Towels & Bathrobes",
+    "Hotel Furniture",
+    "Room Amenities",
+    "Toiletries & Bathroom Supplies",
+    "Cleaning Equipment",
+    "Hotel Uniforms",
+    "Tableware & Crockery",
+    "Cutlery & Glassware",
+    "Kitchen Equipment",
+    "Chairs & Banqueting Furniture",
+    "Curtains & Draperies",
+    "Carpets & Flooring",
+    "Lighting Fixtures",
+    "Signage & Room Numbers",
+    "Guest Room Safes",
+    "Mini Bar Supplies",
+    "Laundry Equipment",
+    "Air Conditioning Units",
+    "Television & Entertainment Systems",
+    "Bathroom Fittings",
+    "Disposable Amenities",
+    "Hotel Decor & Artwork",
+    "Fire Safety Equipment",
+    "Pool & Spa Equipment"
+  ]
+},
+
 
 
   {

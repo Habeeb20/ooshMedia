@@ -442,7 +442,7 @@ function CategoryItem({ category, onClose }) {
             <p className="text-sm font-bold text-gray-800 truncate group-hover:text-[#8B1E3F] transition-colors">
               {category.name}
             </p>
-            <p className="text-[10px] text-gray-400">{category.subcategories.length} subcategories</p>
+            <p className="text-[10px] text-gray-400">{category.subcategories?.length} subcategories</p>
           </div>
         </div>
         <span className="flex-shrink-0 ml-2">
@@ -457,7 +457,7 @@ function CategoryItem({ category, onClose }) {
       {/* Subcategories (still expandable) */}
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96" : "max-h-0"}`}>
         <div className="px-4 pb-3 grid grid-cols-1 gap-1">
-          {category.subcategories.map((sub, i) => (
+          {category.subcategories?.map((sub, i) => (
             <button
               key={i}
               onClick={onClose}

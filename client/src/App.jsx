@@ -36,6 +36,7 @@ import RiderDashboard from "./pages/rider/RiderDashboard";
 import BuyerOrdersDashboard from "./pages/order/BuyerOrderDashboard";
 import AdminDashboard from "./pages/adminDashboard/AdminDashboard";
 import PriceCheckers from "./pages/Home/PriceChecker";
+import CategoriesPage from "./components/home/CategoryPage";
 const App =()=>  {
 
     useEffect(() => {
@@ -152,6 +153,7 @@ const App =()=>  {
                             <Route path="/business/*" element={<FeedPage />} />
                             <Route path="/category/:categorySlug"  element={<ProductsGrid />} />
                             <Route path="/search" element={<SearchResults />} />
+                            <Route path="/categories" element={<CategoriesPage />} />
                             <Route path="/admin/dashboard" element={<AdminDashboard />} />
                             <Route path="/dashboard/ads/verify" element={<AdVerifyPage/>} />
 

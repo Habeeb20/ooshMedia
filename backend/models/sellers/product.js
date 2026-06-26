@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema({
   salePrice: { type: Number },
 
   category: { type: String, required: true },
-  subCategory: String,
+  subCategory: {type:String, required: true},
 
   stockQuantity: { type: Number, required: true, default: 0 },
   lowStockThreshold: { type: Number, default: 10 },

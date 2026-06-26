@@ -254,9 +254,24 @@ export default function AddProductModal({ onClose, onSuccess }) {
   const selectedCategory = productCategories.find(cat => cat.id === formData.category);
   const selectedPartCategory = partCategories.find(cat => cat.id === formData.whatPart);
 
-  const handleChange = (e) => {
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData(prev => ({ ...prev, [name]: value }));
+  // };
+
+    const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Add this new handler
+  const handleCategoryChange = (e) => {
+    const categoryId = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      category: categoryId,
+      subCategory: '' // Reset subcategory when category changes
+    }));
   };
 
   const handleTogglePart = () => {
@@ -400,7 +415,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
             </div>
 
             {/* Category & Subcategory */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
                 <select
@@ -430,6 +445,47 @@ export default function AddProductModal({ onClose, onSuccess }) {
                     placeholder="e.g. Smartphones, Brake Pads, etc."
                     className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
                   />
+                </div>
+              )}
+            </div> */}
+
+                        {/* Category & Subcategory */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                <select
+                  name="category"
+                  required
+                  value={formData.category}
+                  onChange={handleCategoryChange}
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                >
+                  <option value="">Select Category</option>
+                  {productCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.icon} {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedCategory && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
+                  <select
+                    name="subCategory"
+                    required
+                    value={formData.subCategory}
+                    onChange={handleChange}
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                  >
+                    <option value="">Select Subcategory</option>
+                    {selectedCategory?.subcategories?.map((sub, index) => (
+                      <option key={index} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
