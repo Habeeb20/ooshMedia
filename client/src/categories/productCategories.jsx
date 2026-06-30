@@ -150,6 +150,38 @@ export const productCategories = [
       "Clipper", "Blade"
     ]
   },
+  {
+    id: "herbal",
+    name: "herbal",
+    icon: "📚",
+    subcategories: [
+      "leaf", "Powder", "root", "mixture", "sweet", "bitter", "herbal beverages", "fast food", "drops"
+    ]
+  },
+  {
+  id: "farm-products",
+  name: "Farm Products",
+  icon: "🌾",
+  subcategories: [
+    "Leafy Vegetables (Ugu, Spinach, Waterleaf)",
+    "Fruit Vegetables (Tomatoes, Peppers, Okra)",
+    "Root Crops (Yam, Cassava, Sweet Potato, Cocoyam)",
+    "Grains (Rice, Maize, Guinea Corn, Millet)",
+    "Legumes (Cowpea, Groundnut, Soybean, Pigeon Pea)",
+    "Fresh Fruits (Mango, Orange, Pineapple, Pawpaw)",
+    "Livestock & Poultry",
+    "Eggs & Dairy",
+    "Fish Farming (Catfish, Tilapia)",
+    "Herbs & Spices (Scent Leaf, Uziza, Curry)",
+    "Palm Produce (Palm Oil, Palm Kernel)",
+    "Honey & Beeswax",
+    "Mushrooms & Edible Fungi",
+    "Plantain & Banana",
+    "Cocoa, Coffee & Kolanut",
+    "Cashew, Coconut & Other Nuts"
+  ]
+},
+
 
   {
   id: "building-materials",

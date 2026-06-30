@@ -1,6 +1,6 @@
 import Transaction from '../../models/order/Transaction.js';
 
-import Product from '../../models/sellers/Product.js';
+import Product from '../../models/sellers/product.js';
 import User from '../../models/user.js';
 
 // POST /pos/sale

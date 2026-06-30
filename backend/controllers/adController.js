@@ -1,6 +1,6 @@
 import axios from 'axios';
 import crypto from 'crypto';
-import AdSubscription from '../models/AdSubscription.js';
+import AdSubscription from '../models/adSubscription.js';
 import product from '../models/sellers/product.js';
 import { AD_PLANS } from '../utills/adPlan.js';
 

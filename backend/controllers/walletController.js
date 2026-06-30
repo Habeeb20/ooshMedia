@@ -434,7 +434,7 @@
 
 
 import User from '../models/user.js';
-import WalletTransaction from '../models/WalletTransaction.js';
+import WalletTransaction from '../models/walletTransaction.js';
 import axios from 'axios';
 
 const WALLET_BASE = 'https://api-ewallet.eroot.ng/api';
