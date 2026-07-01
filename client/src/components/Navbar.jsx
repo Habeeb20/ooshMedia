@@ -68,9 +68,9 @@ export default function Navbar() {
             <a href="/price-checker" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               Price Checker
             </a>
-            <a href="#about" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
+            {/* <a href="#about" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
               About Us
-            </a>
+            </a> */}
           </div>
 
           {/* Right Side */}
@@ -145,9 +145,9 @@ export default function Navbar() {
              
               </>
             )}
-            <a href="#price-checker" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Price Checker</a>
+            <a href="/price-checker" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Price Checker</a>
             <a href="/chain" className="font-medium text-gray-700 hover:text-[#8B1E3F]">Distribution Chain</a>
-            <a href="#about" className="font-medium text-gray-700 hover:text-[#8B1E3F]">About Us</a>
+            {/* <a href="#about" className="font-medium text-gray-700 hover:text-[#8B1E3F]">About Us</a> */}
 
             <div className="pt-6 border-t flex flex-col gap-4">
               {isAuthenticated ? (

@@ -31,13 +31,20 @@ import MarketPlace from "./pages/Home/MarketPlace"
 import { loadGoogleMaps } from "./config/LoadGoogleMap";
 import { disconnectSocket } from "./config/UsesSocket";
 
+import { useLocation } from 'react-router-dom';
+
+
 // import BuyerOrderTracking from "./pages/Buyerordertracking";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import BuyerOrdersDashboard from "./pages/order/BuyerOrderDashboard";
 import AdminDashboard from "./pages/adminDashboard/AdminDashboard";
 import PriceCheckers from "./pages/Home/PriceChecker";
 import CategoriesPage from "./components/home/CategoryPage";
+import { useScrollToTop } from "./useScrolltoTheTop";
 const App =()=>  {
+
+
+  useScrollToTop();
 
     useEffect(() => {
     loadGoogleMaps().catch((err) => console.error('Google Maps failed to load:', err));
@@ -167,6 +174,7 @@ const App =()=>  {
         </Routes>
       </div>
            </CartProvider>
+     
     </>
   );
 }

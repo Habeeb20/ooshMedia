@@ -213,4 +213,11 @@ app.use("/api/delivery", deliveryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/wallet", walletRoutes);
 
-export default app;
+
+// Start server
+const port = process.env.PORT || 2020;
+
+app.listen(port, async () => {
+  console.log(`Server is running on port ${port}`);
+
+})

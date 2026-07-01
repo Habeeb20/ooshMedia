@@ -709,13 +709,14 @@ const fetchProduct = async () => {
     >
       {format(effectivePrice)}
     </h2>
-    <CurrencySelector
+   
+  </div>
+   <CurrencySelector
       currency={currency}
       setCurrency={setCurrency}
       currencies={currencies}
       loading={ratesLoading}
     />
-  </div>
   {product?.salePrice && (
     <p className="line-through text-gray-400 mt-2 text-xl">
       {format(product?.price)}
