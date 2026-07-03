@@ -42,13 +42,46 @@ export default function DealCard({ deal, onClick, onUpdated }) {
   };
 
   const handleShare = async (e) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(`${window.location.origin}/deals/${deal._id}`);
-      await dealsAPI.share(deal._id);
-    } catch {}
-  };
+  e.stopPropagation();
 
+  const shareUrl = `${window.location.origin}/deals/${deal._id}`;
+  const shareTitle = deal.title;
+  const shareText = `Check out this deal: ${deal.title}`;
+
+  try {
+    // First: Try Native Web Share API (Best on mobile)
+    if (navigator.share) {
+      await navigator.share({
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+      });
+      toast.success("Shared successfully!");
+    } 
+    // Fallback: Copy to clipboard + show options
+    else {
+      await navigator.clipboard.writeText(shareUrl);
+      
+      // Optional: Show a small toast or modal with more options
+      toast.success("Link copied! You can now share it.", {
+        description: "Paste it on WhatsApp, Facebook, etc.",
+        action: {
+          label: "Copy Again",
+          onClick: () => navigator.clipboard.writeText(shareUrl),
+        },
+      });
+    }
+
+    // Record share on backend
+    await dealsAPI.share(deal._id);
+
+  } catch (error) {
+    if (error.name !== 'AbortError') { // User cancelled share
+      console.error("Share failed:", error);
+      toast.error("Could not share this deal");
+    }
+  }
+};
   const author = deal.author || {};
   const authorName = `${author.firstName || ''} ${author.lastName || ''}`.trim() || author.username || 'Anonymous';
   const avatar = author.avatar;
@@ -145,14 +178,14 @@ export default function DealCard({ deal, onClick, onUpdated }) {
             <Eye size={14} />
             <span>{deal.views ?? 0}</span>
           </button>
-          <button
+          {/* <button
             className={`eng-btn ${reposted ? 'eng-reposted' : ''}`}
             onClick={handleRepost}
             title="Repost"
           >
             <Repeat2 size={14} />
             <span>{repostCount}</span>
-          </button>
+          </button> */}
           <button className="eng-btn" onClick={handleShare} title="Share">
             <Share2 size={14} />
             <span>{deal.shares ?? 0}</span>

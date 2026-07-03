@@ -629,8 +629,17 @@ function JobDistance({ userLocation, lga, state }) {
                   )}
                 </div>
               </div>
+<button
+  onClick={() => {
+    recordView(job._id);         
+    window.open('https://joblink.ng/jobs', '_blank');
 
-              <button
+  }}
+  className="w-full mt-5 bg-rose-900 hover:bg-rose-900 text-white py-3 rounded-2xl font-medium"
+>
+  View Details
+</button>
+              {/* <button
                 onClick={() => {
                   recordView(job._id);
                   setSelectedJob(job);
@@ -638,7 +647,7 @@ function JobDistance({ userLocation, lga, state }) {
                 className="w-full mt-5 bg-rose-900 hover:bg-rose-900 text-white py-3 rounded-2xl font-medium"
               >
                 View Details
-              </button>
+              </button> */}
             </div>
           ))}
         </div>

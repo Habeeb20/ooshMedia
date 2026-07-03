@@ -59,14 +59,14 @@ export default function ProductsGrid() {
           </p>
         </div>
 
-        <button
+        {/* <button
           className="hidden md:flex px-5 py-3 rounded-xl text-white font-semibold"
           style={{
             background: appConfig.colors.primary,
           }}
         >
           View More
-        </button>
+        </button> */}
       </div>
 
       {/* LOADING */}
@@ -128,13 +128,13 @@ export default function ProductsGrid() {
 
                         {/* ACTIONS */}
                         <div className="absolute top-3 right-3 flex flex-col gap-2">
-                          <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
+                          {/* <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                             <Heart size={16} />
-                          </button>
+                          </button> */}
 
-                          <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
+                          {/* <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                             <Eye size={16} />
-                          </button>
+                          </button> */}
                         </div>
                       </div>
                     </Link>

@@ -104,6 +104,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import appConfig from "../../config/appConfig";
+import { Link } from "react-router-dom";
 
 const slides = [
   {
@@ -158,8 +159,8 @@ export default function HeroSwiper() {
                 <p className="mt-2 sm:mt-3 md:mt-5 text-sm sm:text-base md:text-lg lg:text-xl text-gray-200 font-medium">
                   {slide.subtitle}
                 </p>
-
-                <button
+<Link to='/categories'>
+  <button
                   className="mt-4 sm:mt-6 md:mt-8 px-6 py-3 sm:px-8 sm:py-3.5 md:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base md:text-lg transition-all hover:scale-105 active:scale-95"
                   style={{
                     background: appConfig.colors.primary,
@@ -167,6 +168,8 @@ export default function HeroSwiper() {
                 >
                   Shop Now
                 </button>
+</Link>
+              
               </div>
             </div>
           </div>
