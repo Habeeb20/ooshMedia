@@ -132,8 +132,8 @@ export default function FashionProductsSlider() {
               accessories
             </p>
           </div>
-
-          <button
+<Link to='/category/fashion'>
+   <button
             className="hidden md:flex px-5 py-3 rounded-xl text-white font-semibold"
             style={{
               background: appConfig.colors.primary,
@@ -141,6 +141,8 @@ export default function FashionProductsSlider() {
           >
             View All
           </button>
+</Link>
+       
         </div>
 
         {/* LOADING */}

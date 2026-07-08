@@ -276,6 +276,7 @@ const features = [
     icon: ShoppingBag,
     gradient: "from-[#111827] to-[#1F2937]",
     link: "/marketplace",
+        requiresAuth: true,
   },
 
   {
@@ -284,6 +285,7 @@ const features = [
     icon: BadgeDollarSign,
     gradient: "from-[#1E3A8A] to-[#2563EB]",
     link: "/price-checker",
+        requiresAuth: true,
   },
 
   {
@@ -292,6 +294,7 @@ const features = [
     icon: Truck,
     gradient: "from-[#059669] to-[#10B981]",
     link: "/vendors",
+        requiresAuth: true,
   },
 ];
 
@@ -301,6 +304,7 @@ const otherServices = [
     title: "Edrivers",
     link: "https://edrivers.ng",
     description: "looking to hire drivers ",
+    
   },
   {
     title: "Efixit",
@@ -376,24 +380,25 @@ export default function FeatureGrid() {
         })}
 
         {/* Other Services Card */}
+          {isAuthenticated && (
         <button
           onClick={() => setShowOtherModal(true)}
           className="block w-full text-left"
         >
           <div
-            className="group relative overflow-hidden rounded-[2rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
+             className="group relative overflow-hidden rounded-[0.5rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
             style={{
               background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
             }}
           >
-            <div className="bg-white rounded-[2rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
+             <div className="bg-white rounded-[0.8rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#9333EA] flex items-center justify-center text-white shadow-lg mx-auto">
                 <Users size={30} />
               </div>
 
               <div className="mt-1 relative z-10">
                 <h3 className="text-sm font-black text-gray-900">Other Services</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Edrivers, Efixit, E Hotels</p>
+                <p className="text-xs text-gray-500 mt-0.5">You can access our other services, they are  reliable for getting drivers,service providers</p>
               </div>
 
               <div
@@ -403,6 +408,9 @@ export default function FeatureGrid() {
             </div>
           </div>
         </button>
+      
+      
+        )}
       </div>
 
       {/* Other Services Modal */}
@@ -421,6 +429,7 @@ export default function FeatureGrid() {
                 >
                   <span className="font-semibold text-lg">{service.title}</span> <br/>
                   <span className=" text-lg">{service.description}</span>
+                  
                 </Link>
               ))}
             </div>

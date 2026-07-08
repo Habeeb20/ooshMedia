@@ -20,16 +20,14 @@ export default function Step3_AdditionalInfo({ formData, updateForm, prevStep })
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
+   
         const data = await res.json();
         localStorage.setItem('token', data.token);
         toast.success("Account created successfully! Welcome to MediaPulse");
         window.location.href = '/dashboard';
-      } else {
-        toast.error("Signup failed. Please try again.");
-      }
+    
     } catch (err) {
-      toast.error("Network error. Please check your connection.");
+      toast.error(err.response.data.message || "Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }

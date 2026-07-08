@@ -439,12 +439,15 @@ export default function ProductsGrid() {
             Products For You
           </h2>
         </div>
-        <button
+        <Link to='/products'>
+           <button
           className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm font-bold transition-opacity hover:opacity-90 flex-shrink-0"
           style={{ background: appConfig.colors.primary }}
         >
           View All <ChevronRight size={15} />
         </button>
+        </Link>
+     
       </div>
 
       {/* Tabs */}

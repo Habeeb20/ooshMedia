@@ -73,7 +73,7 @@ export default function Footer() {
           </div>
 
           {/* Column 5 - Newsletter */}
-          <div className="lg:col-span-1">
+          {/* <div className="lg:col-span-1">
             <h3 className="text-white font-semibold text-lg mb-5">Stay Updated</h3>
             <p className="text-sm text-gray-400 mb-4">
               Get exclusive deals and updates straight to your inbox.
@@ -93,20 +93,12 @@ export default function Footer() {
               </button>
             </div>
 
-            {/* <div className="mt-8">
-              <p className="text-xs text-gray-500 mb-3">Follow Us</p>
-              <div className="flex gap-4">
-                <a href="#" className="hover:text-white transition"><Facebook size={20} /></a>
-                <a href="#" className="hover:text-white transition"><Instagram size={20} /></a>
-                <a href="#" className="hover:text-white transition"><Twitter size={20} /></a>
-                <a href="#" className="hover:text-white transition"><Youtube size={20} /></a>
-              </div>
-            </div> */}
-          </div>
+         
+          </div> */}
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+        {/* <div className="border-t border-gray-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <div className="text-gray-500">
             © {new Date().getFullYear()} {appConfig.name}. All Rights Reserved.
           </div>
@@ -120,7 +112,7 @@ export default function Footer() {
           <div className="text-gray-500 text-xs">
             Made with ❤️ for Nigeria
           </div>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

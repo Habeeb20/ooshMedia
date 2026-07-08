@@ -108,14 +108,14 @@ export default function Step2_PersonalInfo({ formData, updateForm, nextStep, pre
         </div>
 
         {/* Username Preview */}
-        {username && (
+        {/* {username && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Suggested Username</label>
             <div className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-mono text-lg text-gray-800">
               @{username}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Alternate Contact */}
         <div>
