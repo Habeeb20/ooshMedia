@@ -65,9 +65,9 @@ const App =()=>  {
         <Route
           path="/product/:slug"
           element={
-               <ProtectedRoute>
+            
                 <ProductDetails />
-                </ProtectedRoute>}
+              }
         />
 
 
