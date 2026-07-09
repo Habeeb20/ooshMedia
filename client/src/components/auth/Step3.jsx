@@ -2,35 +2,38 @@ import { useState } from 'react';
 import appConfig from '../../config/AppConfig';
 import CloudinaryUpload from '../../config/CloudinaryUpload';
 import Loading from '../../config/Loading';
-
+import axios from "axios"
 import { toast } from 'sonner';
 import { User, Camera, Calendar } from 'lucide-react';
-
+import { Eye, EyeOff } from "lucide-react";
 export default function Step3_AdditionalInfo({ formData, updateForm, prevStep }) {
   const [loading, setLoading] = useState(false);
-
+const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+ try {
+  const response = await axios.post(
+    `${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`,
+    formData,
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 
-   
-        const data = await res.json();
-        localStorage.setItem('token', data.token);
-        toast.success("Account created successfully! Welcome to MediaPulse");
-        window.location.href = '/dashboard';
-    
-    } catch (err) {
-      toast.error(err.response.data.message || "Network error. Please check your connection.");
-    } finally {
-      setLoading(false);
-    }
+  const data = response.data;
+
+  if (data.success === true) {
+    localStorage.setItem('token', data.token);
+    toast.success("Account created successfully! Welcome to Estores");
+    window.location.href = '/dashboard';
+  } else {
+    toast.error(data.message || "An error occurred");
+  }
+} catch (err) {
+  toast.error(err.response?.data?.message || "Network error. Please check your connection.");
+} finally {
+  setLoading(false);
+}
   };
 
   return (
@@ -89,18 +92,29 @@ export default function Step3_AdditionalInfo({ formData, updateForm, prevStep })
         </div>
 
         {/* Password */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Create Password</label>
-          <input
-            type="password"
-            required
-            minLength={8}
-            className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
-            placeholder="Minimum 8 characters"
-            value={formData.password}
-            onChange={(e) => updateForm({ password: e.target.value })}
-          />
-        </div>
+     <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">Create Password</label>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      required
+      minLength={8}
+      className="w-full px-5 py-4 pr-14 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+      placeholder="Minimum 8 characters"
+      value={formData.password}
+      onChange={(e) => updateForm({ password: e.target.value })}
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword((v) => !v)}
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      aria-label={showPassword ? "Hide password" : "Show password"}
+      tabIndex={-1}
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+  </div>
+</div>
 
         <div className="flex gap-4 pt-6">
           <button

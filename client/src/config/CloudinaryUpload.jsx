@@ -139,24 +139,62 @@ const CloudinaryUpload = ({
           </button>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-            <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="mb-2 text-sm text-gray-500">
-              <span className="font-semibold">Click to upload</span> or drag & drop
-            </p>
-            <p className="text-xs text-gray-500">
-              PNG, JPG, MP4 (max 10MB)
-            </p>
-          </div>
-          <input
-            type="file"
-            className="hidden"
-            accept={accept}
-            onChange={handleFileChange}
-            disabled={uploading}
-          />
-        </label>
+        // <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+        //   <div className="flex flex-col items-center justify-center pt-5 pb-6">
+        //     <Upload className="w-20 h-10 text-gray-400 mb-3" />
+        //     <p className="mb-2 text-sm text-gray-500">
+        //       <span className="font-semibold">Click to upload</span> or drag & drop
+        //     </p>
+        //     <p className="text-xs text-gray-500">
+        //       PNG, JPG, MP4 (max 10MB)
+        //     </p>
+        //   </div>
+        //   <input
+        //     type="file"
+        //     className="hidden"
+        //     accept={accept}
+        //     onChange={handleFileChange}
+        //     disabled={uploading}
+        //   />
+        // </label>
+
+        <label 
+  className={`
+    group relative flex flex-col items-center justify-center w-full min-h-[240px] py-10 px-6 
+    border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer 
+    bg-slate-50/50 hover:bg-slate-50 hover:border-blue-500 
+    transition-all duration-300 ease-in-out focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2
+    ${uploading ? 'opacity-60 cursor-not-allowed' : 'active:scale-[0.99]'}
+  `}
+>
+  <div className="flex flex-col items-center justify-center text-center">
+    {/* Animated Icon Container */}
+    <div className="flex items-center justify-center w-14 h-14 mb-4 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 group-hover:text-blue-500 group-hover:scale-110 transition-all duration-300">
+      <Upload className="w-6 h-6" />
+    </div>
+
+    {/* Primary Text */}
+    <p className="mb-1 text-sm font-medium text-slate-700 md:text-base">
+      <span className="text-blue-600 font-semibold group-hover:underline">
+        Click to upload
+      </span>{" "}
+      <span className="hidden sm:inline">or drag & drop</span>
+    </p>
+
+    {/* Secondary Support Text */}
+    <p className="text-xs text-slate-500 mt-1 max-w-[200px] sm:max-w-none leading-relaxed">
+      PNG, JPG, or MP4 <span className="inline-block px-1.5 py-0.5 ml-1 font-medium bg-slate-200/60 text-slate-600 rounded">max 10MB</span>
+    </p>
+  </div>
+
+  <input
+    type="file"
+    className="sr-only" // Better accessibility than "hidden" for screen readers
+    accept={accept}
+    onChange={handleFileChange}
+    disabled={uploading}
+  />
+</label>
       )}
     </div>
   );

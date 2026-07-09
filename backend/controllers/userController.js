@@ -58,13 +58,20 @@ export const signup = async (req, res) => {
       role, profilePicture, password,    referralCode 
     } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { phoneNumber }, { username }] 
-    });
+ const orConditions = [];
+if (email) orConditions.push({ email: email.toLowerCase() });
+if (phoneNumber) orConditions.push({ phoneNumber });
 
+if (orConditions.length === 0) {
+  return res.status(400).json({
+    status: false,
+    message: "Email or phone number is required",
+  });
+}
+
+const existingUser = await User.findOne({ $or: orConditions });
     if (existingUser) {
-   
+   console.log("i am here")
       return res.status(400).json({ message: "User already exists" });
     }
 

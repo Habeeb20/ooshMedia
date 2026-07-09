@@ -318,7 +318,7 @@ function PostCard({ post: initialPost, onFinalized }) {
               <div className="flex flex-wrap gap-2">
                 {post.budget && (
                   <span className="text-emerald-700 text-xs font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                    Budget: ₦{post.budget.toLocaleString()}
+                    Budget: ₦{post.budget.min}- ₦{post.budget.max}
                   </span>
                 )}
                 {post.deadline && (
@@ -428,6 +428,7 @@ export default function MyPostsView() {
       const data = await res.json();
       if (data.success) {
         setPosts(data.data);
+        console.log(data.data)
         setPagination(data.pagination);
       }
     } finally { setLoading(false); }

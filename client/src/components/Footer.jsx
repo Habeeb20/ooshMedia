@@ -42,7 +42,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li><a href="/category/electronics" className="hover:text-white transition">Electronics</a></li>
               <li><a href="/category/fashion" className="hover:text-white transition">Fashion</a></li>
-              <li><a href="/category/home-living" className="hover:text-white transition">Home & Living</a></li>
+              {/* <li><a href="/category/home-living" className="hover:text-white transition">Home & Living</a></li> */}
               <li><a href="/category/beauty" className="hover:text-white transition">Beauty</a></li>
               <li><a href="/deals" className="hover:text-white transition text-orange-400">Today's Deals</a></li>
             </ul>
@@ -53,22 +53,23 @@ export default function Footer() {
             <h3 className="text-white font-semibold text-lg mb-5">Support</h3>
             <ul className="space-y-3 text-sm">
               <li><a href="/track-order" className="hover:text-white transition">Track Order</a></li>
-              <li><a href="/shipping" className="hover:text-white transition">Shipping Policy</a></li>
-              <li><a href="/returns" className="hover:text-white transition">Returns & Refunds</a></li>
-              <li><a href="/faq" className="hover:text-white transition">FAQs</a></li>
+              {/* <li><a href="/shipping" className="hover:text-white transition">Shipping Policy</a></li>
+              <li><a href="/returns" className="hover:text-white transition">Returns & Refunds</a></li> */}
+              {/* <li><a href="/faq" className="hover:text-white transition">FAQs</a></li> */}
+                 <li><a href="/about" className="hover:text-white transition">About Us</a></li>
               <li><a href="/contact" className="hover:text-white transition">Contact Us</a></li>
             </ul>
           </div>
 
           {/* Column 4 - Company */}
           <div>
-            <h3 className="text-white font-semibold text-lg mb-5">Company</h3>
+            {/* <h3 className="text-white font-semibold text-lg mb-5">Company</h3> */}
             <ul className="space-y-3 text-sm">
-              <li><a href="/about" className="hover:text-white transition">About Us</a></li>
-              <li><a href="/careers" className="hover:text-white transition">Careers</a></li>
-              <li><a href="/sell" className="hover:text-white transition">Sell on {appConfig.name}</a></li>
-              <li><a href="/blog" className="hover:text-white transition">Blog</a></li>
-              <li><a href="/affiliate" className="hover:text-white transition">Affiliate Program</a></li>
+           
+              {/* <li><a href="/careers" className="hover:text-white transition">Careers</a></li> */}
+              {/* <li><a href="/sell" className="hover:text-white transition">Sell on {appConfig.name}</a></li> */}
+              {/* <li><a href="/blog" className="hover:text-white transition">Blog</a></li> */}
+              {/* <li><a href="/affiliate" className="hover:text-white transition">Affiliate Program</a></li> */}
             </ul>
           </div>
 

@@ -569,6 +569,9 @@ export default function Navbar() {
               <a href="/" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
                 Home
               </a>
+              <a href="/marketplace" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
+                Marketplace
+              </a>
               <a href="/chain" className="font-medium text-gray-600 hover:text-[#8B1E3F] transition-colors duration-300">
                 Distribution chain
               </a>
@@ -617,10 +620,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile secondary row — Businesses / Price Checker / Distribution chain, no hamburger */}
-          <div className="md:hidden flex items-center justify-center gap-6 pb-3 -mt-1 text-sm overflow-x-auto">
+          <div className="md:hidden flex items-center justify-center gap-4 pb-3 -mt-1 text-sm overflow-x-auto">
             {isAuthenticated && (
-              <a href="/business" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">
-                Businesses
+              <a href="/marketplace" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">
+                Marketplace
               </a>
             )}
             <a href="/price-checker" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">

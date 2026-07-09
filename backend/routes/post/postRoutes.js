@@ -7,6 +7,7 @@ import {
   applyToPost, getMyApplications, getPostApplications,
   updateApplicationStatus, withdrawApplication, getUserPosts, finalizePost
 } from '../../controllers/post/postController.js';
+import { getOrCreateChat, sendMessage } from '../../controllers/post/chatController.js';
 
 const router = express.Router();
 
@@ -30,4 +31,8 @@ router.get('/:id/applications', verifyToken, getPostApplications);
 router.put('/:id/applications/:applicationId/status', verifyToken, updateApplicationStatus);
 router.delete('/:id/applications/:applicationId/withdraw', verifyToken, withdrawApplication);
 router.put('/:id/finalize', verifyToken, finalizePost);
+
+router.post('/:postId/chat/:participantId/send', verifyToken, sendMessage);
+router.get('/:postId/chat/:participantId', verifyToken, getOrCreateChat);
+
 export default router;

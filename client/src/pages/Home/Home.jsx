@@ -18,7 +18,7 @@ import { FlashSaleSection,
 import Food from "../../components/home/Food";
 import Footer from "../../components/Footer";
 const TRUST_BADGES = [
-  { icon: Truck, label: "Fast Delivery", desc: "Same day in Lagos" },
+  { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
   { icon: ShieldCheck, label: "Send your package", desc: "Fast and Reliable" },
   { icon: ShieldCheck, label: "Best Riders", desc: "Qualified" },

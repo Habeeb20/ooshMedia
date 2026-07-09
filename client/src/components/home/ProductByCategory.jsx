@@ -965,20 +965,20 @@ function ScrollCarousel({ children }) {
     <div className="relative">
       <button
         onClick={() => scroll(-1)}
-        className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 hidden md:flex w-8 h-8 bg-white border border-gray-200 shadow-md rounded-full items-center justify-center hover:shadow-lg transition-all"
+        className="absolute -left-3 top-1/2 -translate-y-1/2 z-10    md:flex w-8 h-8 bg-white  mborder border-gray-200 shadow-md rounded-full items-center justify-center hover:shadow-lg transition-all"
       >
-        <ChevronLeft size={14} className="text-gray-600" />
+        <ChevronLeft size={14} className="text-gray-600 " />
       </button>
       <div
         ref={ref}
-        className="flex gap-2.5 overflow-x-auto pb-1 scroll-smooth"
+        className="flex ml-5 mr-5 gap-2.5 overflow-x-auto pb-1 scroll-smooth"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
       </div>
       <button
         onClick={() => scroll(1)}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 hidden md:flex w-8 h-8 bg-white border border-gray-200 shadow-md rounded-full items-center justify-center hover:shadow-lg transition-all"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 z-10  md:flex w-8 h-8 bg-white border border-gray-200 shadow-md rounded-full items-center justify-center hover:shadow-lg transition-all"
       >
         <ChevronRight size={14} className="text-gray-600" />
       </button>
@@ -1330,7 +1330,7 @@ export default function ProductsGrid() {
             {activeState && (
               <>
                 <ChevronRight size={12} />
-                <span className="text-gray-600 font-medium">{activeState}</span>
+                <span className="text-gray-600  font-medium">{activeState}</span>
               </>
             )}
             {activeLga && (
