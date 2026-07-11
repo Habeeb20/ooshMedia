@@ -41,6 +41,7 @@ import AdminDashboard from "./pages/adminDashboard/AdminDashboard";
 import PriceCheckers from "./pages/Home/PriceChecker";
 import CategoriesPage from "./components/home/CategoryPage";
 import { useScrollToTop } from "./useScrolltoTheTop";
+import BeautyMarketplace from "./pages/others/Busibody";
 const App =()=>  {
 
 
@@ -169,6 +170,11 @@ const App =()=>  {
                             <Route path="/eparts" element={
                        
                                 <Eparts />
+                           
+                            } />
+                            <Route path="/busibody" element={
+                       
+                                <BeautyMarketplace />
                            
                             } />
         </Routes>
