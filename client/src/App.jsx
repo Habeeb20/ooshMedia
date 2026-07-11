@@ -42,6 +42,7 @@ import PriceCheckers from "./pages/Home/PriceChecker";
 import CategoriesPage from "./components/home/CategoryPage";
 import { useScrollToTop } from "./useScrolltoTheTop";
 import BeautyMarketplace from "./pages/others/Busibody";
+import HerbalMarketplace from "./pages/others/Eherbal";
 const App =()=>  {
 
 
@@ -175,6 +176,11 @@ const App =()=>  {
                             <Route path="/busibody" element={
                        
                                 <BeautyMarketplace />
+                           
+                            } />
+                            <Route path="/herbal" element={
+                       
+                                <HerbalMarketplace/>
                            
                             } />
         </Routes>
