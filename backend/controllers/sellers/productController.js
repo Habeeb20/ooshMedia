@@ -133,6 +133,50 @@ export const updateStock = async (req, res) => {
 
 
 
+// export const getProductStats = async (req, res) => {
+//   try {
+//     const sellerId = req.user._id;
+
+//     // Get all products for this seller
+//     const products = await Product.find({ seller: sellerId });
+
+//     const totalProducts = products.length;
+//     const totalStockValue = products.reduce((sum, p) => sum + (p.price * p.stockQuantity), 0);
+    
+//     const lowStock = products.filter(p => p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0).length;
+//     const outOfStock = products.filter(p => p.stockQuantity === 0).length;
+//     const activeProducts = products.filter(p => p.status === 'active').length;
+
+//     // Monthly sales simulation (you can replace with real order data later)
+//     const monthlySales = [
+//       { name: 'Jan', sales: 4200000 },
+//       { name: 'Feb', sales: 3800000 },
+//       { name: 'Mar', sales: 5100000 },
+//       { name: 'Apr', sales: 4600000 },
+//       { name: 'May', sales: 5900000 },
+//     ];
+
+//     res.json({
+//       success: true,
+//       stats: {
+//         totalProducts,
+//         totalStockValue,
+//         lowStock,
+//         outOfStock,
+//         activeProducts,
+//         monthlySales
+//       }
+//     });
+
+//   } catch (error) {
+//     console.error("Stats Error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch inventory statistics"
+//     });
+//   }
+// };
+
 export const getProductStats = async (req, res) => {
   try {
     const sellerId = req.user._id;
@@ -141,13 +185,29 @@ export const getProductStats = async (req, res) => {
     const products = await Product.find({ seller: sellerId });
 
     const totalProducts = products.length;
-    const totalStockValue = products.reduce((sum, p) => sum + (p.price * p.stockQuantity), 0);
-    
-    const lowStock = products.filter(p => p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0).length;
+
+    // New fields
+    let totalUnits = 0;                    // Total quantity of all items in stock
+    let totalStockValue = 0;               // Total inventory value (price × quantity)
+    let totalProductPriceSum = 0;          // Sum of all product prices (without quantity)
+
+    products.forEach(p => {
+      const quantity = p.stockQuantity || 0;
+      const price = p.price || 0;
+
+      totalUnits += quantity;
+      totalStockValue += price * quantity;
+      totalProductPriceSum += price;
+    });
+
+    const lowStock = products.filter(p => 
+      p.stockQuantity <= (p.lowStockThreshold || 5) && p.stockQuantity > 0
+    ).length;
+
     const outOfStock = products.filter(p => p.stockQuantity === 0).length;
     const activeProducts = products.filter(p => p.status === 'active').length;
 
-    // Monthly sales simulation (you can replace with real order data later)
+    // Monthly sales (replace with real data later)
     const monthlySales = [
       { name: 'Jan', sales: 4200000 },
       { name: 'Feb', sales: 3800000 },
@@ -160,11 +220,18 @@ export const getProductStats = async (req, res) => {
       success: true,
       stats: {
         totalProducts,
-        totalStockValue,
+        totalUnits,                    // ← New: Total number of units in stock
+        totalStockValue,               // ← Total inventory value (price × qty)
+        totalProductPriceSum,          // ← New: Sum of all product prices
         lowStock,
         outOfStock,
         activeProducts,
-        monthlySales
+        monthlySales,
+        
+        // Optional: average price
+        averageProductPrice: totalProducts > 0 
+          ? Math.round(totalProductPriceSum / totalProducts) 
+          : 0
       }
     });
 
@@ -176,8 +243,6 @@ export const getProductStats = async (req, res) => {
     });
   }
 };
-
-
 
 export const getAllProducts = async (req, res) => {
   try {
