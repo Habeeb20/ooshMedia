@@ -87,8 +87,8 @@ router.post('/', verifyToken, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-/** PATCH /api/deals/:id  — update (author only) */
-router.patch('/:id', verifyToken, async (req, res) => {
+/** put /api/deals/:id  — update (author only) */
+router.put('/:id', verifyToken, async (req, res) => {
   try {
     const deal = await Deal.findById(req.params.id);
     if (!deal) return res.status(404).json({ message: 'Deal not found' });
@@ -217,8 +217,8 @@ router.post('/:id/reviews', verifyToken, async (req, res) => {
 //  STATUS
 // ════════════════════════════════════════════════════════
 
-/** PATCH /api/deals/:id/status */
-router.patch('/:id/status', verifyToken, async (req, res) => {
+/** put /api/deals/:id/status */
+router.put('/:id/status', verifyToken, async (req, res) => {
   try {
     const deal = await Deal.findById(req.params.id);
     if (!deal) return res.status(404).json({ message: 'Deal not found' });

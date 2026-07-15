@@ -92,7 +92,7 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        {/* Rider delivery code input (for dispatch riders) */}
+        {/* Rider delivery code input (for disput riders) */}
         {order.fulfillmentType === 'delivery' && order.status === 'shipped' && !order.delivery.isCodeVerified && (
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-3">Confirm Delivery</h2>

@@ -14,6 +14,6 @@ export const adAPI = {
   verify: (reference) => API.get('/api/ads/verify', { params: { reference } }),
   getMySubscriptions: (status) => API.get('/api/ads/my-subscriptions', { params: status ? { status } : {} }),
   getStats: () => API.get('/api/ads/stats'),
-  cancel: (id) => API.patch(`/api/ads/${id}/cancel`),
+  cancel: (id) => API.put(`/api/ads/${id}/cancel`),
   trackClick: (id) => API.post(`/api/ads/${id}/click`),
 };

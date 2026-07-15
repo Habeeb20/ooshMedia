@@ -315,7 +315,7 @@ export default function BusinessProfileUpdate() {
 
             <div className="flex items-center justify-between">
   <label className="text-sm font-medium text-gray-700">
-    Are you a dispatch rider?
+    Are you a disput rider?
   </label>
   
   <label className="relative inline-flex items-center cursor-pointer">

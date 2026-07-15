@@ -92,7 +92,7 @@
 //     if (!amount) return;
 //     setSendingCounter((s) => ({ ...s, [reqId]: true }));
 //     try {
-//       const { data } = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${reqId}/counter`, {
+//       const { data } = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/delivery/${reqId}/counter`, {
 //         counterAmount: Number(amount),
 //         message: counterMsgs[reqId],
 //       }, {
@@ -419,7 +419,7 @@ export default function SellerDeliveryPanel() {
     setSendingCounter(s => ({ ...s, [reqId]: true }));
 
     try {
-      const { data } = await api.patch(`/api/delivery/${reqId}/counter`, {
+      const { data } = await api.put(`/api/delivery/${reqId}/counter`, {
         counterAmount: Number(amount),
         message: counterMsgs[reqId],
       });

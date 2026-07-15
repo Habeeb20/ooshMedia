@@ -1,13 +1,12 @@
 import Transaction from '../../models/order/Transaction.js';
-
 import Product from '../../models/sellers/product.js';
 import User from '../../models/user.js';
 
 // POST /pos/sale
-// Seller creates a walk-in sale from POS terminal
+// Seller (or clocked-in staff) creates a walk-in sale from the POS terminal
 export const createPOSSale = async (req, res) => {
   try {
-    const { items, customerName, customerPhone, paymentMethod } = req.body;
+    const { items, customerName, customerPhone, paymentMethod, staffId, staffName } = req.body;
     // items: [{ productId, quantity, price }]
 
     if (!items || items.length === 0) {
@@ -34,7 +33,6 @@ export const createPOSSale = async (req, res) => {
         subtotal,
       });
 
-      // Deduct stock
       product.stockQuantity -= item.quantity;
       product.sold += item.quantity;
       if (product.stockQuantity <= 0) product.status = 'out_of_stock';
@@ -56,6 +54,8 @@ export const createPOSSale = async (req, res) => {
       customerPhone,
       isPOS: true,
       items: enrichedItems,
+      staff: staffId || null,
+      staffName: staffName || null,
     });
 
     res.json({ message: 'Sale recorded', transaction: tx });
@@ -81,9 +81,10 @@ export const getPOSReceipt = async (req, res) => {
 // GET /pos/history
 export const getPOSHistory = async (req, res) => {
   try {
-    const { from, to, paymentMethod } = req.query;
+    const { from, to, paymentMethod, staffId } = req.query;
     const query = { seller: req.user._id, isPOS: true };
     if (paymentMethod) query.paymentMethod = paymentMethod;
+    if (staffId) query.staff = staffId;
     if (from || to) {
       query.createdAt = {};
       if (from) query.createdAt.$gte = new Date(from);

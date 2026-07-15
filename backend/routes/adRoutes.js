@@ -16,7 +16,7 @@ router.post('/subscribe', initiateAdPayment);
 router.get('/verify', verifyAdPayment);
 router.get('/my-subscriptions', getMySubscriptions);
 router.get('/stats', getSubscriptionStats);
-router.patch('/:id/cancel', cancelSubscription);
+router.put('/:id/cancel', cancelSubscription);
 router.post('/:id/click', trackAdClick);
 
 export default router;

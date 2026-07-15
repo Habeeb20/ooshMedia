@@ -21,7 +21,7 @@ export const feedAPI = {
   applyToPost: (id, data) => API.post(`/api/posts/${id}/apply`, data),
   getApplications: (id) => API.get(`/api/posts/${id}/applications`),
   updateApplicationStatus: (postId, appId, status) =>
-    API.patch(`/api/posts/${postId}/applications/${appId}/status`, { status }),
+    API.put(`/api/posts/${postId}/applications/${appId}/status`, { status }),
   withdrawApplication: (postId, appId) =>
     API.delete(`/api/posts/${postId}/applications/${appId}/withdraw`),
   getMyApplications: () => API.get('/api/posts/my-applications'),
@@ -129,9 +129,9 @@ export const dealsAPI = {
   },
   getOne: (id) => request(`/deals/${id}`),
   create: (body) => request('/deals', { method: 'POST', body: JSON.stringify(body) }),
-  update: (id, body) => request(`/deals/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  update: (id, body) => request(`/deals/${id}`, { method: 'put', body: JSON.stringify(body) }),
   delete: (id) => request(`/deals/${id}`, { method: 'DELETE' }),
-  updateStatus: (id, status) => request(`/deals/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  updateStatus: (id, status) => request(`/deals/${id}/status`, { method: 'put', body: JSON.stringify({ status }) }),
 
   like: (id) => request(`/deals/${id}/like`, { method: 'POST' }),
   repost: (id) => request(`/deals/${id}/repost`, { method: 'POST' }),

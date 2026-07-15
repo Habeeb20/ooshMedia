@@ -21,7 +21,7 @@ import {
 
 } from '../controllers/sellerController.js';
 import { verifyToken } from '../middleware/verifyToken.js';
-
+import { initiateInventoryAccessPayment, verifyInventoryAccessPayment } from '../controllers/inventoryaccessController.js';
 const router = express.Router();
 
 router.put('/profile', verifyToken, updateSellerProfile);
@@ -66,5 +66,9 @@ router.get(
   "/seller-chain/:chainId/purchase-history",
   verifyToken,
   getPurchaseHistory);
+
+
+router.post('/inventory-access/initiate', verifyToken, initiateInventoryAccessPayment);
+router.get('/inventory-access/verify', verifyToken, verifyInventoryAccessPayment)
 export default router;
 

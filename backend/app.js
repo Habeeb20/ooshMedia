@@ -153,7 +153,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import adminRouter from "./routes/adminRoute.js";
 import walletRoutes from "./routes/walletRoute.js";
 import priceCheckerRoutes from "./routes/priceCheckerRouter.js";
-
+import staffRoutes from "./routes/sellers/staffRoute.js"
 dotenv.config();
 connectDb();
 
@@ -212,7 +212,7 @@ app.use("/api/rider", riderRouter);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/wallet", walletRoutes);
-
+app.use('/api/staff', staffRoutes);
 
 // Start server
 const port = process.env.PORT || 2020;

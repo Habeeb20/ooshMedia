@@ -1,6 +1,12 @@
 import Navbar from "./components/Navbar";
 import { useEffect } from "react";
-import { BrowserRouter, Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { Toaster } from "sonner";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
@@ -9,7 +15,7 @@ import Home from "./pages/Home/Home";
 import ProductDetails from "./pages/product/ProductDetails";
 // import PriceChecker from "./pages/product/PriceChecker";
 import VendorsPage from "./pages/vendor/Vendor";
-import SellerDetail from "./pages/vendor/vendorDetails"
+import SellerDetail from "./pages/vendor/vendorDetails";
 import ProtectedRoute from "./config/protectedRoute";
 import DistributionChainView from "./pages/vendor/DistributionChainView";
 import FeedPage from "./pages/post/FeedPage";
@@ -23,16 +29,15 @@ import BuyerDashboard from "./pages/order/BuyerDashboard";
 import OrderDetailPage from "./pages/order/OrderDetailPage";
 import PaymentVerifyPage from "./pages/order/PaymentVerifyPage";
 import POSPage from "./pages/order/POSPage";
-import {CartProvider} from "./context/cartContext"
+import { CartProvider } from "./context/cartContext";
 import SubscriptionVerify from "./pages/Deal/SubscriptionVerify";
 import Eparts from "./pages/others/Eparts";
-import AdminLogin from "./pages/adminDashboard/AdminLogin"
-import MarketPlace from "./pages/Home/MarketPlace"
+import AdminLogin from "./pages/adminDashboard/AdminLogin";
+import MarketPlace from "./pages/Home/MarketPlace";
 import { loadGoogleMaps } from "./config/LoadGoogleMap";
 import { disconnectSocket } from "./config/UsesSocket";
 
-import { useLocation } from 'react-router-dom';
-
+import { useLocation } from "react-router-dom";
 
 // import BuyerOrderTracking from "./pages/Buyerordertracking";
 import RiderDashboard from "./pages/rider/RiderDashboard";
@@ -43,239 +48,140 @@ import CategoriesPage from "./components/home/CategoryPage";
 import { useScrollToTop } from "./useScrolltoTheTop";
 import BeautyMarketplace from "./pages/others/Busibody";
 import HerbalMarketplace from "./pages/others/Eherbal";
-const App =()=>  {
+import InventoryAccessCallback from "./pages/vendor/Inventoryaccesscallback";
 
-
+const App = () => {
   useScrollToTop();
 
-    useEffect(() => {
-    loadGoogleMaps().catch((err) => console.error('Google Maps failed to load:', err));
+  useEffect(() => {
+    loadGoogleMaps().catch((err) =>
+      console.error("Google Maps failed to load:", err),
+    );
   }, []);
 
   return (
     <>
-        <CartProvider>
+      <CartProvider>
+        <Toaster richColors position="top-right" />
+        <Navbar />
+        {/* Your other content with pt-20 */}
+        <div className="pt-20">
+          <Routes>
+            <Route path="/" element={<Home />} />
 
-   
-            <Toaster richColors position="top-right" />
-      <Navbar />
-      {/* Your other content with pt-20 */}
-      <div className="pt-20">
-        <Routes>
-                            <Route path="/" element={<Home />} />
-                            
-        <Route
-          path="/product/:slug"
-          element={
-            
-                <ProductDetails />
+            <Route path="/product/:slug" element={<ProductDetails />} />
+
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
               }
-        />
+            />
 
-
-        <Route path="/cart" 
-        element={
-          <ProtectedRoute>
-            <CartPage />
-            </ProtectedRoute>
-        }
-        />
-
-        <Route path="/checkout" 
-        element={
-          <ProtectedRoute>
-            <CheckoutPage />
-            </ProtectedRoute>
-        }
-        />
-        <Route path="/checkout"
-        element={
-          <ProtectedRoute>
-            <CheckoutPage />
-            </ProtectedRoute>
-        }
-        />
-        <Route path="/order/:orderId" 
-        element={
-          <ProtectedRoute>
-            <OrderDetailPage />
-            </ProtectedRoute>
-        }
-        />
-
-        <Route path="/order/verify-payment"
-        element={
-          <ProtectedRoute>
-            <PaymentVerifyPage />
-            </ProtectedRoute>
-        }
-        />
-        <Route
-          path="/product/:slug/:id"
-             element={
-               <ProtectedRoute>
-                <ProductDetails />
-                </ProtectedRoute>}
-        />
-        <Route
-          path="/product/:slug/:id"
-             element={
-               <ProtectedRoute>
-                <ProductDetails />
-                </ProtectedRoute>}
-        />
-        <Route
-          path="/payment/verify/"
-             element={
-           
-                <PaymentVerifyPage />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
+                </ProtectedRoute>
               }
-        />
-     <Route path="/subscription/verify" element={<SubscriptionVerify />} />
+            />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order/:orderId"
+              element={
+                <ProtectedRoute>
+                  <OrderDetailPage />
+                </ProtectedRoute>
+              }
+            />
 
+            <Route
+              path="/order/verify-payment"
+              element={
+                <ProtectedRoute>
+                  <PaymentVerifyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/product/:slug/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/product/:slug/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/payment/verify/" element={<PaymentVerifyPage />} />
+            <Route
+              path="/subscription/verify"
+              element={<SubscriptionVerify />}
+            />
 
-    
-       <Route 
-          path="/seller/:businessName/:id" 
-          element={
-             <ProtectedRoute>
+            <Route
+              path="/seller/:businessName/:id"
+              element={
+                <ProtectedRoute>
                   <SellerDetail />
-             </ProtectedRoute>
-        } 
-        />
+                </ProtectedRoute>
+              }
+            />
 
-            <Route path="/orders/:orderId/track" element={<BuyerOrdersDashboard />} />
- 
-        {/* Rider: their delivery dashboard */}
-        <Route path="/rider/dashboard" element={<RiderDashboard />} />
-                             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/orders/:orderId/track"
+              element={<BuyerOrdersDashboard />}
+            />
 
-                            <Route path="/marketplace" element={<MarketPlace />} />
-                            <Route path="/products" element={<MarketPlace />} />
-                            <Route path="/signup" element={<Signup />} />
-                            {/* <Route path="/price-checker" element={<PriceChecker />} /> */}
-                            <Route path="/price-checker" element={<PriceCheckers />} />
-                            <Route path="/vendors" element={<VendorsPage />} />
-                            <Route path="/chain" element={<DistributionChainView />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/dashboard/*" element={<Dashboard />} />
-                            <Route path="/business/*" element={<FeedPage />} />
-                            <Route path="/category/:categorySlug"  element={<ProductsGrid />} />
-                            <Route path="/search" element={<SearchResults />} />
-                            <Route path="/categories" element={<CategoriesPage />} />
-                            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                            <Route path="/dashboard/ads/verify" element={<AdVerifyPage/>} />
+            {/* Rider: their delivery dashboard */}
+            <Route path="/rider/dashboard" element={<RiderDashboard />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
+            <Route path="/marketplace" element={<MarketPlace />} />
+            <Route path="/products" element={<MarketPlace />} />
+            <Route path="/signup" element={<Signup />} />
+            {/* <Route path="/price-checker" element={<PriceChecker />} /> */}
+            <Route path="/price-checker" element={<PriceCheckers />} />
+            <Route path="/vendors" element={<VendorsPage />} />
+            <Route path="/chain" element={<DistributionChainView />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/business/*" element={<FeedPage />} />
+            <Route path="/category/:categorySlug" element={<ProductsGrid />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/dashboard/ads/verify" element={<AdVerifyPage />} />
 
+            <Route
+              path="/dashboard/inventory-access/callback"
+              element={<InventoryAccessCallback />}
+            />
 
-                            <Route path="/eparts" element={
-                       
-                                <Eparts />
-                           
-                            } />
-                            <Route path="/busibody" element={
-                       
-                                <BeautyMarketplace />
-                           
-                            } />
-                            <Route path="/herbal" element={
-                       
-                                <HerbalMarketplace/>
-                           
-                            } />
-        </Routes>
-      </div>
-           </CartProvider>
-     
+            <Route path="/eparts" element={<Eparts />} />
+            <Route path="/busibody" element={<BeautyMarketplace />} />
+            <Route path="/herbal" element={<HerbalMarketplace />} />
+          </Routes>
+        </div>
+      </CartProvider>
     </>
   );
-}
+};
 
-
-export default App
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default App;

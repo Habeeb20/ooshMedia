@@ -167,6 +167,19 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
       enum: ['manufacturer', 'wholesaler', 'retailer', 'distributor', "agent"]
     }],
   market: { type: String },
+  // Add inside sellerProfile: { ... } in models/User.js
+inventoryAccess: {
+  paid: { type: Boolean, default: false },
+  amount: Number,
+  reference: String,
+  paidAt: Date,
+},
+
+controlRoom: {
+  codeHash: String,      // bcrypt hash of the creator's 4-digit access code
+  activatedAt: Date,
+  codeIssuedAt: Date,
+},
     // Seller Chain (especially for Manufacturers)
     sellerChain: [{
       businessName: String,

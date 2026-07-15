@@ -2,13 +2,493 @@
 
 
 
+// import { useState, useEffect } from 'react';
+// import { toast } from 'sonner';
+// import appConfig from '../../config/AppConfig';
+// import {
+//   Home, Briefcase, Store, PlaySquare, User, LogOut,
+//   Package, BarChart3, ChevronDown, ChevronRight, Sparkles, Rss
+// } from 'lucide-react';
+// import POSPage from "../order/POSPage"
+// import BottomNav from '../../components/dashboard/BottomNav';
+// import DashboardHome from '../../components/dashboard/DashboardHome';
+// import BusinessProfileUpdate from '../../components/dashboard/Profile';
+// import SellerProfileSetup from '../../components/dashboard/SellerProfile';
+// import Loading from '../../config/Loading';
+// import InventoryDashboard from '../inventory/InventoryDashboard';
+// import ProductList from '../inventory/ProductsList';
+// import CreatePostModal from '../post/CreatePost';
+// import FeedPage from '../post/FeedPage';
+// import AdVerifyPage from './../ads/AdVerify';
+// import AdPlansPage from '../ads/AdplanPage';
+// import MySubscriptionsPage from '../ads/MySubscriptionPage';
+// import SellerDashboard from '../order/SellerDashboard';
+// import CartPage from "../order/CartPage"
+// import ProductsGrid from '../product/ProductGrid';
+// import BuyerDashboard from '../order/BuyerDashboard';
+// import PostDashboard from '../post/PostDashboard';
+// import PurchaseHistoryManager from '../../components/dashboard/PurchaseHistory';
+// import RiderProfile from '../rider/RiderProfile';
+// import SellerDeliveryPanel from '../vendor/SellerDeliveryPanel';
+// import DeliveryTrackingMap from '../DeliverytrackingMap';
+// import BuyerOrderTracking from '../vendor/SellerOrderTracking';
+// import RiderDashboard from '../rider/RiderDashboard';
+// import RiderBreakdown from '../rider/RiderBreakdown';
+// // import WalletSetup from '../../components/dashboard/WalletSetup';
+// import WalletManager from '../../components/dashboard/WalletSetup';
+// import SellerAnalyticsDashboard from '../vendor/SellerAnalyticDashboard';
+// const Jobs = () => (
+//   <div className="flex flex-col items-center justify-center h-64 gap-4">
+//     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+//       <Briefcase className="text-[#8B1E3F]" size={28} />
+//     </div>
+//     <p className="text-2xl font-semibold text-gray-700">Jobs</p>
+//     <span className="px-4 py-1.5 rounded-full bg-rose-50 text-[#8B1E3F] text-sm font-medium">Coming Soon</span>
+//   </div>
+// );
+
+// const Marketplace = () => (
+//   <div className="flex flex-col items-center justify-center h-64 gap-4">
+//     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+//       <Store className="text-[#8B1E3F]" size={28} />
+//     </div>
+//     <p className="text-2xl font-semibold text-gray-700">Marketplace</p>
+//     <span className="px-4 py-1.5 rounded-full bg-rose-50 text-[#8B1E3F] text-sm font-medium">Coming Soon</span>
+//   </div>
+// );
+
+// const Media = () => (
+//   <div className="flex flex-col items-center justify-center h-64 gap-4">
+//     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+//       <PlaySquare className="text-[#8B1E3F]" size={28} />
+//     </div>
+//     <p className="text-2xl font-semibold text-gray-700">Media Hub</p>
+//     <span className="px-4 py-1.5 rounded-full bg-rose-50 text-[#8B1E3F] text-sm font-medium">Coming Soon</span>
+//   </div>
+// );
+
+// const pages = {
+//   home: DashboardHome,
+//   post: FeedPage,
+//   jobs: Jobs,
+//   marketplace: Marketplace,
+//   media: Media,
+//   profile: BusinessProfileUpdate,
+//   sellerProfile: SellerProfileSetup,
+//   inventory: InventoryDashboard,
+//   products: ProductList,
+//   subscribe: AdPlansPage,
+//   ads: MySubscriptionsPage,
+//   wallet:WalletManager,
+//   verify: AdVerifyPage,
+//   stock : SellerDashboard,
+//   POS: POSPage,
+//   cart: CartPage,
+//   products: ProductsGrid,
+//   orderBreakdown: BuyerDashboard,
+//   postFeedbacks: PostDashboard,
+//   riderProfile: RiderProfile,
+//   sellerChain: PurchaseHistoryManager,
+//   sellerDelivery: SellerDeliveryPanel,
+//   deliveryTracking: BuyerOrderTracking,
+//   buyerOrderTracking: BuyerOrderTracking,
+//   riderDashboard: RiderDashboard,
+//   riderBreakdown:RiderBreakdown,
+//   customerAnalytics: SellerAnalyticsDashboard
+// };
+
+// const navItems = [
+//   { id: 'home', label: 'Dashboard', icon: Home },
+//   { id: 'post', label: 'Feed', icon: Rss },
+//   { id: 'postFeedbacks', label: 'Post Feedbacks', icon: Rss },
+//   // { id: 'products', label: 'Marketplace', icon: BarChart3 },
+//   {id:'cart', label:'Cart', icon: Sparkles},
+//   { id: 'ads', label: 'my ads', icon: Rss },
+//   { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
+//   {id:'orderBreakdown', label:'Orders', icon: Package},
+//   { id: 'profile', label: 'Profile', icon: User },
+//   { id: 'wallet', label: 'Set up wallet', icon: User },
+  
+//   // { id: 'buyerOrderTracking', label: 'Tracking order(buyer)', icon: User },
+  
+
+//   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
+// ];
+
+// export default function Dashboard() {
+//   const getPageFromURL = () => {
+//     const params = new URLSearchParams(window.location.search);
+//     return params.get('page') || 'home';
+//   };
+
+//   const [activePage, setActivePage] = useState(getPageFromURL());
+//   const [sidebarOpen, setSidebarOpen] = useState(false);
+//   const [dashboardData, setDashboardData] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [openDropdown, setOpenDropdown] = useState(null);
+
+//   const ActiveComponent = pages[activePage];
+//   const isSeller = dashboardData?.user?.isSeller || false;
+//   const isRider = dashboardData?.user?.isRider || false;
+// console.log(dashboardData)
+//   useEffect(() => {
+//     const params = new URLSearchParams(window.location.search);
+//     params.set('page', activePage);
+//     window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+//   }, [activePage]);
+
+//   useEffect(() => {
+//     const fetchDashboard = async () => {
+//       try {
+//         const token = localStorage.getItem('token');
+//         if (!token) {
+//           toast.error("Please login again");
+//           window.location.href = '/login';
+//           return;
+//         }
+//         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/dashboard`, {
+//           method: 'GET',
+//           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+//         });
+//         const data = await res.json();
+//         if (data.success) setDashboardData(data);
+//         else toast.error(data.message || "Failed to load dashboard");
+//       } catch (err) {
+//         console.error(err);
+//         toast.error("Unable to connect to server");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchDashboard();
+//   }, []);
+
+//   if (loading) return <Loading text="Loading your dashboard..." />;
+
+//   const toggleDropdown = (key) => setOpenDropdown(openDropdown === key ? null : key);
+
+//   const NavItem = ({ item, onClick, mobile = false }) => {
+//     const Icon = item.icon;
+//     const isActive = activePage === item.id;
+//     return (
+//       <button
+//         key={item.id}
+//         onClick={() => { setActivePage(item.id); if (onClick) onClick(); }}
+//         className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl mb-1 transition-all duration-200 text-sm font-medium group ${
+//           isActive
+//             ? 'bg-[#8B1E3F] text-white shadow-md shadow-rose-900/20'
+//             : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+//         }`}
+//       >
+//         <span className={`w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 transition-all ${
+//           isActive ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'
+//         }`}>
+//           <Icon size={17} />
+//         </span>
+//         <span>{item.label}</span>
+//         {isActive && (
+//           <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
+//         )}
+//       </button>
+//     );
+//   };
+
+//   const SidebarContent = ({ mobile = false }) => (
+//     <div className="px-3 py-4">
+//       <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Main Menu</p>
+//       {navItems.map(item => (
+//         <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} mobile={mobile} />
+//       ))}
+
+//       {isSeller && (
+//         <div className="mt-6">
+//           <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Seller Tools</p>
+
+//           <div>
+//             <button
+//               onClick={() => toggleDropdown('inventory')}
+//               className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-1 transition-all text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-800 group"
+//             >
+//               <div className="flex items-center gap-3.5">
+//                 <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 group-hover:bg-gray-200 flex-shrink-0">
+//                   <BarChart3 size={17} />
+//                 </span>
+//                 <span>Inventory</span>
+//               </div>
+//               <span className={`transition-transform duration-200 ${openDropdown === 'inventory' ? 'rotate-90' : ''}`}>
+//                 <ChevronRight size={15} />
+//               </span>
+//             </button>
+
+//             {openDropdown === 'inventory' && (
+//               <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
+//                 {[
+//                   { label: 'Stock', page: 'stock' },
+//                   { label: 'Stock Management', page: 'inventory' },
+//                   { label: 'POS', page: 'POS' },
+//                   { label: 'Delivery Panel', page: 'sellerDelivery' },
+//                   { label: 'Delivery Tracking', page: 'deliveryTracking' },
+//                   { label: 'seller Chain History', page: 'sellerChain' },
+//                   { label: 'Products', page: 'products' },
+//                   { label: 'Sales analytics', page: 'customerAnalytics' },
+//                   { label: 'Orders', page: null },
+//                 ].map(sub => (
+//                   <button
+//                     key={sub.label}
+//                     onClick={() => {
+//                       if (sub.page) { setActivePage(sub.page); setOpenDropdown(null); if (mobile) setSidebarOpen(false); }
+//                     }}
+//                     className={`block w-full text-left py-2 px-3 text-sm rounded-lg transition-colors ${
+//                       activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
+//                     } ${!sub.page ? 'opacity-40 cursor-not-allowed' : ''}`}
+//                   >
+//                     {sub.label}
+//                     {!sub.page && <span className="ml-2 text-[10px] font-medium bg-gray-100 text-black px-1.5 py-0.5 rounded">Soon</span>}
+//                   </button>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       )}
+//       {isRider && (
+//         <div className="mt-6">
+//           <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Rider Tools</p>
+
+//           <div>
+//             <button
+//               onClick={() => toggleDropdown('riderDashboard')}
+//               className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-1 transition-all text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-800 group"
+//             >
+//               <div className="flex items-center gap-3.5">
+//                 <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 group-hover:bg-gray-200 flex-shrink-0">
+//                   <BarChart3 size={17} />
+//                 </span>
+//                 <span>Rider dashboard</span>
+//               </div>
+//               <span className={`transition-transform duration-200 ${openDropdown === 'riderDashboard' ? 'rotate-90' : ''}`}>
+//                 <ChevronRight size={15} />
+//               </span>
+//             </button>
+
+//             {openDropdown === 'riderDashboard' && (
+//               <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
+//                 {[
+//                   { label: 'Rider Dashboard', page: 'riderBreakdown' },
+//                   { label: 'Rider Breakdown', page: 'riderDashboard' },
+//                   { id: 'riderProfile', label: 'Rider Profile', icon: User },
+//                   // { label: 'POS', page: 'POS' },
+//                   // { label: 'Delivery Panel', page: 'sellerDelivery' },
+//                   // { label: 'Delivery Tracking', page: 'deliveryTracking' },
+//                   // { label: 'seller Chain History', page: 'sellerChain' },
+//                   // { label: 'Products', page: 'products' },
+//                   // { label: 'Orders', page: null },
+//                 ].map(sub => (
+//                   <button
+//                     key={sub.label}
+//                     onClick={() => {
+//                       if (sub.page) { setActivePage(sub.page); setOpenDropdown(null); if (mobile) setSidebarOpen(false); }
+//                     }}
+//                     className={`block w-full text-left py-2 px-3 text-sm rounded-lg transition-colors ${
+//                       activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
+//                     } ${!sub.page ? 'opacity-40 cursor-not-allowed' : ''}`}
+//                   >
+//                     {sub.label}
+//                     {!sub.page && <span className="ml-2 text-[10px] font-medium bg-gray-100 text-black px-1.5 py-0.5 rounded">Soon</span>}
+//                   </button>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       )}
+
+//       <div className="mt-6 pt-4 border-t border-gray-100">
+//         <button
+//           onClick={() => window.location.href = '/login'}
+//           className="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-50 hover:text-red-600 transition-all group"
+//         >
+//           <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 group-hover:bg-red-100 flex-shrink-0">
+//             <LogOut size={17} />
+//           </span>
+//           <span>Logout</span>
+//         </button>
+//       </div>
+//     </div>
+//   );
+
+//   return (
+//     <div className="min-h-screen bg-[#F7F5F3] flex font-sans">
+
+//       {/* Fixed Sidebar - Desktop */}
+//       <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 z-40 shadow-sm">
+//         {/* Logo */}
+//         <div className="px-5 py-5 border-b border-gray-100 flex items-center gap-3 flex-shrink-0">
+//           <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-[#8B1E3F]">
+//             🎥
+//           </div>
+//           <div>
+//             <h2 className="text-base font-bold text-gray-900 tracking-tight leading-none">{appConfig.name}</h2>
+//             <p className="text-[11px] text-gray-400 mt-0.5">Creator Dashboard</p>
+//           </div>
+//         </div>
+
+//         {/* Nav */}
+//         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+//           <SidebarContent />
+//         </div>
+
+//         {/* User badge at bottom */}
+//         <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100">
+//           <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-gray-50">
+//             <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+//               <img
+//                 src={dashboardData?.user?.profilePicture || "https://via.placeholder.com/150"}
+//                 alt={dashboardData?.user?.firstName}
+//                 className="w-full h-full object-cover"
+//               />
+//             </div>
+//             <div className="min-w-0">
+//               <p className="text-sm font-semibold text-gray-800 truncate leading-none">{dashboardData?.user?.firstName} {dashboardData?.user?.lastName}</p>
+//               <p className="text-xs text-gray-400 mt-0.5 truncate">@{dashboardData?.user?.username}</p>
+//             </div>
+//             <div className="ml-auto flex-shrink-0 w-2 h-2 rounded-full bg-green-400" title="Online" />
+//           </div>
+//         </div>
+//       </aside>
+
+//       {/* Main Content */}
+//       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+
+//         {/* Top Navbar */}
+//         <nav className="bg-white border-b border-gray-100 px-4 md:px-6 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+//           <div className="flex items-center gap-3">
+//             <button
+//               onClick={() => setSidebarOpen(true)}
+//               className="lg:hidden p-2 hover:bg-gray-100 rounded-xl text-gray-600 transition"
+//               aria-label="Open menu"
+//             >
+//               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+//                 <line x1="3" y1="5" x2="17" y2="5" />
+//                 <line x1="3" y1="10" x2="17" y2="10" />
+//                 <line x1="3" y1="15" x2="13" y2="15" />
+//               </svg>
+//             </button>
+//             <div className="lg:hidden flex items-center gap-2">
+//               <div className="w-7 h-7 rounded-lg bg-[#8B1E3F] flex items-center justify-center text-sm">🎥</div>
+//               <span className="text-base font-bold text-gray-900">{appConfig.name}</span>
+//             </div>
+//             <div className="hidden lg:flex items-center gap-2">
+//               <span className="text-gray-300">/</span>
+//               <span className="text-sm font-medium text-gray-700 capitalize">{activePage === 'home' ? 'Dashboard' : activePage}</span>
+//             </div>
+//           </div>
+
+//           <div className="flex items-center gap-3">
+//             {/* Notification bell */}
+//             {/* <button className="relative p-2 hover:bg-gray-100 rounded-xl transition text-gray-500">
+//               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+//                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+//                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+//               </svg>
+//               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#8B1E3F]" />
+//             </button> */}
+
+//             <div className="flex items-center gap-2.5 pl-3 border-l border-gray-100">
+//               <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow">
+//                 <img
+//                   src={dashboardData?.user?.profilePicture || "https://via.placeholder.com/150"}
+//                   alt={dashboardData?.user?.firstName}
+//                   className="w-full h-full object-cover"
+//                 />
+//               </div>
+//               <div className="hidden sm:block">
+//                 <p className="text-sm font-semibold text-gray-800 leading-none">{dashboardData?.user?.firstName}</p>
+//                 <p className="text-xs text-gray-400 mt-0.5">@{dashboardData?.user?.username}</p>
+//               </div>
+//             </div>
+//           </div>
+//         </nav>
+
+//         {/* Page Content */}
+//         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pb-24 lg:pb-8">
+//           <ActiveComponent />
+//         </main>
+
+//         {/* Bottom Nav - Mobile */}
+//         <BottomNav activePage={activePage} setActivePage={setActivePage} />
+//       </div>
+
+//       {/* Mobile Sidebar Overlay */}
+//       {sidebarOpen && (
+//         <div
+//           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+//           onClick={() => setSidebarOpen(false)}
+//         >
+//           <div
+//             className="bg-white w-72 h-full overflow-y-auto shadow-2xl flex flex-col"
+//             onClick={e => e.stopPropagation()}
+//           >
+//             {/* Mobile header */}
+//             <div className="px-5 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+//               <div className="flex items-center gap-3">
+//                 <div className="w-9 h-9 rounded-xl bg-[#8B1E3F] flex items-center justify-center text-lg">🎥</div>
+//                 <div>
+//                   <h2 className="text-base font-bold text-gray-900">{appConfig.name}</h2>
+//                   <p className="text-[11px] text-gray-400">Creator Dashboard</p>
+//                 </div>
+//               </div>
+//               <button
+//                 onClick={() => setSidebarOpen(false)}
+//                 className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition"
+//               >
+//                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+//                   <line x1="2" y1="2" x2="16" y2="16" />
+//                   <line x1="16" y1="2" x2="2" y2="16" />
+//                 </svg>
+//               </button>
+//             </div>
+
+//             <div className="flex-1 overflow-y-auto">
+//               <SidebarContent mobile />
+//             </div>
+
+//             <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100">
+//               <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-gray-50">
+//                 <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+//                   <img
+//                     src={dashboardData?.user?.profilePicture || "https://via.placeholder.com/150"}
+//                     alt={dashboardData?.user?.firstName}
+//                     className="w-full h-full object-cover"
+//                   />
+//                 </div>
+//                 <div className="min-w-0">
+//                   <p className="text-sm font-semibold text-gray-800 truncate">{dashboardData?.user?.firstName} {dashboardData?.user?.lastName}</p>
+//                   <p className="text-xs text-gray-400 truncate">@{dashboardData?.user?.username}</p>
+//                 </div>
+//                 <div className="ml-auto w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
+
+
+
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import appConfig from '../../config/AppConfig';
 import {
   Home, Briefcase, Store, PlaySquare, User, LogOut,
-  Package, BarChart3, ChevronDown, ChevronRight, Sparkles, Rss
+  Package, BarChart3, ChevronDown, ChevronRight, Sparkles, Rss, Lock
 } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import POSPage from "../order/POSPage"
 import BottomNav from '../../components/dashboard/BottomNav';
 import DashboardHome from '../../components/dashboard/DashboardHome';
@@ -34,9 +514,11 @@ import DeliveryTrackingMap from '../DeliverytrackingMap';
 import BuyerOrderTracking from '../vendor/SellerOrderTracking';
 import RiderDashboard from '../rider/RiderDashboard';
 import RiderBreakdown from '../rider/RiderBreakdown';
-// import WalletSetup from '../../components/dashboard/WalletSetup';
 import WalletManager from '../../components/dashboard/WalletSetup';
 import SellerAnalyticsDashboard from '../vendor/SellerAnalyticDashboard';
+import InventoryPaywall from '../vendor/inventorypaywall';
+import ControlRoom from '../vendor/Controlroom';
+import ControlRoomAccess from '../vendor/ControlRoomAccess';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -76,24 +558,25 @@ const pages = {
   profile: BusinessProfileUpdate,
   sellerProfile: SellerProfileSetup,
   inventory: InventoryDashboard,
-  products: ProductList,
   subscribe: AdPlansPage,
   ads: MySubscriptionsPage,
-  wallet:WalletManager,
+  wallet: WalletManager,
   verify: AdVerifyPage,
-  stock : SellerDashboard,
+  stock: SellerDashboard,
   POS: POSPage,
   cart: CartPage,
   products: ProductsGrid,
   orderBreakdown: BuyerDashboard,
   postFeedbacks: PostDashboard,
   riderProfile: RiderProfile,
+  controlRoom: () => <ControlRoomAccess isActivated={!!dashboardData?.user?.sellerProfile?.controlRoom?.activatedAt} />,
+
   sellerChain: PurchaseHistoryManager,
   sellerDelivery: SellerDeliveryPanel,
   deliveryTracking: BuyerOrderTracking,
   buyerOrderTracking: BuyerOrderTracking,
   riderDashboard: RiderDashboard,
-  riderBreakdown:RiderBreakdown,
+  riderBreakdown: RiderBreakdown,
   customerAnalytics: SellerAnalyticsDashboard
 };
 
@@ -101,18 +584,20 @@ const navItems = [
   { id: 'home', label: 'Dashboard', icon: Home },
   { id: 'post', label: 'Feed', icon: Rss },
   { id: 'postFeedbacks', label: 'Post Feedbacks', icon: Rss },
-  // { id: 'products', label: 'Marketplace', icon: BarChart3 },
-  {id:'cart', label:'Cart', icon: Sparkles},
+  { id: 'cart', label: 'Cart', icon: Sparkles },
   { id: 'ads', label: 'my ads', icon: Rss },
   { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
-  {id:'orderBreakdown', label:'Orders', icon: Package},
+  { id: 'orderBreakdown', label: 'Orders', icon: Package },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'wallet', label: 'Set up wallet', icon: User },
-  
-  // { id: 'buyerOrderTracking', label: 'Tracking order(buyer)', icon: User },
-  
-
   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
+];
+
+// Pages that require the one-time ₦3,000 inventory-access payment.
+// Gated at render level so it can't be bypassed by editing the URL's ?page= param.
+const PAID_INVENTORY_PAGES = [
+  'stock', 'inventory', 'POS', 'sellerDelivery',
+  'deliveryTracking', 'sellerChain', 'products', 'customerAnalytics',
 ];
 
 export default function Dashboard() {
@@ -130,7 +615,9 @@ export default function Dashboard() {
   const ActiveComponent = pages[activePage];
   const isSeller = dashboardData?.user?.isSeller || false;
   const isRider = dashboardData?.user?.isRider || false;
-console.log(dashboardData)
+  const hasInventoryAccess = dashboardData?.user?.sellerProfile?.inventoryAccess?.paid || false;
+  const isGatedPage = PAID_INVENTORY_PAGES.includes(activePage);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.set('page', activePage);
@@ -167,7 +654,7 @@ console.log(dashboardData)
 
   const toggleDropdown = (key) => setOpenDropdown(openDropdown === key ? null : key);
 
-  const NavItem = ({ item, onClick, mobile = false }) => {
+  const NavItem = ({ item, onClick }) => {
     const Icon = item.icon;
     const isActive = activePage === item.id;
     return (
@@ -193,17 +680,36 @@ console.log(dashboardData)
     );
   };
 
+  const inventorySubItems = [
+    { label: 'Stock', page: 'stock' },
+    { label: 'Stock Management', page: 'inventory' },
+    { label: 'POS', page: 'POS' },
+    { label: 'Delivery Panel', page: 'sellerDelivery' },
+    { label: 'Delivery Tracking', page: 'deliveryTracking' },
+    { label: 'seller Chain History', page: 'sellerChain' },
+    { label: 'Products', page: 'products' },
+    { label: 'Sales analytics', page: 'customerAnalytics' },
+    { label: 'Orders', page: null },
+  ];
+
   const SidebarContent = ({ mobile = false }) => (
     <div className="px-3 py-4">
       <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Main Menu</p>
       {navItems.map(item => (
-        <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} mobile={mobile} />
+        <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} />
       ))}
 
       {isSeller && (
         <div className="mt-6">
-          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Seller Tools</p>
-
+          <div className="flex items-center justify-between px-3 mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Seller Tools</p>
+            {!hasInventoryAccess && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#8B1E3F] bg-rose-50 px-2 py-0.5 rounded-full">
+                <Lock size={10} /> ₦3,000
+              </span>
+            )}
+          </div>
+<NavItem item={{ id: 'controlRoom', label: 'Control Room', icon: KeyRound }} onClick={mobile ? () => setSidebarOpen(false) : null} />
           <div>
             <button
               onClick={() => toggleDropdown('inventory')}
@@ -222,30 +728,27 @@ console.log(dashboardData)
 
             {openDropdown === 'inventory' && (
               <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
-                {[
-                  { label: 'Stock', page: 'stock' },
-                  { label: 'Stock Management', page: 'inventory' },
-                  { label: 'POS', page: 'POS' },
-                  { label: 'Delivery Panel', page: 'sellerDelivery' },
-                  { label: 'Delivery Tracking', page: 'deliveryTracking' },
-                  { label: 'seller Chain History', page: 'sellerChain' },
-                  { label: 'Products', page: 'products' },
-                  { label: 'Sales analytics', page: 'customerAnalytics' },
-                  { label: 'Orders', page: null },
-                ].map(sub => (
-                  <button
-                    key={sub.label}
-                    onClick={() => {
-                      if (sub.page) { setActivePage(sub.page); setOpenDropdown(null); if (mobile) setSidebarOpen(false); }
-                    }}
-                    className={`block w-full text-left py-2 px-3 text-sm rounded-lg transition-colors ${
-                      activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
-                    } ${!sub.page ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    {sub.label}
-                    {!sub.page && <span className="ml-2 text-[10px] font-medium bg-gray-100 text-black px-1.5 py-0.5 rounded">Soon</span>}
-                  </button>
-                ))}
+                {inventorySubItems.map(sub => {
+                  const locked = sub.page && !hasInventoryAccess;
+                  return (
+                    <button
+                      key={sub.label}
+                      onClick={() => {
+                        if (sub.page) { setActivePage(sub.page); setOpenDropdown(null); if (mobile) setSidebarOpen(false); }
+                      }}
+                      className={`w-full flex items-center justify-between text-left py-2 px-3 text-sm rounded-lg transition-colors ${
+                        activePage === sub.page ? 'text-[#8B1E3F] font-medium bg-rose-50' : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
+                      } ${!sub.page ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    >
+                      <span>{sub.label}</span>
+                      {!sub.page ? (
+                        <span className="text-[10px] font-medium bg-gray-100 text-black px-1.5 py-0.5 rounded">Soon</span>
+                      ) : locked ? (
+                        <Lock size={12} className="text-gray-400" />
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -276,13 +779,7 @@ console.log(dashboardData)
                 {[
                   { label: 'Rider Dashboard', page: 'riderBreakdown' },
                   { label: 'Rider Breakdown', page: 'riderDashboard' },
-                  { id: 'riderProfile', label: 'Rider Profile', icon: User },
-                  // { label: 'POS', page: 'POS' },
-                  // { label: 'Delivery Panel', page: 'sellerDelivery' },
-                  // { label: 'Delivery Tracking', page: 'deliveryTracking' },
-                  // { label: 'seller Chain History', page: 'sellerChain' },
-                  // { label: 'Products', page: 'products' },
-                  // { label: 'Orders', page: null },
+                  { label: 'Rider Profile', page: 'riderProfile' },
                 ].map(sub => (
                   <button
                     key={sub.label}
@@ -322,7 +819,6 @@ console.log(dashboardData)
 
       {/* Fixed Sidebar - Desktop */}
       <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 z-40 shadow-sm">
-        {/* Logo */}
         <div className="px-5 py-5 border-b border-gray-100 flex items-center gap-3 flex-shrink-0">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-[#8B1E3F]">
             🎥
@@ -333,12 +829,10 @@ console.log(dashboardData)
           </div>
         </div>
 
-        {/* Nav */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
           <SidebarContent />
         </div>
 
-        {/* User badge at bottom */}
         <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100">
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-gray-50">
             <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
@@ -385,15 +879,6 @@ console.log(dashboardData)
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notification bell */}
-            {/* <button className="relative p-2 hover:bg-gray-100 rounded-xl transition text-gray-500">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#8B1E3F]" />
-            </button> */}
-
             <div className="flex items-center gap-2.5 pl-3 border-l border-gray-100">
               <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow">
                 <img
@@ -411,10 +896,16 @@ console.log(dashboardData)
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pb-24 lg:pb-8">
-          <ActiveComponent />
-        </main>
-
+        {/* <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pb-24 lg:pb-8">
+          {isGatedPage && !hasInventoryAccess ? <InventoryPaywall /> : <ActiveComponent />}
+        </main> */}
+{activePage === 'controlRoom' ? (
+  <ControlRoomAccess isActivated={!!dashboardData?.user?.sellerProfile?.controlRoom?.activatedAt} />
+) : isGatedPage && !hasInventoryAccess ? (
+  <InventoryPaywall />
+) : (
+  <ActiveComponent />
+)}
         {/* Bottom Nav - Mobile */}
         <BottomNav activePage={activePage} setActivePage={setActivePage} />
       </div>
@@ -429,7 +920,6 @@ console.log(dashboardData)
             className="bg-white w-72 h-full overflow-y-auto shadow-2xl flex flex-col"
             onClick={e => e.stopPropagation()}
           >
-            {/* Mobile header */}
             <div className="px-5 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-[#8B1E3F] flex items-center justify-center text-lg">🎥</div>
@@ -475,18 +965,3 @@ console.log(dashboardData)
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-// // Routes
-// <Route path="/dashboard/ads/subscribe" element={<AdPlansPage currentUser={currentUser} />} />
-// <Route path="/dashboard/ads" element={<MySubscriptionsPage />} />
-// <Route path="/dashboard/ads/verify" element={<AdVerifyPage />} />

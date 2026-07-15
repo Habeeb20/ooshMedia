@@ -4,6 +4,9 @@ const transactionSchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
   buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  // Add alongside your existing fields
+staff: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', default: null },
+staffName: { type: String, default: null }, // denormalized so history reads fine even if staff is later removed
   type: { type: String, enum: ['sale', 'refund', 'transfer', 'pos_sale'], required: true },
   amount: { type: Number, required: true },
   platformFee: { type: Number, default: 0 },

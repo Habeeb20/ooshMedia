@@ -46,7 +46,7 @@ export const generateAndSendOTP = async ({ contact, type }) => {
   return otp;
 };
 
-const sendSMSViaKudi = async (phone, message) => {
+export const sendSMSViaKudi = async (phone, message) => {
   try {
     const response = await axios.post('https://my.kudisms.net/api/corporate', {
       token: process.env.KUDI_API_KEY,
@@ -80,3 +80,8 @@ export const verifyOTP = (contact, enteredOtp) => {
   otpStore.delete(contact);
   return { success: true };
 };
+
+
+
+// utils/generateCode.js
+export const generate4DigitCode = () => String(Math.floor(1000 + Math.random() * 9000));

@@ -73,7 +73,7 @@ export default function RiderDashboard() {
       navigator.geolocation.getCurrentPosition(
         async ({ coords }) => {
           try {
-            await api.patch(`/api/delivery/${requestId}/location`, {
+            await api.put(`/api/delivery/${requestId}/location`, {
               lat: coords.latitude,
               lng: coords.longitude,
             });

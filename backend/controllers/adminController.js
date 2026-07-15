@@ -412,7 +412,7 @@ export const getAllSellersAdmin = async (req, res) => {
   }
 };
 
-/** PATCH /api/admin/users/:id/status — suspend/verify/ban a user */
+/** put /api/admin/users/:id/status — suspend/verify/ban a user */
 export const updateUserStatusAdmin = async (req, res) => {
   try {
     const { id } = req.params;

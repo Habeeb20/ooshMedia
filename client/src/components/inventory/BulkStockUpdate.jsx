@@ -14,7 +14,7 @@ export default function BulkStockUpdate({ products, onSuccess, onClose }) {
       await Promise.all(
         Object.entries(updates).map(([id, quantity]) =>
           fetch(`${import.meta.env.VITE_BACKEND_URL}/api/inventory/${id}/stock`, {
-            method: 'PATCH',
+            method: 'put',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${localStorage.getItem('token')}`

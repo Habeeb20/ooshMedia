@@ -28,7 +28,7 @@ export default function UsersTable({ onSelectUser }) {
 
   const toggleField = async (id, field, value) => {
     await fetch(`/api/admin/users/${id}/status`, {
-      method: "PATCH",
+      method: "put",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ field, value }),

@@ -512,7 +512,7 @@ import { useAuth } from '../context/AuthContext';
 // Adjust these import paths to wherever your files actually live
 import { productCategories } from '../categories/productCategories';
 import { useCart } from '../context/cartContext';
-import { Home, Grid3x3, Briefcase, User, ShoppingCart, X, Play } from 'lucide-react';
+import { Home, Grid3x3, Briefcase, User, ShoppingCart, X, Play, MarsStrokeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const slugify = (str) =>
@@ -622,8 +622,8 @@ export default function Navbar() {
           {/* Mobile secondary row — Businesses / Price Checker / Distribution chain, no hamburger */}
           <div className="md:hidden flex items-center justify-center gap-4 pb-3 -mt-1 text-sm overflow-x-auto">
             {isAuthenticated && (
-              <a href="/marketplace" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">
-                Marketplace
+              <a href="/business" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">
+               Business
               </a>
             )}
             <a href="/price-checker" className="font-medium text-gray-600 hover:text-[#8B1E3F] whitespace-nowrap">
@@ -667,9 +667,9 @@ export default function Navbar() {
             <span className="text-[11px] font-medium">Cart</span>
           </Link>
 
-          <Link to="/business" className="flex flex-col items-center justify-center py-2.5 gap-1 text-gray-600 active:text-[#8B1E3F]">
-            <Briefcase size={22} />
-            <span className="text-[11px] font-medium">Business</span>
+          <Link to="/marketplace" className="flex flex-col items-center justify-center py-2.5 gap-1 text-gray-600 active:text-[#8B1E3F]">
+            <MarsStrokeIcon size={22} />
+            <span className="text-[11px] font-medium">Marketplace</span>
           </Link>
 
           <button

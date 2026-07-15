@@ -65,7 +65,7 @@
 
 //   {
 //     title: "Vendors",
-//     description: "Hire reliable dispatch riders and errand services easily.",
+//     description: "Hire reliable disput riders and errand services easily.",
 //     icon: Truck,
 //     gradient: "from-[#059669] to-[#10B981]",
 //     link: "/vendors",
@@ -290,7 +290,7 @@ const features = [
 
   {
     title: "Vendors",
-    description: "Hire reliable dispatch riders and errand services easily.",
+    description: "Hire reliable disput riders and errand services easily.",
     icon: Truck,
     gradient: "from-[#059669] to-[#10B981]",
     link: "/vendors",

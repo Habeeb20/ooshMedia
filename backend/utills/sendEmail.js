@@ -6,6 +6,7 @@ const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
   secure: false,
+  family: 4,
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD,
@@ -14,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async ({ to, subject, html }) => {
   await transporter.sendMail({
-    from: `"Oosh Media" <${process.env.EMAIL_FROM}>`,
+    from: `"Estores" <${process.env.EMAIL_FROM}>`,
     to,
     subject,
     html,
