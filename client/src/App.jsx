@@ -49,6 +49,7 @@ import { useScrollToTop } from "./useScrolltoTheTop";
 import BeautyMarketplace from "./pages/others/Busibody";
 import HerbalMarketplace from "./pages/others/Eherbal";
 import InventoryAccessCallback from "./pages/vendor/Inventoryaccesscallback";
+import VerifyCallback from "./pages/VerifyCallback";
 
 const App = () => {
   useScrollToTop();
@@ -173,7 +174,7 @@ const App = () => {
               path="/dashboard/inventory-access/callback"
               element={<InventoryAccessCallback />}
             />
-
+<Route path="/verify/callback" element={<VerifyCallback />} />
             <Route path="/eparts" element={<Eparts />} />
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />

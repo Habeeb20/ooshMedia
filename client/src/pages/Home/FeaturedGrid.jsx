@@ -271,22 +271,30 @@ const features = [
   },
 
   {
-    title: "Marketplace",
-    description: "Shop thousands of premium products across categories.",
+    title: "Eparts",
+    description: "Shop thousands of premium parts products across categories.",
     icon: ShoppingBag,
     gradient: "from-[#111827] to-[#1F2937]",
-    link: "/marketplace",
+    link: "/eparts",
         requiresAuth: true,
   },
 
   {
-    title: "Price Checker",
-    description: "Compare product prices instantly across multiple vendors.",
+    title: "BusiBody",
+    description: "check out  beauty product for women",
     icon: BadgeDollarSign,
     gradient: "from-[#1E3A8A] to-[#2563EB]",
-    link: "/price-checker",
+    link: "/busibody",
         requiresAuth: true,
   },
+  // {
+  //   title: "Price Checker",
+  //   description: "Compare product prices instantly across multiple vendors.",
+  //   icon: BadgeDollarSign,
+  //   gradient: "from-[#1E3A8A] to-[#2563EB]",
+  //   link: "/price-checker",
+  //       requiresAuth: true,
+  // },
 
   {
     title: "Vendors",

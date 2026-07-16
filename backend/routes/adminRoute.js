@@ -22,17 +22,17 @@ import { verifyToken, adminOnly } from '../middleware/verifyToken.js';
 const adminRouter = express.Router();
 
 adminRouter.post('/login', adminLogin);
-adminRouter.get('/admin/dashboard/overview', verifyToken, adminOnly, getAdminOverview);
+adminRouter.get('/dashboard/overview', verifyToken, adminOnly, getAdminOverview);
 
-adminRouter.get('/admin/users', verifyToken, adminOnly, getAllUsersAdmin);
-adminRouter.get('/admin/users/:id', verifyToken, adminOnly, getUserFullProfileAdmin);
-adminRouter.put('/admin/users/:id/status', verifyToken, adminOnly, updateUserStatusAdmin);
-adminRouter.delete('/admin/users/:id', verifyToken, adminOnly, deleteUserAdmin);
+adminRouter.get('/users', verifyToken, adminOnly, getAllUsersAdmin);
+adminRouter.get('/users/:id', verifyToken, adminOnly, getUserFullProfileAdmin);
+adminRouter.put('/users/:id/status', verifyToken, adminOnly, updateUserStatusAdmin);
+adminRouter.delete('/users/:id', verifyToken, adminOnly, deleteUserAdmin);
 
-adminRouter.get('/admin/products', verifyToken, adminOnly, getAllProductsAdmin);
-adminRouter.get('/admin/orders', verifyToken, adminOnly, getAllOrdersAdmin);
-adminRouter.get('/admin/posts', verifyToken, adminOnly, getAllPostsAdmin);
-adminRouter.get('/admin/riders', verifyToken, adminOnly, getAllRidersAdmin);
-adminRouter.get('/admin/sellers', verifyToken, adminOnly, getAllSellersAdmin);
+adminRouter.get('/products', verifyToken, adminOnly, getAllProductsAdmin);
+adminRouter.get('/orders', verifyToken, adminOnly, getAllOrdersAdmin);
+adminRouter.get('/posts', verifyToken, adminOnly, getAllPostsAdmin);
+adminRouter.get('/riders', verifyToken, adminOnly, getAllRidersAdmin);
+adminRouter.get('/sellers', verifyToken, adminOnly, getAllSellersAdmin);
 
 export default adminRouter;

@@ -52,7 +52,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg mb-5">Support</h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="/track-order" className="hover:text-white transition">Track Order</a></li>
+              {/* <li><a href="/track-order" className="hover:text-white transition">Track Order</a></li> */}
               {/* <li><a href="/shipping" className="hover:text-white transition">Shipping Policy</a></li>
               <li><a href="/returns" className="hover:text-white transition">Returns & Refunds</a></li> */}
               {/* <li><a href="/faq" className="hover:text-white transition">FAQs</a></li> */}

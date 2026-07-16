@@ -154,6 +154,8 @@ import adminRouter from "./routes/adminRoute.js";
 import walletRoutes from "./routes/walletRoute.js";
 import priceCheckerRoutes from "./routes/priceCheckerRouter.js";
 import staffRoutes from "./routes/sellers/staffRoute.js"
+import verificationRoutes from "./routes/verifyNgRoute.js"
+
 dotenv.config();
 connectDb();
 
@@ -213,6 +215,7 @@ app.use("/api/delivery", deliveryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/identity-verification', verificationRoutes);
 
 // Start server
 const port = process.env.PORT || 2020;
