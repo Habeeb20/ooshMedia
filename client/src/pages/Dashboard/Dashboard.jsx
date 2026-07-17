@@ -8,7 +8,7 @@
 // import {
 //   Home, Briefcase, Store, PlaySquare, User, LogOut,
 //   Package, BarChart3, ChevronDown, ChevronRight, Sparkles, Rss
-// } from 'lucide-react';
+// } from 'lucide-react';""
 // import POSPage from "../order/POSPage"
 // import BottomNav from '../../components/dashboard/BottomNav';
 // import DashboardHome from '../../components/dashboard/DashboardHome';
@@ -870,10 +870,10 @@ export default function Dashboard() {
                 <line x1="3" y1="15" x2="13" y2="15" />
               </svg>
             </button>
-            <div className="lg:hidden flex items-center gap-2">
+            {/* <div className="lg:hidden flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#8B1E3F] flex items-center justify-center text-sm">🎥</div>
               <span className="text-base font-bold text-gray-900">{appConfig.name}</span>
-            </div>
+            </div> */}
             <div className="hidden lg:flex items-center gap-2">
               <span className="text-gray-300">/</span>
               <span className="text-sm font-medium text-gray-700 capitalize">{activePage === 'home' ? 'Dashboard' : activePage}</span>
@@ -901,13 +901,24 @@ export default function Dashboard() {
         {/* <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pb-24 lg:pb-8">
           {isGatedPage && !hasInventoryAccess ? <InventoryPaywall /> : <ActiveComponent />}
         </main> */}
-{activePage === 'controlRoom' ? (
+{/* {activePage === 'controlRoom' ? (
   <ControlRoomAccess isActivated={!!dashboardData?.user?.sellerProfile?.controlRoom?.activatedAt} />
 ) : isGatedPage && !hasInventoryAccess ? (
   <InventoryPaywall />
 ) : (
   <ActiveComponent />
-)}
+)} */}
+
+{/* Page Content */}
+        <main className="flex-1 px-4 md:px-6 lg:px-8 pt-3 md:pt-4 pb-24 lg:pb-8 overflow-auto">
+          {activePage === 'controlRoom' ? (
+            <ControlRoomAccess isActivated={!!dashboardData?.user?.sellerProfile?.controlRoom?.activatedAt} />
+          ) : isGatedPage && !hasInventoryAccess ? (
+            <InventoryPaywall />
+          ) : (
+            <ActiveComponent />
+          )}
+        </main>
         {/* Bottom Nav - Mobile */}
         <BottomNav activePage={activePage} setActivePage={setActivePage} />
       </div>
