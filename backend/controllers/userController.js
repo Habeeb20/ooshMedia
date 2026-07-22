@@ -5,6 +5,29 @@ import { generateAndSendOTP, verifyOTP } from '../utills/sendOtp.js';
 import axios from "axios"
 import { uploadVideoToS3 } from '../utills/s3BucketUpload.js';
 import { generateFallbackEmail } from './walletController.js';
+import { sendEmail } from '../utills/sendEmail.js';
+import { generateToken } from '../utills/sendEmail.js';
+
+const generateOtp = () => Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit
+
+// Build the safe user object returned to the client
+const toClientUser = (user) => ({
+  _id: user._id,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  username: user.username,
+  email: user.email,
+  phoneNumber: user.phoneNumber,
+  role: user.role,
+  profilePicture: user.profilePicture,
+  isRider: user.isRider,
+  isSeller: user.isSeller,
+  isEmployer: user.isEmployer,
+  uniqueNumber: user.uniqueNumber,
+  referralCode: user.referralCode,
+  referralPoints: user.referralPoints,
+  businessProfileCompleted: user.businessProfileCompleted,
+});
 // ==================== SEND OTP ====================
 export const sendOTP = async (req, res) => {
   try {
@@ -170,7 +193,133 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
+// ── Contact login (email, phone, or username + password) ───────────
 
+
+// export const login = async (req, res) => {
+//   try {
+//     const { contact, password } = req.body;
+
+//     if (!contact || !password) {
+//       return res.status(400).json({ success: false, message: 'Contact and password are required' });
+//     }
+
+//     const normalizedContact = contact.trim().toLowerCase();
+
+//     const user = await User.findOne({
+//       $or: [
+//         { email: normalizedContact },
+//         { phoneNumber: contact.trim() },
+//         { username: normalizedContact },
+//       ],
+//     }).select('+password');
+
+//     if (!user) {
+//       return res.status(401).json({ success: false, message: 'Invalid credentials' });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ success: false, message: 'Invalid credentials' });
+//     }
+
+//     const token = generateToken(user);
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Login successful',
+//       token,
+//       user: toClientUser(user),
+//     });
+//   } catch (error) {
+//     console.error('Login error:', error);
+//     res.status(500).json({ success: false, message: 'Server error during login' });
+//   }
+// };
+
+// ── e-Auth step 1: request a code (email only — OTP needs an inbox) ─
+export const requestEAuthOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      // Don't reveal whether the email exists
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const code = generateOtp();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+    user.eAuthOtp = { code, expiresAt, attempts: 0 };
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Your Estores login code',
+      html: `<p>Hi ${user.firstName},</p><p>Your login code is:</p><h2 style="letter-spacing:4px">${code}</h2><p>This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>`,
+    });
+
+    res.status(200).json({ success: true, message: 'Verification code sent to your email' });
+  } catch (error) {
+    console.error('Request OTP error:', error);
+    res.status(500).json({ success: false, message: 'Server error while sending code' });
+  }
+};
+
+// ── e-Auth step 2: verify the code and log in ───────────────────────
+export const verifyEAuthOtp = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ success: false, message: 'Email and code are required' });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+eAuthOtp.code');
+
+    if (!user || !user.eAuthOtp?.code) {
+      return res.status(401).json({ success: false, message: 'Invalid or expired code' });
+    }
+
+    if (user.eAuthOtp.expiresAt < new Date()) {
+      user.eAuthOtp = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(401).json({ success: false, message: 'Code has expired. Please request a new one.' });
+    }
+
+    if (user.eAuthOtp.attempts >= 5) {
+      user.eAuthOtp = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(429).json({ success: false, message: 'Too many attempts. Please request a new code.' });
+    }
+
+    if (user.eAuthOtp.code !== code.trim()) {
+      user.eAuthOtp.attempts += 1;
+      await user.save({ validateBeforeSave: false });
+      return res.status(401).json({ success: false, message: 'Incorrect code' });
+    }
+
+    user.eAuthOtp = undefined;
+    await user.save({ validateBeforeSave: false });
+
+       const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: toClientUser(user),
+    });
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({ success: false, message: 'Server error during verification' });
+  }
+};
 // ==================== NEW: FORGOT PASSWORD ====================
 export const forgotPassword = async (req, res) => {
   try {
@@ -298,122 +447,6 @@ const calculateProfileCompletion = (user) => {
 
   return Math.round((completed / total) * 100);
 };
-// Helper function to calculate profile completion percentage
-// const calculateProfileCompletion = (user) => {
-//   let completed = 0;
-//   let total = 8; // Total fields to check
-
-//   if (user.firstName) completed++;
-//   if (user.lastName) completed++;
-//   if (user.username) completed++;
-//   if (user.email || user.phoneNumber) completed++;
-//   if (user.profilePicture) completed++;
-//   if (user.state) completed++;
-//   if (user.lga) completed++;
-//   if (user.dateOfBirth) completed++;
-
-//   return Math.round((completed / total) * 100);
-// };
-
-
-
-
-// Update Business Profile
-
-// export const updateBusinessProfile = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-
-//     if (user.role !== 'entity') {
-//       return res.status(403).json({ 
-//         success: false, 
-//         message: "Only business entities can update business profile" 
-//       });
-//     }
-
-//     const {
-//       businessName,
-//       businessAddress,
-//       entityCategory,
-//       yearsInBusiness,
-//       staffCount,
-//       registeredBusiness,
-//       openingHours,
-//     } = req.body;
-
-//     // Handle Gallery (Images from Cloudinary + Videos from S3)
-//     let gallery = user.businessProfile?.gallery || [];
-
-//     // If new gallery items are sent from frontend (Cloudinary URLs)
-//     if (req.body.gallery && Array.isArray(req.body.gallery)) {
-//       gallery = [...gallery, ...req.body.gallery];
-//     }
-
-//     // If videos are uploaded directly (via multer)
-//     if (req.files && req.files.length > 0) {
-//       const videoUploads = await Promise.all(
-//         req.files.map(file => uploadVideoToS3(file, 'business-gallery'))
-//       );
-
-//       const videoEntries = videoUploads.map(upload => ({
-//         url: upload.url,
-//         publicId: upload.key,
-//         type: 'video',
-//         platform: 's3'
-//       }));
-
-//       gallery = [...gallery, ...videoEntries];
-//     }
-
-//     // Update Business Profile
-//     user.businessProfile = {
-//       ...user.businessProfile,
-//       businessName: businessName || user.businessProfile?.businessName,
-//       businessAddress: businessAddress || user.businessProfile?.businessAddress,
-//       entityCategory: entityCategory || user.businessProfile?.entityCategory || [],
-//       yearsInBusiness: yearsInBusiness !== undefined ? Number(yearsInBusiness) : user.businessProfile?.yearsInBusiness,
-//       staffCount: staffCount !== undefined ? Number(staffCount) : user.businessProfile?.staffCount,
-//       registeredBusiness: registeredBusiness !== undefined ? registeredBusiness : user.businessProfile?.registeredBusiness,
-//       openingHours: openingHours || user.businessProfile?.openingHours || [],
-//       gallery: gallery,
-//     };
-
-//     // Calculate Completion Percentage
-//     const completionPercentage = calculateBusinessProfileCompletion(user.businessProfile);
-
-//     user.businessProfileCompleted = completionPercentage === 100;
-//     user.businessProfileUpdatedAt = new Date();
-//     user.businessProfileCompletionPercentage = completionPercentage;
-
-//     await user.save();
-
-//     res.json({
-//       success: true,
-//       message: "Business profile updated successfully",
-//       businessProfile: user.businessProfile,
-//       completionPercentage,
-//       isCompleted: user.businessProfileCompleted
-//     });
-
-//   } catch (error) {
-//     console.error("Business Profile Update Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to update business profile",
-//       error: error.message
-//     });
-//   }
-// };
-
-
-
-
-// Helper Function to Calculate Completion
 
 
 
@@ -551,100 +584,6 @@ const calculateBusinessProfileCompletion = (profile) => {
 
 const WALLET_BASE = 'https://api-ewallet.eroot.ng/api';
 
-// export const createWallet = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-//     const user = await User.findById(userId);
-
-//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-//     if (user.isWallet) {
-//       return res.status(400).json({ success: false, message: "Wallet already created" });
-//     }
-
-//     // ── Validate required fields before calling external API ──────────
-//     const email = user.email;
-//     if (!email) {
-//       return res.status(400).json({ success: false, message: "Account email is required to create a wallet" });
-//     }
-
-//     const rawPhone = user.phoneNumber || user.alternateContact || "";
-
-//     // Normalise phone to 080XXXXXXXX format (strip +234 or 234 prefix)
-//     let phone = rawPhone.replace(/\s+/g, "").replace(/^\+/, "");
-//     if (phone.startsWith("234")) {
-//       phone = "0" + phone.slice(3); // 2348012345678 → 08012345678
-//     }
-//     if (!phone || phone.length < 10) {
-//       return res.status(400).json({ success: false, message: "A valid phone number is required to create a wallet" });
-//     }
-
-//     const payload = {
-//       first_name:      user.firstName,
-//       last_name:       user.lastName,
-//       email:           user.email || user.alternateContact,
-//       password:        "password123",
-//       phone:           phone,               // ← now 080XXXXXXXX
-//       preferred_bank:  "wema-bank",
-//       provider_slug:   "wema-bank",
-//       metadata: [
-//         { key: "user_id",  value: user._id.toString() },
-//         { key: "username", value: user.username }
-//       ]
-//     };
-
-//     console.log("Wallet payload →", payload);
-
-//     // ── Call External Wallet API ──────────────────────────────────────
-//     const walletResponse = await axios.post(
-//       "https://api-ewallet.eroot.ng/api/register",
-//       payload,
-//       { headers: { "Content-Type": "application/json" } }
-//     );
-
-//     const responseData = walletResponse.data;
-//     console.log("Wallet API response →", responseData);
-
-//     // ── Map response correctly from dedicated_account object ──────────
-//     const dedicatedAccount = responseData?.dedicated_account || {};
-
-//     user.isWallet = true;
-//     user.walletAccount = {
-//       accountNumber: dedicatedAccount.account_number || "N/A",
-//       accountName:   dedicatedAccount.account_name   || "N/A",
-//       bankName:      dedicatedAccount.bank_name       || "Wema Bank",
-//       currency:      dedicatedAccount.currency        || "NGN",
-//       providerSlug:  "wema-bank",
-//       customerCode:  responseData?.customer?.customer_code || null,
-//       externalId:    responseData?.user?.id           || null,
-//     };
-
-//     await user.save();
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Wallet created successfully",
-//       wallet:  user.walletAccount
-//     });
-
-//   } catch (error) {
-//     // Surface the exact validation errors from the external API
-//     const apiError = error.response?.data;
-//     console.error("Wallet creation error →", apiError || error.message);
-
-//     return res.status(500).json({
-//       success:  false,
-//       message:  apiError?.message || "Failed to create wallet",
-//       details:  apiError || null   // ← helps debug which field failed
-//     });
-//   }
-// };
-
-
-
-
-// Get Wallet Status (for dashboard)
-
 
 
 export const createWallet = async (req, res) => {
@@ -753,3 +692,28 @@ export const getWalletStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

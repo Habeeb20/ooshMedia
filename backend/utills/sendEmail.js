@@ -1,5 +1,17 @@
 import nodemailer from "nodemailer";
 import dotenv from 'dotenv';
+import jwt from "jsonwebtoken"
+export const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      currentRole: user.currentRole,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+  );
+};
 
 dotenv.config();
 const transporter = nodemailer.createTransport({

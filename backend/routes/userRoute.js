@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendOTP, verifyOtp, signup, login, forgotPassword, resetPassword, getDashboard, updateBusinessProfile, createWallet, getWalletStatus } from '../controllers/userController.js';
+import { sendOTP, verifyOtp, signup, login, forgotPassword, resetPassword, getDashboard, updateBusinessProfile, createWallet, getWalletStatus, requestEAuthOtp, verifyEAuthOtp } from '../controllers/userController.js';
 import {verifyToken} from "../middleware/verifyToken.js"
 import {upload} from "../middleware/multer.js"
 const router = express.Router();
@@ -20,4 +20,7 @@ router.put(
 );
 router.post('/create', verifyToken, createWallet);
 router.get('/status', verifyToken, getWalletStatus);
+
+router.post('/e-auth/request', requestEAuthOtp);
+router.post('/e-auth/verify', verifyEAuthOtp);
 export default router;

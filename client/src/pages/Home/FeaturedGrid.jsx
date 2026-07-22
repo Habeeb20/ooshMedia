@@ -272,7 +272,7 @@ const features = [
 
   {
     title: "Eparts",
-    description: "Shop thousands of premium parts products across categories.",
+    description: "Shop  premium parts products across categories.",
     icon: ShoppingBag,
     gradient: "from-[#111827] to-[#1F2937]",
     link: "/eparts",
@@ -281,7 +281,7 @@ const features = [
 
   {
     title: "BusiBody",
-    description: "check out  beauty product for women",
+    description: "check out  beauty product for women across categories",
     icon: BadgeDollarSign,
     gradient: "from-[#1E3A8A] to-[#2563EB]",
     link: "/busibody",

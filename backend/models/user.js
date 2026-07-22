@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema({
   profilePicture: String,
   password: { type: String, required: true },
 
+  eAuthOtp: {
+  code: { type: String, select: false },
+  expiresAt: { type: Date },
+  attempts: { type: Number, default: 0 },
+},
+
     uniqueNumber: { type: String, unique: true, sparse: true },
     referralCode: { type: String, unique: true, sparse: true },
     referralPoints: { type: Number, default: 0 },
