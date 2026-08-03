@@ -7,7 +7,8 @@ import { createProduct,  getSellerProducts,
   likeProduct,
   viewProduct,
   rateProduct,
-  getProductsByCategory} from '../../controllers/sellers/productController.js';
+  getProductsByCategory,
+  getBuildMaterialsProducts} from '../../controllers/sellers/productController.js';
 import { verifyToken } from '../../middleware/verifyToken.js';
 import { upload } from '../../middleware/multer.js';
 import { getAllProducts, getAllPartProducts } from '../../controllers/sellers/productController.js';
@@ -19,6 +20,7 @@ router.post('/', verifyToken, createProduct);
 router.get('/category', getProductsByCategory);
 router.get('/all', getAllProducts);
 router.get("/parts", getAllPartProducts);
+router.get('/building-materials', getBuildMaterialsProducts);
 
 router.get('/', verifyToken, getSellerProducts);
 router.put('/:id', verifyToken, updateProduct);

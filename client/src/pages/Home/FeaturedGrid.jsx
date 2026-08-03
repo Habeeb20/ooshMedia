@@ -1,3 +1,6 @@
+
+
+
 // import { useState } from 'react';
 // import {
 //   Store,
@@ -48,20 +51,30 @@
 //   },
 
 //   {
-//     title: "Marketplace",
-//     description: "Shop thousands of premium products across categories.",
+//     title: "Eparts",
+//     description: "Shop  premium parts products across categories.",
 //     icon: ShoppingBag,
 //     gradient: "from-[#111827] to-[#1F2937]",
-//     link: "/marketplace",
+//     link: "/eparts",
+//         requiresAuth: true,
 //   },
 
 //   {
-//     title: "Price Checker",
-//     description: "Compare product prices instantly across multiple vendors.",
+//     title: "BusiBody",
+//     description: "check out  beauty product for women across categories",
 //     icon: BadgeDollarSign,
 //     gradient: "from-[#1E3A8A] to-[#2563EB]",
-//     link: "/price-checker",
+//     link: "/busibody",
+//         requiresAuth: true,
 //   },
+//   // {
+//   //   title: "Price Checker",
+//   //   description: "Compare product prices instantly across multiple vendors.",
+//   //   icon: BadgeDollarSign,
+//   //   gradient: "from-[#1E3A8A] to-[#2563EB]",
+//   //   link: "/price-checker",
+//   //       requiresAuth: true,
+//   // },
 
 //   {
 //     title: "Vendors",
@@ -69,6 +82,7 @@
 //     icon: Truck,
 //     gradient: "from-[#059669] to-[#10B981]",
 //     link: "/vendors",
+//         requiresAuth: true,
 //   },
 // ];
 
@@ -78,6 +92,7 @@
 //     title: "Edrivers",
 //     link: "https://edrivers.ng",
 //     description: "looking to hire drivers ",
+    
 //   },
 //   {
 //     title: "Efixit",
@@ -114,36 +129,34 @@
 //               className="block"
 //             >
 //               <div
-//                 className="group relative overflow-hidden rounded-[1rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
+//                 className="group relative overflow-hidden rounded-[0.5rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
 //                 style={{
 //                   background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
 //                 }}
 //               >
-//                 <div className="bg-white rounded-[2rem] p-3 h-full relative overflow-hidden  shadow-sm hover:shadow-2xl transition-all duration-500">
+//                 <div className="bg-white rounded-[0.8rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
 //                   <div
 //                     className={`absolute top-0 right-0 w-40 h-10 rounded-full blur-3xl opacity-10 bg-gradient-to-br ${item.gradient}`}
 //                   />
 
 //                   <div
-//                     className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center ml-10 justify-center  text-white shadow-lg`}
+//                     className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white shadow-lg mx-auto`}
 //                   >
 //                     <Icon size={30} />
 //                   </div>
 
-//                   <div className="mt-1  z-10">
+//                   <div className="mt-1 z-10">
 //                     <h3 className="text-sm text-center font-black text-gray-900">
 //                       {item.title}
 //                     </h3>
-               
 //                   </div>
-//                        <h3 className="text-xs font-light font-black text-gray-900">
-//                       {item.description}
-//                     </h3>
+//                   <h3 className="text-xs text-center font-light font-black text-gray-900">
+//                     {item.description}
+//                   </h3>
 
-
-//    <h3 className="text-sm text-center font-black pt-5 text-rose-900">
-//                       Explore now
-//                     </h3>
+//                   <h3 className="text-sm text-center font-black pt-5 text-rose-900">
+//                     Explore now
+//                   </h3>
 //                   <div
 //                     className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
 //                     style={{ background: appConfig.colors.primary }}
@@ -155,24 +168,25 @@
 //         })}
 
 //         {/* Other Services Card */}
+//           {isAuthenticated && (
 //         <button
 //           onClick={() => setShowOtherModal(true)}
 //           className="block w-full text-left"
 //         >
 //           <div
-//             className="group relative overflow-hidden rounded-[2rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
+//              className="group relative overflow-hidden rounded-[0.5rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
 //             style={{
 //               background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
 //             }}
 //           >
-//             <div className="bg-white rounded-[2rem] p-3 h-full relative overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500">
-//               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#9333EA] flex items-center justify-center text-white shadow-lg">
+//              <div className="bg-white rounded-[0.8rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
+//               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#9333EA] flex items-center justify-center text-white shadow-lg mx-auto">
 //                 <Users size={30} />
 //               </div>
 
 //               <div className="mt-1 relative z-10">
 //                 <h3 className="text-sm font-black text-gray-900">Other Services</h3>
-//                 <p className="text-xs text-gray-500 mt-0.5">Edrivers, Efixit, E Hotels</p>
+//                 <p className="text-xs text-gray-500 mt-0.5">You can access our other services, they are  reliable for getting drivers,service providers</p>
 //               </div>
 
 //               <div
@@ -182,6 +196,9 @@
 //             </div>
 //           </div>
 //         </button>
+      
+      
+//         )}
 //       </div>
 
 //       {/* Other Services Modal */}
@@ -200,6 +217,7 @@
 //                 >
 //                   <span className="font-semibold text-lg">{service.title}</span> <br/>
 //                   <span className=" text-lg">{service.description}</span>
+                  
 //                 </Link>
 //               ))}
 //             </div>
@@ -216,7 +234,6 @@
 //     </section>
 //   );
 // }
-
 
 
 
@@ -238,7 +255,7 @@ import appConfig from "../../config/appConfig";
 
 const features = [
   {
-    title: "contracts",
+    title: "Contracts",
     description: "Discover trusted vendors and premium business stores.",
     icon: Store,
     gradient: "from-[#8B1E3F] to-[#A6224A]",
@@ -246,7 +263,7 @@ const features = [
     requiresAuth: true,
   },
   {
-    title: "supply",
+    title: "Supply",
     description: "Discover trusted vendors and premium business stores.",
     icon: Store,
     gradient: "from-[#8B1E3F] to-[#A6224A]",
@@ -254,7 +271,7 @@ const features = [
     requiresAuth: true,
   },
   {
-    title: "jobs",
+    title: "Jobs",
     description: "Discover trusted vendors and premium business stores.",
     icon: Store,
     gradient: "from-[#8B1E3F] to-[#A6224A]",
@@ -272,37 +289,29 @@ const features = [
 
   {
     title: "Eparts",
-    description: "Shop  premium parts products across categories.",
+    description: "Shop premium parts products across categories.",
     icon: ShoppingBag,
     gradient: "from-[#111827] to-[#1F2937]",
     link: "/eparts",
-        requiresAuth: true,
+    requiresAuth: true,
   },
 
   {
     title: "BusiBody",
-    description: "check out  beauty product for women across categories",
+    description: "Check out beauty products for women across categories.",
     icon: BadgeDollarSign,
     gradient: "from-[#1E3A8A] to-[#2563EB]",
     link: "/busibody",
-        requiresAuth: true,
+    requiresAuth: true,
   },
-  // {
-  //   title: "Price Checker",
-  //   description: "Compare product prices instantly across multiple vendors.",
-  //   icon: BadgeDollarSign,
-  //   gradient: "from-[#1E3A8A] to-[#2563EB]",
-  //   link: "/price-checker",
-  //       requiresAuth: true,
-  // },
 
   {
     title: "Vendors",
-    description: "Hire reliable disput riders and errand services easily.",
+    description: "Hire reliable dispatch riders and errand services easily.",
     icon: Truck,
     gradient: "from-[#059669] to-[#10B981]",
     link: "/vendors",
-        requiresAuth: true,
+    requiresAuth: true,
   },
 ];
 
@@ -311,18 +320,17 @@ const otherServices = [
   {
     title: "Edrivers",
     link: "https://edrivers.ng",
-    description: "looking to hire drivers ",
-    
+    description: "Looking to hire drivers.",
   },
   {
     title: "Efixit",
     link: "https://efixit.ng",
-    description: "looking for service providers to fix render services",
+    description: "Looking for service providers to fix and render services.",
   },
   {
     title: "E Hotels",
     link: "/e-hotels",
-    description: "looking to get an hotel ",
+    description: "Looking to get a hotel.",
   },
 ];
 
@@ -346,6 +354,8 @@ export default function FeatureGrid() {
             <Link
               key={index}
               to={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
               className="block"
             >
               <div
@@ -388,36 +398,34 @@ export default function FeatureGrid() {
         })}
 
         {/* Other Services Card */}
-          {isAuthenticated && (
-        <button
-          onClick={() => setShowOtherModal(true)}
-          className="block w-full text-left"
-        >
-          <div
-             className="group relative overflow-hidden rounded-[0.5rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
-            style={{
-              background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
-            }}
+        {isAuthenticated && (
+          <button
+            onClick={() => setShowOtherModal(true)}
+            className="block w-full text-left"
           >
-             <div className="bg-white rounded-[0.8rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#9333EA] flex items-center justify-center text-white shadow-lg mx-auto">
-                <Users size={30} />
-              </div>
+            <div
+              className="group relative overflow-hidden rounded-[0.5rem] p-[1px] hover:scale-[1.02] transition-all duration-300"
+              style={{
+                background: `linear-gradient(135deg, ${appConfig.colors.primaryLight}, transparent)`,
+              }}
+            >
+              <div className="bg-white rounded-[0.8rem] p-3 h-full relative overflow-hidden flex flex-col items-center text-center shadow-sm hover:shadow-2xl transition-all duration-500">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#9333EA] flex items-center justify-center text-white shadow-lg mx-auto">
+                  <Users size={30} />
+                </div>
 
-              <div className="mt-1 relative z-10">
-                <h3 className="text-sm font-black text-gray-900">Other Services</h3>
-                <p className="text-xs text-gray-500 mt-0.5">You can access our other services, they are  reliable for getting drivers,service providers</p>
-              </div>
+                <div className="mt-1 relative z-10">
+                  <h3 className="text-sm font-black text-gray-900">Essential Products</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">You can access our other services, they are reliable for getting drivers etc</p>
+                </div>
 
-              <div
-                className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
-                style={{ background: appConfig.colors.primary }}
-              />
+                <div
+                  className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
+                  style={{ background: appConfig.colors.primary }}
+                />
+              </div>
             </div>
-          </div>
-        </button>
-      
-      
+          </button>
         )}
       </div>
 
@@ -425,19 +433,20 @@ export default function FeatureGrid() {
       {showOtherModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-8">
-            <h2 className="text-2xl font-bold text-center mb-8">Other Services</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">Essential Products</h2>
 
             <div className="space-y-3">
               {otherServices.map((service, i) => (
                 <Link
                   key={i}
                   to={service.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => setShowOtherModal(false)}
                   className="block w-full text-left px-6 py-5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors"
                 >
                   <span className="font-semibold text-lg">{service.title}</span> <br/>
-                  <span className=" text-lg">{service.description}</span>
-                  
+                  <span className="text-lg">{service.description}</span>
                 </Link>
               ))}
             </div>

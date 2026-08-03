@@ -1551,7 +1551,7 @@ const fetchProduct = async () => {
                       {partner.businessName || `${partner.firstName || ""} ${partner.lastName || ""}`}
                     </p>
                     <p className="text-sm text-gray-500">@{partner.username}</p>
-                    <p className="text-sm text-gray-500">{partner.phoneNumber}</p>
+                    {/* <p className="text-sm text-gray-500">{partner.phoneNumber}</p> */}
                     <p className="text-sm text-gray-500">{partner.address}</p>
                     <p className="text-sm font-bold text-black">{partner.relationship}</p>
     

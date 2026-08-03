@@ -440,6 +440,23 @@ export const getUserPosts = async (req, res) => {
 
 
 
+// export const finalizePost = async (req, res) => {
+//   try {
+//     const post = await Post.findById(req.params.id);
+//     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+//     if (post.author.toString() !== req.user._id.toString()) {
+//       return res.status(403).json({ success: false, message: 'Unauthorized' });
+//     }
+//     post.status = 'closed';
+//     await post.save();
+//     res.status(200).json({ success: true, data: post });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+
+
 export const finalizePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -447,8 +464,15 @@ export const finalizePost = async (req, res) => {
     if (post.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
-    post.status = 'closed';
+
+    // Switch: active <-> closed. Drafts are left alone — publish first.
+    if (post.status === 'draft') {
+      return res.status(400).json({ success: false, message: 'Draft posts must be published before they can be closed' });
+    }
+
+    post.status = post.status === 'closed' ? 'active' : 'closed';
     await post.save();
+
     res.status(200).json({ success: true, data: post });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

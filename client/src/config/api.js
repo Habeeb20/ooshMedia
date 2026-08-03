@@ -144,6 +144,12 @@ export const dealsAPI = {
 
   sendMessage: (id, text) => request(`/deals/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
   getMessages: (id) => request(`/deals/${id}/messages`),
+  
+replyMessage: (dealId, conversationId, text) =>
+  request(`/deals/${dealId}/messages/${conversationId}/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  }),
 };
 
 export const subscriptionAPI = {
@@ -231,3 +237,5 @@ export const subscriptionAPI = {
 //     res.status(500).json({ message: err.message });
 //   }
 // });
+
+

@@ -50,7 +50,7 @@ const getProviderText = (p) =>
     .toLowerCase();
 
 // Product shape varies a fair bit across the estores catalog, so try a
-// handful of common field names before giving up.
+// handful of common field names before giving up
 const getProductImage = (prod) => {
   const img =
     prod.images?.[0]?.url ||

@@ -89,11 +89,18 @@ export default function ChatPanel({
   }, [loadChat]);
 
   useEffect(() => {
-    if (!minimized) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  }, [messages, minimized]);
+  if (!minimized) {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 100);
+  }
+}, [messages, minimized]);
+
+  // useEffect(() => {
+  //   if (!minimized) {
+  //     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  //     setTimeout(() => inputRef.current?.focus(), 100);
+  //   }
+  // }, [messages, minimized]);
 
   const handleSend = async (e) => {
     e.preventDefault();

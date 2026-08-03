@@ -119,10 +119,10 @@ export default function FashionProductsSlider() {
         >
           <div>
             <h2
-              className="text-xl md:text-3xl font-black flex items-center gap-3"
-              style={{
-                color: appConfig.colors.primary,
-              }}
+              className="text-xl md:text-3xl font-black  flex items-center gap-3"
+              // style={{
+              //   color: appConfig.colors.primary,
+              // }}
             >
               👗 Fashion Deals
             </h2>
@@ -227,7 +227,7 @@ export default function FashionProductsSlider() {
                           )}
 
                           {/* ACTIONS */}
-                          <div className="absolute top-3 right-3 flex flex-col gap-2">
+                          {/* <div className="absolute top-3 right-3 flex flex-col gap-2">
                             <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                               <Heart size={16} />
                             </button>
@@ -235,7 +235,7 @@ export default function FashionProductsSlider() {
                             <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                               <Eye size={16} />
                             </button>
-                          </div>
+                          </div> */}
                         </div>
                       </Link>
 

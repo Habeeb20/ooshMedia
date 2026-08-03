@@ -84,12 +84,16 @@ function ReviewItem({ review }) {
   );
 }
 
+
+
+
 // function ConversationItem({ conv, currentUserId }) {
 //   const [open, setOpen] = useState(false);
 //   const other = conv.participants?.find(p => p._id !== currentUserId);
 //   const otherName = other
 //     ? `${other.firstName || ''} ${other.lastName || ''}`.trim() || other.username
 //     : 'User';
+
 //   return (
 //     <div className="bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
 //       <button
@@ -104,13 +108,20 @@ function ReviewItem({ review }) {
 //       {open && (
 //         <div className="border-t border-gray-100 p-3 flex flex-col gap-2">
 //           {conv.messages?.map((m, i) => (
-//             <div key={i} className={`max-w-[80%] ${m.sender === currentUserId ? 'self-end' : 'self-start'}`}>
-//               <p className={`text-xs px-3 py-2 rounded-xl leading-relaxed
-//                 ${m.sender === currentUserId
+//             <div
+//               key={i}
+//               className={`max-w-[80%] flex flex-col ${
+//                 String(m.sender) === String(currentUserId) ? 'self-end items-end' : 'self-start items-start'
+//               }`}
+//             >
+//               <p className={`text-xs px-3 py-2 rounded-xl leading-relaxed ${
+//                 String(m.sender) === String(currentUserId)
 //                   ? 'bg-[#8B1E3F]/10 text-gray-800'
-//                   : 'bg-white border border-gray-100 text-gray-700'}`}
-//               >{m.text}</p>
-//               <span className="text-[10px] text-gray-400 block mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
+//                   : 'bg-white border border-gray-100 text-gray-700'
+//               }`}>
+//                 {m.text}
+//               </p>
+//               <span className="text-[10px] text-gray-400 mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
 //             </div>
 //           ))}
 //         </div>
@@ -119,13 +130,27 @@ function ReviewItem({ review }) {
 //   );
 // }
 
-
-function ConversationItem({ conv, currentUserId }) {
+function ConversationItem({ conv, currentUserId, isAuthor, dealId, onMessageSent }) {
   const [open, setOpen] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
   const other = conv.participants?.find(p => p._id !== currentUserId);
   const otherName = other
     ? `${other.firstName || ''} ${other.lastName || ''}`.trim() || other.username
     : 'User';
+
+  const handleReply = async (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || sending) return;
+    setSending(true);
+    try {
+      await dealsAPI.replyMessage(dealId, conv._id, replyText);
+      setReplyText('');
+      await onMessageSent?.();
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl overflow-hidden">
@@ -157,6 +182,25 @@ function ConversationItem({ conv, currentUserId }) {
               <span className="text-[10px] text-gray-400 mt-0.5 px-1">{timeAgo(m.createdAt)}</span>
             </div>
           ))}
+
+          {/* Only the seller (deal owner) can reply here */}
+          {isAuthor && (
+            <form onSubmit={handleReply} className="flex gap-2 mt-1 pt-2 border-t border-gray-100">
+              <input
+                className="flex-1 text-xs px-3 py-2 bg-white border border-gray-100 rounded-xl outline-none focus:border-[#8B1E3F] text-gray-700 placeholder-gray-400"
+                placeholder={`Reply to ${otherName}…`}
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+              />
+              <button
+                type="submit"
+                disabled={sending || !replyText.trim()}
+                className="px-3 py-2 bg-[#8B1E3F] text-white rounded-xl hover:bg-[#7a1835] transition disabled:opacity-50 flex items-center"
+              >
+                <Send size={12} />
+              </button>
+            </form>
+          )}
         </div>
       )}
     </div>
@@ -605,7 +649,7 @@ const loadMessages = async () => {
                   )}
 
                   {/* Messages (author only) */}
-                  {tab === 'Messages' && (
+                  {/* {tab === 'Messages' && (
                     <div className="flex flex-col gap-2">
                       {!isAuthor && <p className="text-xs text-gray-400 text-center py-6">Only the post author can view messages here.</p>}
                       {isAuthor && conversations.length === 0 && <p className="text-xs text-gray-400 text-center py-6">No messages yet.</p>}
@@ -613,8 +657,25 @@ const loadMessages = async () => {
                         <ConversationItem key={conv._id} conv={conv} currentUserId={currentUser?._id} />
                       ))}
                     </div>
-                  )}
+                  )} */}
 
+
+{tab === 'Messages' && (
+  <div className="flex flex-col gap-2">
+    {!isAuthor && <p className="text-xs text-gray-400 text-center py-6">Only the post author can view messages here.</p>}
+    {isAuthor && conversations.length === 0 && <p className="text-xs text-gray-400 text-center py-6">No messages yet.</p>}
+    {isAuthor && conversations.map(conv => (
+      <ConversationItem
+        key={conv._id}
+        conv={conv}
+        currentUserId={currentUser?._id}
+        isAuthor={isAuthor}
+        dealId={dealId}
+        onMessageSent={loadMessages}
+      />
+    ))}
+  </div>
+)}
                 </div>
                 {/* end tab content */}
               </div>

@@ -1,7 +1,24 @@
-// import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-// import api from '../config/api';
 
-// const CartContext = createContext(null);
+
+// import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+// // import api from '../utils/api';
+// import api from '../config/api';
+// import axios from 'axios';
+// import {toast} from 'sonner'
+// const defaultValue = {
+//   cart: null,
+//   loading: false,
+//   cartCount: 0,
+//   cartTotal: 0,
+//   fetchCart: async () => {},
+//   addToCart: async () => ({ success: false, message: 'CartProvider not mounted' }),
+//   updateItem: async () => {},
+//   removeItem: async () => {},
+//   updateFulfillment: async () => {},
+//   clearCart: async () => {},
+// };
+
+// const CartContext = createContext(defaultValue);
 
 // export const CartProvider = ({ children }) => {
 //   const [cart, setCart] = useState(null);
@@ -10,6 +27,7 @@
 //   const fetchCart = useCallback(async () => {
 //     try {
 //       const { data } = await api.get('/api/cart');
+//       console.log(data)
 //       setCart(data);
 //     } catch (err) {
 //       console.error(err);
@@ -23,8 +41,10 @@
 //     try {
 //       const { data } = await api.post('/api/cart/add', { productId, quantity });
 //       setCart(data.cart);
+//       toast.success('Item added to cart');
 //       return { success: true };
 //     } catch (err) {
+//       toast.error( err.response?.data?.message || 'Failed to add item to cart');
 //       return { success: false, message: err.response?.data?.message };
 //     } finally {
 //       setLoading(false);
@@ -35,7 +55,9 @@
 //     try {
 //       const { data } = await api.put(`/api/cart/item/${productId}`, { quantity });
 //       setCart(data.cart);
+//       toast.success('Cart updated');
 //     } catch (err) {
+//       toast.error( err.response?.data?.message || 'Failed to update cart');
 //       console.error(err);
 //     }
 //   };
@@ -44,7 +66,9 @@
 //     try {
 //       const { data } = await api.delete(`/api/cart/item/${productId}`);
 //       setCart(data.cart);
+//       toast.success('Item removed from cart');
 //     } catch (err) {
+//       toast.error( err.response?.data?.message || 'Failed to remove item from cart');
 //       console.error(err);
 //     }
 //   };
@@ -53,13 +77,16 @@
 //     try {
 //       const { data } = await api.put('/api/cart/fulfillment', options);
 //       setCart(data.cart);
+//       toast.success('Fulfillment updated');
 //     } catch (err) {
+//       toast.error( err.response?.data?.message || 'Failed to update fulfillment');
 //       console.error(err);
 //     }
 //   };
 
 //   const clearCart = async () => {
-//     await api.delete('/api/cart');
+//     await api.delete('/cart');
+//     toast.success('Cart cleared');
 //     setCart(null);
 //   };
 
@@ -76,6 +103,8 @@
 //   );
 // };
 
+
+// // Safe hook — works even if CartProvider is not yet mounted
 // export const useCart = () => useContext(CartContext);
 
 
@@ -106,16 +135,10 @@
 
 
 
-
-
-
-
-
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-// import api from '../utils/api';
 import api from '../config/api';
-import axios from 'axios';
-import {toast} from 'sonner'
+import { toast } from 'sonner';
+
 const defaultValue = {
   cart: null,
   loading: false,
@@ -131,6 +154,19 @@ const defaultValue = {
 
 const CartContext = createContext(defaultValue);
 
+// Ensures every item.productId is always a plain string ID,
+// regardless of whether the backend sent item.product populated or as a raw ObjectId.
+const normalizeCart = (rawCart) => {
+  if (!rawCart) return rawCart;
+  return {
+    ...rawCart,
+    items: (rawCart.items || []).map(item => ({
+      ...item,
+      productId: typeof item.product === 'string' ? item.product : item.product?._id,
+    })),
+  };
+};
+
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -138,8 +174,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = useCallback(async () => {
     try {
       const { data } = await api.get('/api/cart');
-      console.log(data)
-      setCart(data);
+      setCart(normalizeCart(data));
     } catch (err) {
       console.error(err);
     }
@@ -151,11 +186,11 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       const { data } = await api.post('/api/cart/add', { productId, quantity });
-      setCart(data.cart);
+      setCart(normalizeCart(data.cart));
       toast.success('Item added to cart');
       return { success: true };
     } catch (err) {
-      toast.error( err.response?.data?.message || 'Failed to add item to cart');
+      toast.error(err.response?.data?.message || 'Failed to add item to cart');
       return { success: false, message: err.response?.data?.message };
     } finally {
       setLoading(false);
@@ -165,10 +200,10 @@ export const CartProvider = ({ children }) => {
   const updateItem = async (productId, quantity) => {
     try {
       const { data } = await api.put(`/api/cart/item/${productId}`, { quantity });
-      setCart(data.cart);
+      setCart(normalizeCart(data.cart));
       toast.success('Cart updated');
     } catch (err) {
-      toast.error( err.response?.data?.message || 'Failed to update cart');
+      toast.error(err.response?.data?.message || 'Failed to update cart');
       console.error(err);
     }
   };
@@ -176,10 +211,10 @@ export const CartProvider = ({ children }) => {
   const removeItem = async (productId) => {
     try {
       const { data } = await api.delete(`/api/cart/item/${productId}`);
-      setCart(data.cart);
+      setCart(normalizeCart(data.cart));
       toast.success('Item removed from cart');
     } catch (err) {
-      toast.error( err.response?.data?.message || 'Failed to remove item from cart');
+      toast.error(err.response?.data?.message || 'Failed to remove item from cart');
       console.error(err);
     }
   };
@@ -187,18 +222,23 @@ export const CartProvider = ({ children }) => {
   const updateFulfillment = async (options) => {
     try {
       const { data } = await api.put('/api/cart/fulfillment', options);
-      setCart(data.cart);
+      setCart(normalizeCart(data.cart));
       toast.success('Fulfillment updated');
     } catch (err) {
-      toast.error( err.response?.data?.message || 'Failed to update fulfillment');
+      toast.error(err.response?.data?.message || 'Failed to update fulfillment');
       console.error(err);
     }
   };
 
   const clearCart = async () => {
-    await api.delete('/cart');
-    toast.success('Cart cleared');
-    setCart(null);
+    try {
+      await api.delete('/api/cart');
+      toast.success('Cart cleared');
+      setCart(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to clear cart');
+      console.error(err);
+    }
   };
 
   const cartCount = cart?.items?.reduce((s, i) => s + i.quantity, 0) || 0;
@@ -214,36 +254,5 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-
 // Safe hook — works even if CartProvider is not yet mounted
 export const useCart = () => useContext(CartContext);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

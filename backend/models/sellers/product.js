@@ -13,13 +13,23 @@ const productSchema = new mongoose.Schema({
   salePrice: { type: Number },
 
   category: { type: String, required: true },
-  subCategory: {type:String, required: true},
+  subCategory: {type:String, },
 
   stockQuantity: { type: Number, required: true, default: 0 },
   lowStockThreshold: { type: Number, default: 10 },
   part:{type: Boolean, default: false},
+
   whatPart:{type: String},
   subCategoryPart:{type: String},
+    condition:{type: String},
+  yearOfMake:{type:String},
+ //////if is a car part ///////
+    gearTransmission:{type: String},
+  fuelType:{type:String},
+  maker:{type:String},
+  
+
+
 
   images: [{
     url: String,

@@ -517,6 +517,23 @@ export const getProductsByCategory = async (req, res) => {
   }
 };
 
+
+
+export const getBuildMaterialsProducts = async (req, res) => {
+ try {
+      const category = 'building-materials';
+      const products = await Product.find({ category })
+        .select('-__v -createdAt -updatedAt')
+        .sort({ name: 1 });
+
+      res.json(products);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error fetching products' });
+    }
+  }
+
+
 /**
  * Picks a display name + storefront-relevant fields from a populated seller,
  * regardless of whether they're an individual ('user') or a business ('entity').

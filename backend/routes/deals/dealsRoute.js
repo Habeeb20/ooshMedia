@@ -239,79 +239,8 @@ router.put('/:id/status', verifyToken, async (req, res) => {
 const POINTS_PER_PURCHASE = 10;
 const AMOUNT_KOBO = 1000000; // ₦10,000 in kobo
 
-/** POST /api/deals/subscription/initiate — start Paystack payment */
-
-// router.post('/subscription/initiate', verifyToken, async (req, res) => {
-//   console.log('req.body:', req.body); // ← check your server terminal for this
-//   try {
-//     // ✅ Accept the reference generated client-side
-//     const { reference } = req.body;
-
-//     if (!reference) {
-//       return res.status(400).json({ message: 'Transaction reference is required.' });
-//     }
-
-//     const response = await axios.post(
-//       'https://api.paystack.co/transaction/initialize',
-//       {
-//         email: req.user.email || req.user.alternateContact,
-//         amount: AMOUNT_KOBO,
-//         reference, // ✅ pass it to Paystack so both sides agree on the same ref
-//         metadata: {
-//           userId: req.user._id.toString(),
-//           points: POINTS_PER_PURCHASE,
-//         },
-//         callback_url: `${process.env.FRONTEND_URL}/subscription/verify`,
-//       },
-//       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
-//     );
-
-//     res.json(response.data);
-//   } catch (err) {
-//     console.log(err.response?.data?.message || err.message);
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-// /** GET /api/deals/subscription/verify?reference=xxx — verify after redirect */
-// router.get('/subscription/verify', verifyToken, async (req, res) => {
-//   try {
-//     const { reference } = req.query;
-//     const response = await axios.get(
-//       `https://api.paystack.co/transaction/verify/${reference}`,
-//       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
-//     );
-
-//     if (response.data.data.status === 'success') {
-//       await Subscription.findOneAndUpdate(
-//         { user: req.user._id },
-//         {
-//           $inc: { points: POINTS_PER_PURCHASE, totalPurchased: POINTS_PER_PURCHASE },
-//           $push: {
-//             transactions: {
-//               reference,
-//               amount: AMOUNT_KOBO,
-//               pointsAdded: POINTS_PER_PURCHASE,
-//               status: 'success',
-//             },
-//           },
-//         },
-//         { upsert: true, new: true }
-//       );
-//       res.json({ message: 'Subscription successful', points: POINTS_PER_PURCHASE });
-//     } else {
-//       res.status(400).json({ message: 'Payment not successful' });
-//     }
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
 
 
-
-
-
-// POST /api/deals/subscription/initiate
 router.post('/subscription/initiate', verifyToken, async (req, res) => {
   try {
     const reference = `sub-${req.user._id}-${Date.now()}`;
@@ -482,6 +411,47 @@ console.log('Fetched conversations:', conversations);
   }
 });
 
+
+
+/** POST /api/deals/:id/messages/:conversationId/reply — seller (deal owner) replies, no point cost */
+router.post('/:id/messages/:conversationId/reply', verifyToken, async (req, res) => {
+  try {
+    const deal = await Deal.findById(req.params.id);
+    if (!deal) return res.status(404).json({ message: 'Deal not found' });
+
+    // Only the deal owner can reply through this route
+    if (deal.author.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: 'Only the deal owner can reply here' });
+
+    if (!req.body.text?.trim())
+      return res.status(400).json({ message: 'Message text is required' });
+
+    const conversation = await Conversation.findOne({
+      _id: req.params.conversationId,
+      deal: deal._id,
+    });
+    if (!conversation) return res.status(404).json({ message: 'Conversation not found' });
+
+    const recipientId = conversation.participants.find(
+      p => p.toString() !== req.user._id.toString()
+    );
+    if (!recipientId) return res.status(400).json({ message: 'Recipient not found in conversation' });
+
+    conversation.messages.push({
+      deal: deal._id,
+      sender: req.user._id,
+      recipient: recipientId,
+      text: req.body.text,
+    });
+    conversation.lastMessage = new Date();
+    await conversation.save();
+
+    await conversation.populate('participants', 'firstName lastName username avatar');
+    res.status(201).json(conversation);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 // ════════════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════════════

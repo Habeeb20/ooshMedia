@@ -852,7 +852,7 @@ function ProductCard({ product, viewMode, primaryColor }) {
         </div>
 
         {/* Wishlist */}
-        <button
+        {/* <button
           onClick={(e) => { e.preventDefault(); setWishlisted(!wishlisted); }}
           className="absolute top-2.5 right-2.5 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
         >
@@ -860,7 +860,7 @@ function ProductCard({ product, viewMode, primaryColor }) {
             size={14}
             className={wishlisted ? "fill-red-500 text-red-500" : "text-gray-400"}
           />
-        </button>
+        </button> */}
       </Link>
 
       {/* Content */}

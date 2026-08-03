@@ -352,7 +352,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Category Navigation */}
-          <div className="hidden lg:flex items-center gap-2 pb-3 overflow-x-auto no-scrollbar">
+          {/* <div className="hidden lg:flex items-center gap-2 pb-3 overflow-x-auto no-scrollbar">
             <button
               className="flex items-center gap-2 px-5 py-2 rounded-xl text-white text-sm font-semibold whitespace-nowrap"
               style={{ background: appConfig.colors.primary }}
@@ -374,7 +374,7 @@ export default function Navbar() {
             <a href="/deals" className="ml-auto px-5 py-2 rounded-xl text-sm font-bold text-orange-600 hover:bg-orange-50 transition-all whitespace-nowrap">
               🔥 Today's Deals
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
 

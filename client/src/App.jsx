@@ -51,6 +51,8 @@ import HerbalMarketplace from "./pages/others/Eherbal";
 import InventoryAccessCallback from "./pages/vendor/Inventoryaccesscallback";
 import VerifyCallback from "./pages/VerifyCallback";
 
+import AutoParts from "./pages/others/Autoparts";
+
 const App = () => {
   useScrollToTop();
 
@@ -176,6 +178,7 @@ const App = () => {
             />
 <Route path="/verify/callback" element={<VerifyCallback />} />
             <Route path="/eparts" element={<Eparts />} />
+            <Route path="/carparts" element={<AutoParts/>} />
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />
           </Routes>

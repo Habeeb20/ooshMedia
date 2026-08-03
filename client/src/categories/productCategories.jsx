@@ -87,6 +87,14 @@ export const productCategories = [
     ]
   },
   {
+    id: "pharmacy",
+    name: "Pharmacy",
+    icon: "💊",
+    subcategories: [
+      "Drugs"
+    ]
+  },
+  {
     id: "groceries",
     name: "Groceries & Food",
     icon: "🛒",

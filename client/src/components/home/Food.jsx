@@ -415,9 +415,9 @@ export default function Food() {
           <div>
             <h2
               className="text-xl md:text-3xl font-black flex items-center gap-3"
-              style={{
-                color: appConfig.colors.primary,
-              }}
+              // style={{
+              //   color: appConfig.colors.primary,
+              // }}
             >
               👗 Groceries & Food
             </h2>
@@ -501,14 +501,14 @@ export default function Food() {
                           )}
 
                           {/* ACTIONS */}
-                          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                          {/* <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
                             <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                               <Heart size={16} />
                             </button>
                             <button className="bg-white rounded-full p-2 shadow-md hover:scale-110 transition">
                               <Eye size={16} />
                             </button>
-                          </div>
+                          </div> */}
                         </div>
                       </Link>
 

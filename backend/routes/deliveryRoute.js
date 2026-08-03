@@ -117,28 +117,43 @@ console.log(req.body)
     });
 
     // Email rider
-    await sendEmail({
-      to: rider.email,
-      subject: '🚴 New Delivery Request',
-      html: `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-          <div style="background:#881337;padding:24px;border-radius:12px 12px 0 0">
-            <h2 style="color:#fff;margin:0">New Delivery Request</h2>
-          </div>
-          <div style="padding:24px;background:#fff;border:1px solid #f1f5f9;border-radius:0 0 12px 12px">
-            <p>Hi <strong>${rider.firstName}</strong>,</p>
-            <p><strong>${seller.firstName} ${seller.lastName}</strong> has sent you a delivery request.</p>
-            <table style="width:100%;border-collapse:collapse;margin:16px 0">
-              <tr><td style="padding:8px;color:#64748b">Pickup</td><td style="padding:8px;font-weight:600">${sellerAddress}</td></tr>
-              <tr style="background:#fdf2f8"><td style="padding:8px;color:#64748b">Delivery</td><td style="padding:8px;font-weight:600">${order.delivery.address}</td></tr>
-              <tr><td style="padding:8px;color:#64748b">Distance</td><td style="padding:8px;font-weight:600">${distanceKm?.toFixed(1)} km</td></tr>
-              <tr style="background:#fdf2f8"><td style="padding:8px;color:#64748b">Offered Amount</td><td style="padding:8px;font-weight:600;color:#881337">₦${offeredAmount.toLocaleString()}</td></tr>
-            </table>
-            <p>Log in to accept, reject, or negotiate.</p>
-          </div>
+  await sendEmail({
+  to: rider.email,
+  subject: '🚴 New Delivery Request',
+  html: `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+      <div style="background:#881337;padding:24px;border-radius:12px 12px 0 0">
+        <h2 style="color:#fff;margin:0">New Delivery Request</h2>
+      </div>
+      <div style="padding:24px;background:#fff;border:1px solid #f1f5f9;border-radius:0 0 12px 12px">
+        <p>Hi <strong>${rider.firstName}</strong>,</p>
+        <p><strong>${seller.firstName} ${seller.lastName}</strong> has sent you a delivery request.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px;color:#64748b">Pickup</td><td style="padding:8px;font-weight:600">${sellerAddress}</td></tr>
+          <tr style="background:#fdf2f8"><td style="padding:8px;color:#64748b">Delivery</td><td style="padding:8px;font-weight:600">${order.delivery.address}</td></tr>
+          <tr><td style="padding:8px;color:#64748b">Distance</td><td style="padding:8px;font-weight:600">${distanceKm?.toFixed(1)} km</td></tr>
+          <tr style="background:#fdf2f8"><td style="padding:8px;color:#64748b">Offered Amount</td><td style="padding:8px;font-weight:600;color:#881337">₦${offeredAmount.toLocaleString()}</td></tr>
+        </table>
+        <p>Log in to accept, reject, or negotiate.</p>
+
+        <div style="text-align:center;margin:28px 0 12px">
+          <a href="${process.env.FRONTEND_URL}/dashboard?page=riderDashboard&orderId=${order._id}&action=accept"
+             style="display:inline-block;padding:12px 28px;margin:0 8px 8px;background:#059669;color:#fff;font-weight:600;text-decoration:none;border-radius:8px;font-size:14px">
+            ✓ Accept
+          </a>
+          <a href="${process.env.FRONTEND_URL}/dashboard?page=riderDashboard&orderId=${order._id}&action=reject"
+             style="display:inline-block;padding:12px 28px;margin:0 8px 8px;background:#dc2626;color:#fff;font-weight:600;text-decoration:none;border-radius:8px;font-size:14px">
+            ✕ Reject
+          </a>
         </div>
-      `,
-    });
+
+        <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:16px">
+          Or <a href="${process.env.FRONTEND_URL}/dashboard?page=riderDashboard" style="color:#881337">view full details in your dashboard</a>
+        </p>
+      </div>
+    </div>
+  `,
+});
 
     res.status(201).json({ success: true, deliveryRequest: deliveryReq });
   } catch (err) {

@@ -232,11 +232,11 @@ console.log(cart);
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <div className="flex justify-between text-gray-600 text-sm mb-1">
               <span>Subtotal</span>
-              <span>₦{cartTotal.toLocaleString()}</span>
+              <span>₦{cartTotal?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-bold text-gray-800 text-lg border-t pt-2">
               <span>Total</span>
-              <span>₦{cartTotal.toLocaleString()}</span>
+              <span>₦{cartTotal?.toLocaleString()}</span>
             </div>
             <button
               onClick={() => navigate('/checkout')}

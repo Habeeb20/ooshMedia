@@ -16,6 +16,129 @@ const generateDeliveryCode = () => String(Math.floor(1000 + Math.random() * 9000
 
 // ── CHECKOUT ───────────────────────────────────────────────
 // POST /orders/checkout
+// export const checkout = async (req, res) => {
+//   try {
+//     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
+//     if (!cart || cart.items.length === 0) {
+//       return res.status(400).json({ message: 'Cart is empty' });
+//     }
+
+//     // Validate stock & payment method
+//     for (const item of cart.items) {
+//       const product = item.product;
+//       if (!product || product.status !== 'active') {
+//         return res.status(400).json({ message: `${item.name} is no longer available` });
+//       }
+//       if (product.stockQuantity < item.quantity) {
+//         return res.status(400).json({ message: `Insufficient stock for ${item.name}` });
+//       }
+
+//       // Check seller's accepted payment methods
+//       const seller = await User.findById(item.seller);
+//       if (cart.paymentMethod === 'on_delivery' && !seller?.acceptsPaymentOnDelivery) {
+//         return res.status(400).json({
+//           message: `Seller of "${item.name}" does not accept payment on delivery`,
+//         });
+//       }
+//     }
+
+//     // Build order items with fee calculations
+//     let totalAmount = 0;
+//     let totalPlatformFee = 0;
+//     const orderItems = cart.items.map(item => {
+//       const subtotal = item.price * item.quantity;
+//       const platformFee = +(subtotal * PLATFORM_FEE_RATE).toFixed(2);
+//       const sellerAmount = +(subtotal - platformFee).toFixed(2);
+//       totalAmount += subtotal;
+//       totalPlatformFee += platformFee;
+//       return {
+//         product: item.product._id,
+//         seller: item.seller,
+//         name: item.name,
+//         image: item.image,
+//         price: item.price,
+//         quantity: item.quantity,
+//         subtotal,
+//         platformFee,
+//         sellerAmount,
+//       };
+//     });
+
+//     const deliveryCode = cart.fulfillmentType === 'delivery' ? generateDeliveryCode() : undefined;
+
+//     // Create order
+//     const order = new Order({
+//       buyer: req.user._id,
+//       seller:seller?._id,
+//       items: orderItems,
+//       fulfillmentType: cart.fulfillmentType,
+//       pickup: cart.pickup,
+//       delivery: {
+//         address: cart.delivery?.address,
+//         deliveryCode,
+//         isCodeVerified: false,
+//       },
+//       paymentMethod: cart.paymentMethod,
+//       paymentStatus: cart.paymentMethod === 'on_delivery' ? 'pending' : 'pending',
+//       status: 'pending',
+//       totalAmount: +totalAmount.toFixed(2),
+//       totalPlatformFee: +totalPlatformFee.toFixed(2),
+//       totalSellerAmount: +(totalAmount - totalPlatformFee).toFixed(2),
+//     });
+
+//     await order.save();
+
+//     // If paying online, initialize Paystack
+//     if (cart.paymentMethod === 'online') {
+//       const buyer = await User.findById(req.user._id);
+
+//       const paystackRes = await axios.post(
+//         'https://api.paystack.co/transaction/initialize',
+//         {
+//           email: buyer.email || buyer.alternateContact,
+//           amount: Math.round(totalAmount * 100), // kobo
+//           reference: `ORD-${order._id}-${Date.now()}`,
+//           metadata: { orderId: order._id.toString() },
+//           callback_url: `${process.env.FRONTEND_URL}/payment/verify`,
+//         },
+//         { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
+//       );
+//       order.paystackReference = paystackRes.data.data.reference;
+//       order.paystackAccessCode = paystackRes.data.data.access_code;
+//       await order.save();
+
+//       // Reduce stock optimistically
+//       await decreaseStock(cart.items);
+
+//       return res.json({
+//         order,
+//         paymentUrl: paystackRes.data.data.authorization_url,
+//         reference: paystackRes.data.data.reference,
+//         deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
+//       });
+//     }
+
+//     // Pay on delivery — just confirm order
+//     await decreaseStock(cart.items);
+//     order.status = 'confirmed';
+//     await order.save();
+
+//     // Create transaction record
+//     await createTransaction(order, 'pending');
+
+//     await Cart.findOneAndDelete({ buyer: req.user._id });
+
+//     res.json({
+//       order,
+//       deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
+//     });
+//   } catch (err) {
+//     console.error('Checkout error:', err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
 export const checkout = async (req, res) => {
   try {
     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
@@ -23,7 +146,10 @@ export const checkout = async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
-    // Validate stock & payment method
+    // Validate stock & payment method, capture seller info as we go
+    const sellerCache = new Map(); // avoid refetching the same seller repeatedly
+    let orderSellerId; // top-level order.seller (assumes single-seller cart)
+
     for (const item of cart.items) {
       const product = item.product;
       if (!product || product.status !== 'active') {
@@ -33,13 +159,21 @@ export const checkout = async (req, res) => {
         return res.status(400).json({ message: `Insufficient stock for ${item.name}` });
       }
 
-      // Check seller's accepted payment methods
-      const seller = await User.findById(item.seller);
+      const sellerId = item.seller.toString();
+      let seller = sellerCache.get(sellerId);
+      if (!seller) {
+        seller = await User.findById(item.seller);
+        sellerCache.set(sellerId, seller);
+      }
+
       if (cart.paymentMethod === 'on_delivery' && !seller?.acceptsPaymentOnDelivery) {
         return res.status(400).json({
           message: `Seller of "${item.name}" does not accept payment on delivery`,
         });
       }
+
+      // capture the seller for the order (last one wins if cart somehow has more than one)
+      orderSellerId = seller?._id;
     }
 
     // Build order items with fee calculations
@@ -69,7 +203,7 @@ export const checkout = async (req, res) => {
     // Create order
     const order = new Order({
       buyer: req.user._id,
-      seller:seller?._id,
+      seller: orderSellerId,
       items: orderItems,
       fulfillmentType: cart.fulfillmentType,
       pickup: cart.pickup,
@@ -79,7 +213,7 @@ export const checkout = async (req, res) => {
         isCodeVerified: false,
       },
       paymentMethod: cart.paymentMethod,
-      paymentStatus: cart.paymentMethod === 'on_delivery' ? 'pending' : 'pending',
+      paymentStatus: 'pending',
       status: 'pending',
       totalAmount: +totalAmount.toFixed(2),
       totalPlatformFee: +totalPlatformFee.toFixed(2),
@@ -103,6 +237,7 @@ export const checkout = async (req, res) => {
         },
         { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
       );
+
       order.paystackReference = paystackRes.data.data.reference;
       order.paystackAccessCode = paystackRes.data.data.access_code;
       await order.save();

@@ -1,774 +1,9 @@
-// import { useState, useEffect, useRef, useCallback } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// const lagosMarkets = [
-//   { id: 1, name: "Ladipo Market", location: "Mushin", knownFor: "Car Spare Parts", description: "The largest auto spare parts market in West Africa.", category: "Auto Parts", emoji: "🔧" },
-//   { id: 2, name: "Computer Village", location: "Ikeja", knownFor: "Phones, Laptops & Electronics", description: "Nigeria's biggest tech hub for new and fairly used devices.", category: "Electronics & Tech", emoji: "💻" },
-//   { id: 3, name: "Alaba International Market", location: "Ojo", knownFor: "Electronics & Home Appliances", description: "Massive market for TVs, generators, refrigerators.", category: "Electronics", emoji: "📺" },
-//   { id: 4, name: "Balogun Market", location: "Lagos Island", knownFor: "Fashion, Clothing & Textiles", description: "Biggest market for Ankara, lace, aso-ebi and fashion.", category: "Fashion", emoji: "👗" },
-//   { id: 5, name: "Idumota Market", location: "Lagos Island", knownFor: "Textiles & General Goods", description: "Popular for fabrics, clothing and wholesale goods.", category: "Fashion", emoji: "🧵" },
-//   { id: 6, name: "Mile 12 Market", location: "Mile 12", knownFor: "Foodstuff & Provisions", description: "The largest food market in Lagos.", category: "Foodstuff", emoji: "🥦" },
-//   { id: 7, name: "Oshodi Market", location: "Oshodi", knownFor: "General Goods & Food", description: "One of the biggest and busiest general markets.", category: "General", emoji: "🛍️" },
-//   { id: 8, name: "Trade Fair Complex", location: "Badagry Expressway", knownFor: "Building Materials & Wholesale", description: "Huge market for building materials and furniture.", category: "Building Materials", emoji: "🏗️" },
-//   { id: 9, name: "Tejuosho Market", location: "Yaba", knownFor: "General Goods & Fashion", description: "Popular for clothing and household items.", category: "General", emoji: "🛒" },
-//   { id: 10, name: "Jankara Market", location: "Lagos Island", knownFor: "Fabrics & Household Items", description: "Known for affordable fabrics and household goods.", category: "Fashion", emoji: "🎀" },
-// ];
-
-// const VISIBLE_MARKETS = 6;
-
-// function slugify(name) {
-//   return name?.toLowerCase()
-//       ?.replace(/[^\w ]+/g, "")
-//       ?.replace(/ +/g, "-");;
-// }
-// // function slugify(name) {
-// //   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-// // }
-
-// function formatPrice(price) {
-//   return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(price);
-// }
-
-// function ProductCard({ product, onClick }) {
-//   const primaryImage = product.images?.find((i) => i.isPrimary)?.url || product.images?.[0]?.url;
-//   const isOnSale = product.salePrice && product.salePrice < product.price;
-//   const discount = isOnSale ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
-
-//   return (
-//     <div className="product-card" onClick={() => onClick(product)}>
-//       <div className="product-card__image-wrap">
-//         {primaryImage ? (
-//           <img src={primaryImage} alt={product.name} className="product-card__img" loading="lazy" />
-//         ) : (
-//           <div className="product-card__no-img">
-//             <span>📦</span>
-//           </div>
-//         )}
-//         {isOnSale && <span className="product-card__badge">-{discount}%</span>}
-//         {product.status === "out_of_stock" && <div className="product-card__out-overlay">Out of Stock</div>}
-//         <div className="product-card__hover-cta">
-//           <button className="btn-view">View Details</button>
-//         </div>
-//       </div>
-//       <div className="product-card__body">
-//         <p className="product-card__category">{product.category}</p>
-//         <h3 className="product-card__name">{product.name}</h3>
-//         {product.seller?.sellerProfile?.market && (
-//           <p className="product-card__market">📍 {product.seller.sellerProfile.market}</p>
-//         )}
-//         <div className="product-card__price-row">
-//           {isOnSale ? (
-//             <>
-//               <span className="price-sale">{formatPrice(product.salePrice)}</span>
-//               <span className="price-original">{formatPrice(product.price)}</span>
-//             </>
-//           ) : (
-//             <span className="price-main">{formatPrice(product.price)}</span>
-//           )}
-//         </div>
-//         {product.ratings > 0 && (
-//           <div className="product-card__rating">
-//             {"★".repeat(Math.round(product.ratings))}{"☆".repeat(5 - Math.round(product.ratings))}
-//             <span className="rating-count">({product.sold || 0} sold)</span>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// function SkeletonCard() {
-//   return (
-//     <div className="skeleton-card">
-//       <div className="skeleton skeleton-img" />
-//       <div className="skeleton-body">
-//         <div className="skeleton skeleton-line short" />
-//         <div className="skeleton skeleton-line" />
-//         <div className="skeleton skeleton-line medium" />
-//         <div className="skeleton skeleton-line short" />
-//       </div>
-//     </div>
-//   );
-// }
-
-// function MarketModal({ open, onClose, onSelect, selectedMarket }) {
-//   useEffect(() => {
-//     if (open) document.body.style.overflow = "hidden";
-//     else document.body.style.overflow = "";
-//     return () => { document.body.style.overflow = ""; };
-//   }, [open]);
-
-//   if (!open) return null;
-
-//   return (
-//     <div className="modal-backdrop" onClick={onClose}>
-//       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-//         <div className="modal-header">
-//           <div>
-//             <h2 className="modal-title">All Lagos Markets</h2>
-//             <p className="modal-subtitle">Select a market to browse its products</p>
-//           </div>
-//           <button className="modal-close" onClick={onClose}>✕</button>
-//         </div>
-//         <div className="modal-grid">
-//           {lagosMarkets.map((m) => (
-//             <button
-//               key={m.id}
-//               className={`modal-market-card ${selectedMarket?.id === m.id ? "active" : ""}`}
-//               onClick={() => { onSelect(m); onClose(); }}
-//             >
-//               <span className="modal-market-emoji">{m.emoji}</span>
-//               <div className="modal-market-info">
-//                 <p className="modal-market-name">{m.name}</p>
-//                 <p className="modal-market-loc">📍 {m.location}</p>
-//                 <p className="modal-market-known">{m.knownFor}</p>
-//               </div>
-//             </button>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default function OjaFlowMarketplace() {
-//   const navigate = useNavigate();
-//   const [products, setProducts] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [selectedMarket, setSelectedMarket] = useState(null);
-//   const [modalOpen, setModalOpen] = useState(false);
-//   const [search, setSearch] = useState("");
-//   const filterRef = useRef(null);
-
-//   useEffect(() => {
-//     async function fetchProducts() {
-//       try {
-//         setLoading(true);
-//         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`);
-//         if (!res.ok) throw new Error("Failed to fetch products");
-//         const data = await res.json();
-//         setProducts(Array.isArray(data) ? data : data.products || []);
-//       } catch (err) {
-//         setError(err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-//     fetchProducts();
-//   }, []);
-
-//   const handleProductClick = useCallback((product) => {
-//     const slug = slugify(product.name) + "-" + product._id.slice(-6);
-//     navigate(`/product/${slug}`, { state: { product } });
-//   }, [navigate]);
-
-//   const filteredProducts = products.filter((p) => {
-//     const matchesMarket = selectedMarket
-//       ? p.seller?.sellerProfile?.market === selectedMarket.name
-//       : true;
-//     const matchesSearch = search
-//       ? p.name.toLowerCase().includes(search.toLowerCase()) ||
-//         p.category?.toLowerCase().includes(search.toLowerCase())
-//       : true;
-//     return matchesMarket && matchesSearch;
-//   });
-
-//   const visibleMarkets = lagosMarkets.slice(0, VISIBLE_MARKETS);
-
-//   return (
-//     <>
-//       <style>{`
-//         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
-
-//         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-//         :root {
-//           --green: #0D3B2E;
-//           --green-mid: #185C45;
-//           --green-light: #E8F5EF;
-//           --amber: #F5A623;
-//           --amber-light: #FFF8EC;
-//           --coral: #E8533A;
-//           --bg: #FAF8F4;
-//           --card-bg: #FFFFFF;
-//           --text: #1A1A1A;
-//           --text-muted: #6B7280;
-//           --text-light: #9CA3AF;
-//           --border: #E5E7EB;
-//           --radius: 14px;
-//           --radius-sm: 8px;
-//           --shadow: 0 2px 12px rgba(0,0,0,0.07);
-//           --shadow-hover: 0 8px 32px rgba(13,59,46,0.13);
-//         }
-
-//         body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
-
-//         /* ── NAVBAR ── */
-//         .oja-nav {
-//           position: sticky; top: 0; z-index: 100;
-//           background: var(--green);
-//           padding: 0 5%;
-//           display: flex; align-items: center; justify-content: space-between;
-//           height: 64px;
-//           box-shadow: 0 2px 16px rgba(0,0,0,0.18);
-//         }
-//         .oja-nav__logo {
-//           font-family: 'Sora', sans-serif;
-//           font-weight: 800; font-size: 1.5rem;
-//           color: #fff; letter-spacing: -0.5px;
-//           display: flex; align-items: center; gap: 6px;
-//         }
-//         .oja-nav__logo span { color: var(--amber); }
-//         .oja-nav__search {
-//           flex: 1; max-width: 420px; margin: 0 2rem;
-//           position: relative;
-//         }
-//         .oja-nav__search input {
-//           width: 100%; padding: 10px 16px 10px 40px;
-//           border-radius: 50px; border: none;
-//           background: rgba(255,255,255,0.12);
-//           color: #fff; font-size: 0.9rem;
-//           outline: none;
-//           transition: background 0.2s;
-//         }
-//         .oja-nav__search input::placeholder { color: rgba(255,255,255,0.5); }
-//         .oja-nav__search input:focus { background: rgba(255,255,255,0.2); }
-//         .oja-nav__search-icon {
-//           position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-//           color: rgba(255,255,255,0.55); font-size: 0.95rem; pointer-events: none;
-//         }
-//         .oja-nav__actions { display: flex; align-items: center; gap: 12px; }
-//         .oja-nav__cart {
-//           background: var(--amber); color: var(--green);
-//           border: none; border-radius: 50px;
-//           padding: 8px 18px; font-weight: 700; font-size: 0.85rem;
-//           cursor: pointer; font-family: 'Sora', sans-serif;
-//           display: flex; align-items: center; gap: 6px;
-//           transition: transform 0.15s, box-shadow 0.15s;
-//         }
-//         .oja-nav__cart:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,166,35,0.4); }
-
-//         /* ── HERO ── */
-//         .hero {
-//           background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 60%, #0D3B2E 100%);
-//           padding: 80px 5% 90px;
-//           position: relative; overflow: hidden;
-//         }
-//         .hero::after {
-//           content: '';
-//           position: absolute; right: -80px; top: -80px;
-//           width: 500px; height: 500px;
-//           background: radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%);
-//           pointer-events: none;
-//         }
-//         .hero::before {
-//           content: '';
-//           position: absolute; left: 30%; bottom: -60px;
-//           width: 300px; height: 300px;
-//           background: radial-gradient(circle, rgba(232,83,58,0.1) 0%, transparent 70%);
-//           pointer-events: none;
-//         }
-//         .hero__inner { position: relative; z-index: 1; max-width: 680px; }
-//         .hero__eyebrow {
-//           display: inline-flex; align-items: center; gap: 6px;
-//           background: rgba(245,166,35,0.18); border: 1px solid rgba(245,166,35,0.35);
-//           color: var(--amber); font-size: 0.78rem; font-weight: 600;
-//           padding: 5px 12px; border-radius: 50px; margin-bottom: 20px;
-//           letter-spacing: 0.5px; text-transform: uppercase;
-//         }
-//         .hero__title {
-//           font-family: 'Sora', sans-serif;
-//           font-size: clamp(2.2rem, 5vw, 3.5rem);
-//           font-weight: 800; color: #fff;
-//           line-height: 1.1; letter-spacing: -1px;
-//           margin-bottom: 18px;
-//         }
-//         .hero__title em { color: var(--amber); font-style: normal; }
-//         .hero__sub {
-//           color: rgba(255,255,255,0.7); font-size: 1.05rem;
-//           line-height: 1.7; max-width: 520px; margin-bottom: 32px;
-//         }
-//         .hero__stats {
-//           display: flex; gap: 32px; flex-wrap: wrap;
-//         }
-//         .hero__stat-item { text-align: left; }
-//         .hero__stat-num {
-//           font-family: 'Sora', sans-serif;
-//           font-size: 1.8rem; font-weight: 800; color: var(--amber);
-//         }
-//         .hero__stat-label { color: rgba(255,255,255,0.55); font-size: 0.8rem; margin-top: 2px; }
-
-//         /* ── FILTER BAR ── */
-//         .filter-section {
-//           background: #fff;
-//           border-bottom: 1px solid var(--border);
-//           position: sticky; top: 64px; z-index: 90;
-//           box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-//         }
-//         .filter-inner {
-//           padding: 0 5%;
-//           display: flex; align-items: center; gap: 0;
-//           overflow-x: auto;
-//           scrollbar-width: none;
-//         }
-//         .filter-inner::-webkit-scrollbar { display: none; }
-//         .filter-chip {
-//           flex-shrink: 0;
-//           display: flex; align-items: center; gap: 7px;
-//           padding: 14px 18px;
-//           border: none; background: transparent;
-//           cursor: pointer; font-family: 'Inter', sans-serif;
-//           font-size: 0.88rem; font-weight: 500; color: var(--text-muted);
-//           border-bottom: 3px solid transparent;
-//           transition: color 0.18s, border-color 0.18s;
-//           white-space: nowrap;
-//         }
-//         .filter-chip:hover { color: var(--green); }
-//         .filter-chip.active {
-//           color: var(--green); font-weight: 700;
-//           border-bottom-color: var(--green);
-//         }
-//         .filter-chip__emoji { font-size: 1.1rem; }
-//         .filter-chip__count {
-//           background: var(--green-light); color: var(--green);
-//           font-size: 0.72rem; font-weight: 700;
-//           padding: 2px 7px; border-radius: 50px;
-//         }
-//         .filter-chip.active .filter-chip__count {
-//           background: var(--green); color: #fff;
-//         }
-//         .filter-see-more {
-//           flex-shrink: 0;
-//           margin-left: auto;
-//           display: flex; align-items: center; gap: 6px;
-//           padding: 14px 20px;
-//           border: none; background: transparent;
-//           cursor: pointer; font-family: 'Sora', sans-serif;
-//           font-size: 0.85rem; font-weight: 700; color: var(--coral);
-//           white-space: nowrap;
-//           transition: opacity 0.15s;
-//         }
-//         .filter-see-more:hover { opacity: 0.75; }
-
-//         /* ── MAIN CONTENT ── */
-//         .main-content { padding: 40px 5% 80px; }
-
-//         .section-header {
-//           display: flex; align-items: flex-end; justify-content: space-between;
-//           margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
-//         }
-//         .section-title {
-//           font-family: 'Sora', sans-serif;
-//           font-size: 1.55rem; font-weight: 800; color: var(--text);
-//           letter-spacing: -0.5px;
-//         }
-//         .section-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
-//         .section-count {
-//           background: var(--green-light); color: var(--green);
-//           padding: 6px 14px; border-radius: 50px;
-//           font-size: 0.82rem; font-weight: 700;
-//         }
-
-//         /* active market banner */
-//         .market-banner {
-//           background: linear-gradient(90deg, var(--green) 0%, var(--green-mid) 100%);
-//           border-radius: var(--radius);
-//           padding: 18px 24px;
-//           display: flex; align-items: center; justify-content: space-between;
-//           margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
-//         }
-//         .market-banner__left { display: flex; align-items: center; gap: 14px; }
-//         .market-banner__emoji {
-//           font-size: 2rem;
-//           background: rgba(255,255,255,0.12); border-radius: 10px;
-//           padding: 8px 12px;
-//         }
-//         .market-banner__name {
-//           font-family: 'Sora', sans-serif;
-//           font-size: 1.15rem; font-weight: 800; color: #fff;
-//         }
-//         .market-banner__detail { color: rgba(255,255,255,0.65); font-size: 0.83rem; margin-top: 2px; }
-//         .market-banner__clear {
-//           background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-//           color: #fff; border-radius: 50px;
-//           padding: 7px 16px; font-size: 0.82rem; font-weight: 600;
-//           cursor: pointer; transition: background 0.15s;
-//         }
-//         .market-banner__clear:hover { background: rgba(255,255,255,0.25); }
-
-//         /* ── PRODUCT GRID ── */
-//         .products-grid {
-//           display: grid;
-//           grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-//           gap: 20px;
-//         }
-
-//         .product-card {
-//           background: var(--card-bg);
-//           border-radius: var(--radius);
-//           overflow: hidden;
-//           border: 1px solid var(--border);
-//           cursor: pointer;
-//           transition: transform 0.2s, box-shadow 0.2s;
-//         }
-//         .product-card:hover {
-//           transform: translateY(-4px);
-//           box-shadow: var(--shadow-hover);
-//         }
-//         .product-card__image-wrap {
-//           position: relative; overflow: hidden;
-//           aspect-ratio: 1 / 1; background: var(--bg);
-//         }
-//         .product-card__img {
-//           width: 100%; height: 100%; object-fit: cover;
-//           transition: transform 0.35s ease;
-//         }
-//         .product-card:hover .product-card__img { transform: scale(1.05); }
-//         .product-card__no-img {
-//           width: 100%; height: 100%;
-//           display: flex; align-items: center; justify-content: center;
-//           font-size: 3rem; background: var(--green-light);
-//         }
-//         .product-card__badge {
-//           position: absolute; top: 10px; left: 10px;
-//           background: var(--coral); color: #fff;
-//           font-size: 0.72rem; font-weight: 800;
-//           padding: 3px 9px; border-radius: 50px;
-//         }
-//         .product-card__out-overlay {
-//           position: absolute; inset: 0;
-//           background: rgba(0,0,0,0.5);
-//           display: flex; align-items: center; justify-content: center;
-//           color: #fff; font-weight: 700; font-size: 0.85rem;
-//         }
-//         .product-card__hover-cta {
-//           position: absolute; bottom: 0; left: 0; right: 0;
-//           padding: 12px;
-//           background: linear-gradient(0deg, rgba(13,59,46,0.9) 0%, transparent 100%);
-//           opacity: 0; transform: translateY(8px);
-//           transition: opacity 0.22s, transform 0.22s;
-//           display: flex; justify-content: center;
-//         }
-//         .product-card:hover .product-card__hover-cta { opacity: 1; transform: translateY(0); }
-//         .btn-view {
-//           background: var(--amber); color: var(--green);
-//           border: none; border-radius: 50px;
-//           padding: 8px 20px; font-weight: 800; font-size: 0.8rem;
-//           cursor: pointer; font-family: 'Sora', sans-serif;
-//           letter-spacing: 0.2px;
-//         }
-//         .product-card__body { padding: 14px 16px 16px; }
-//         .product-card__category {
-//           font-size: 0.72rem; font-weight: 700; color: var(--amber);
-//           text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;
-//         }
-//         .product-card__name {
-//           font-family: 'Sora', sans-serif;
-//           font-size: 0.95rem; font-weight: 700; color: var(--text);
-//           line-height: 1.35;
-//           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-//           overflow: hidden; margin-bottom: 5px;
-//         }
-//         .product-card__market { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
-//         .product-card__price-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-//         .price-main, .price-sale {
-//           font-family: 'Sora', sans-serif;
-//           font-size: 1.05rem; font-weight: 800; color: var(--green);
-//         }
-//         .price-sale { color: var(--coral); }
-//         .price-original {
-//           font-size: 0.8rem; color: var(--text-light);
-//           text-decoration: line-through;
-//         }
-//         .product-card__rating { font-size: 0.75rem; color: var(--amber); }
-//         .rating-count { color: var(--text-muted); margin-left: 4px; font-size: 0.72rem; }
-
-//         /* ── SKELETON ── */
-//         .skeleton-card {
-//           background: var(--card-bg); border-radius: var(--radius);
-//           border: 1px solid var(--border); overflow: hidden;
-//         }
-//         .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
-//         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-//         .skeleton-img { aspect-ratio: 1/1; border-radius: 0; }
-//         .skeleton-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
-//         .skeleton-line { height: 12px; }
-//         .skeleton-line.short { width: 50%; }
-//         .skeleton-line.medium { width: 70%; }
-
-//         /* ── EMPTY / ERROR ── */
-//         .empty-state {
-//           text-align: center; padding: 80px 20px;
-//           grid-column: 1 / -1;
-//         }
-//         .empty-state__icon { font-size: 3.5rem; margin-bottom: 16px; }
-//         .empty-state__title { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
-//         .empty-state__desc { color: var(--text-muted); font-size: 0.9rem; }
-
-//         /* ── MODAL ── */
-//         .modal-backdrop {
-//           position: fixed; inset: 0; z-index: 200;
-//           background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-//           display: flex; align-items: flex-end;
-//           animation: fadeIn 0.18s ease;
-//         }
-//         @media (min-width: 640px) {
-//           .modal-backdrop { align-items: center; justify-content: center; }
-//         }
-//         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-//         .modal-panel {
-//           background: #fff; width: 100%;
-//           border-radius: 24px 24px 0 0;
-//           max-height: 85vh; overflow-y: auto;
-//           padding: 28px 24px 40px;
-//           animation: slideUp 0.22s ease;
-//         }
-//         @media (min-width: 640px) {
-//           .modal-panel {
-//             border-radius: 20px;
-//             max-width: 720px; max-height: 80vh;
-//           }
-//         }
-//         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
-//         .modal-header {
-//           display: flex; align-items: flex-start; justify-content: space-between;
-//           margin-bottom: 24px;
-//         }
-//         .modal-title { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 800; }
-//         .modal-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
-//         .modal-close {
-//           background: var(--bg); border: none; border-radius: 50%;
-//           width: 36px; height: 36px; cursor: pointer; font-size: 1rem;
-//           display: flex; align-items: center; justify-content: center;
-//           color: var(--text-muted); flex-shrink: 0;
-//           transition: background 0.15s;
-//         }
-//         .modal-close:hover { background: var(--border); }
-//         .modal-grid {
-//           display: grid;
-//           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-//           gap: 12px;
-//         }
-//         .modal-market-card {
-//           background: var(--bg); border: 2px solid var(--border);
-//           border-radius: var(--radius); padding: 16px;
-//           text-align: left; cursor: pointer;
-//           display: flex; gap: 12px; align-items: flex-start;
-//           transition: border-color 0.15s, background 0.15s, transform 0.15s;
-//         }
-//         .modal-market-card:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-2px); }
-//         .modal-market-card.active { border-color: var(--green); background: var(--green-light); }
-//         .modal-market-emoji { font-size: 1.6rem; flex-shrink: 0; }
-//         .modal-market-info { min-width: 0; }
-//         .modal-market-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--text); }
-//         .modal-market-loc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-//         .modal-market-known { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
-
-//         /* ── RESPONSIVE ── */
-//         @media (max-width: 768px) {
-//           .oja-nav__search { display: none; }
-//           .hero { padding: 52px 5% 64px; }
-//           .hero__stats { gap: 20px; }
-//           .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-//           .main-content { padding: 24px 4% 60px; }
-//           .filter-see-more { padding: 14px 14px; }
-//           .section-header { margin-bottom: 18px; }
-//         }
-//         @media (max-width: 400px) {
-//           .products-grid { grid-template-columns: 1fr; }
-//         }
-//       `}</style>
-
-//       {/* NAV */}
-//       <nav className="oja-nav">
-//         <div className="oja-nav__logo">🛒 E<span>Stores</span></div>
-//         <div className="oja-nav__search">
-//           <span className="oja-nav__search-icon">🔍</span>
-//           <input
-//             type="text"
-//             placeholder="Search products, markets..."
-//             value={search}
-//             onChange={(e) => setSearch(e.target.value)}
-//           />
-//         </div>
-//         {/* <div className="oja-nav__actions">
-//           <button className="oja-nav__cart">🛍️ Cart</button>
-//         </div> */}
-//       </nav>
-
-//       {/* HERO */}
-//       <section className="hero">
-//         <div className="hero__inner">
-//           <div className="hero__eyebrow">🇳🇬 Lagos' Premier Marketplace</div>
-//           <h1 className="hero__title">
-//             Shop directly from<br /><em>Lagos' best markets</em>
-//           </h1>
-//           <p className="hero__sub">
-//             Discover thousands of products from verified sellers across Ladipo, Computer Village, Balogun, and every major market in Lagos — all in one place.
-//           </p>
-//           <div className="hero__stats">
-//             <div className="hero__stat-item">
-//               <div className="hero__stat-num">{products.length > 0 ? `${products.length}+` : "10K+"}</div>
-//               <div className="hero__stat-label">Products Listed</div>
-//             </div>
-//             <div className="hero__stat-item">
-//               <div className="hero__stat-num">10</div>
-//               <div className="hero__stat-label">Lagos Markets</div>
-//             </div>
-//             <div className="hero__stat-item">
-//               <div className="hero__stat-num">100%</div>
-//               <div className="hero__stat-label">Verified Sellers</div>
-//             </div>
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* FILTER BAR */}
-//       <div className="filter-section" ref={filterRef}>
-//         <div className="filter-inner">
-//           <button
-//             className={`filter-chip ${!selectedMarket ? "active" : ""}`}
-//             onClick={() => setSelectedMarket(null)}
-//           >
-//             <span className="filter-chip__emoji">🏪</span>
-//             All Markets
-//             <span className="filter-chip__count">
-//               {products.length}
-//             </span>
-//           </button>
-
-//           {visibleMarkets.map((market) => {
-//             const count = products.filter((p) => p.seller?.sellerProfile?.market === market.name).length;
-//             return (
-//               <button
-//                 key={market.id}
-//                 className={`filter-chip ${selectedMarket?.id === market.id ? "active" : ""}`}
-//                 onClick={() => setSelectedMarket(market)}
-//               >
-//                 <span className="filter-chip__emoji">{market.emoji}</span>
-//                 {market.name.split(" ")[0]}
-//                 {count > 0 && <span className="filter-chip__count">{count}</span>}
-//               </button>
-//             );
-//           })}
-
-//           <button className="filter-see-more" onClick={() => setModalOpen(true)}>
-//             All Markets ＋
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* MAIN */}
-//       <main className="main-content">
-//         {selectedMarket && (
-//           <div className="market-banner">
-//             <div className="market-banner__left">
-//               <div className="market-banner__emoji">{selectedMarket.emoji}</div>
-//               <div>
-//                 <div className="market-banner__name">{selectedMarket.name}</div>
-//                 <div className="market-banner__detail">
-//                   📍 {selectedMarket.location} &nbsp;·&nbsp; {selectedMarket.knownFor}
-//                 </div>
-//               </div>
-//             </div>
-//             <button className="market-banner__clear" onClick={() => setSelectedMarket(null)}>
-//               ✕ Clear filter
-//             </button>
-//           </div>
-//         )}
-
-//         <div className="section-header">
-//           <div>
-//             <h2 className="section-title">
-//               {selectedMarket ? `${selectedMarket.name} Products` : "All Products"}
-//             </h2>
-//             <p className="section-subtitle">
-//               {selectedMarket ? selectedMarket.description : "Browse products from all Lagos markets"}
-//             </p>
-//           </div>
-//           {!loading && (
-//             <span className="section-count">
-//               {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
-//             </span>
-//           )}
-//         </div>
-
-//         <div className="products-grid">
-//           {loading ? (
-//             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-//           ) : error ? (
-//             <div className="empty-state">
-//               <div className="empty-state__icon">⚠️</div>
-//               <div className="empty-state__title">Couldn't load products</div>
-//               <p className="empty-state__desc">{error}</p>
-//             </div>
-//           ) : filteredProducts.length === 0 ? (
-//             <div className="empty-state">
-//               <div className="empty-state__icon">🔍</div>
-//               <div className="empty-state__title">No products found</div>
-//               <p className="empty-state__desc">
-//                 {selectedMarket
-//                   ? `No products from ${selectedMarket.name} yet.`
-//                   : "Try adjusting your search."}
-//               </p>
-//             </div>
-//           ) : (
-//             filteredProducts.map((product) => (
-//               <ProductCard key={product._id} product={product} onClick={handleProductClick} />
-//             ))
-//           )}
-//         </div>
-//       </main>
-
-//       {/* MARKET MODAL */}
-//       <MarketModal
-//         open={modalOpen}
-//         onClose={() => setModalOpen(false)}
-//         onSelect={setSelectedMarket}
-//         selectedMarket={selectedMarket}
-//       />
-//     </>
-//   );
-// }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-/**
- * Palette reference (arbitrary Tailwind values used throughout):
- * wine-950 #2B0A16   wine-900 #430F22   wine-800 #5C1730   wine-700 #7C1F3E
- * gold-600 #A67C3D   gold-500 #C9A15A   gold-100 #F3E4C8
- * cream-50 #FBF7F2   cream-100 #F1E7DC
- * ink-900  #241014   ink-500  #7A6068
- * rust-600 #B5442E (sale/discount accent)
- *
- * NOTE ON THE NAVBAR-OVERLAP BUG:
- * If your existing navbar in App.jsx is `sticky top-0`, it only sticks correctly
- * when NONE of its ancestors have `overflow` set to anything other than `visible`.
- * If any wrapper in App.jsx has `overflow-x-hidden` / `overflow-y-auto` etc, the
- * sticky context breaks and content scrolls over it. Two safe fixes:
- *   1) Make the navbar `fixed top-0 inset-x-0 z-50` instead of `sticky`, and add
- *      matching top padding to the first element of every page (done below with
- *      `pt-16` — adjust to your navbar's actual height).
- *   2) Or keep it sticky, but remove `overflow` from every ancestor wrapping it.
- * This component assumes fix #1: a fixed navbar ~64px (h-16) tall.
- */
+
 
 const lagosMarkets = [
   { id: 1, name: "Ladipo Market", location: "Mushin", knownFor: "Car Spare Parts", description: "The largest auto spare parts market in West Africa.", category: "Auto Parts", emoji: "🔧" },
@@ -785,12 +20,23 @@ const lagosMarkets = [
 
 const VISIBLE_MARKETS = 6;
 
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest Arrivals" },
+  { value: "price_low", label: "Price: Low to High" },
+  { value: "price_high", label: "Price: High to Low" },
+  { value: "top_rated", label: "Top Rated" },
+];
+
 function slugify(name) {
   return name?.toLowerCase()?.replace(/[^\w ]+/g, "")?.replace(/ +/g, "-");
 }
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(price);
+}
+
+function effectivePrice(p) {
+  return p.salePrice && p.salePrice < p.price ? p.salePrice : p.price;
 }
 
 /* ── Market "stamp" badge — the page's signature element ── */
@@ -947,6 +193,168 @@ function MarketModal({ open, onClose, onSelect, selectedMarket }) {
   );
 }
 
+/* ── Checkbox row used inside the filter panel ── */
+function FilterCheckbox({ checked, onChange, label, count, indent }) {
+  return (
+    <label
+      className={`flex items-center justify-between gap-3 py-2 cursor-pointer group ${indent ? "pl-6" : ""}`}
+    >
+      <span className="flex items-center gap-2.5 min-w-0">
+        <span
+          className={`w-[18px] h-[18px] rounded-[5px] border-2 flex items-center justify-center shrink-0 transition-colors ${
+            checked ? "bg-[#430F22] border-[#430F22]" : "border-[#D9C9B8] bg-white group-hover:border-[#A67C3D]"
+          }`}
+        >
+          {checked && (
+            <svg viewBox="0 0 12 10" className="w-2.5 h-2.5" fill="none">
+              <path d="M1 5L4.2 8.2L11 1" stroke="#F3E4C8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </span>
+        <span className={`text-sm truncate ${checked ? "text-[#241014] font-semibold" : "text-[#4A3B40]"}`}>{label}</span>
+      </span>
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      {typeof count === "number" && (
+        <span className="text-[11px] font-bold text-[#A67C3D] bg-[#F3E4C8]/70 rounded-full px-2 py-0.5 shrink-0">{count}</span>
+      )}
+    </label>
+  );
+}
+
+function FilterPanel({
+  open,
+  onClose,
+  categoryMap,
+  selectedCategories,
+  toggleCategory,
+  selectedSubCategories,
+  toggleSubCategory,
+  minPrice,
+  maxPrice,
+  setMinPrice,
+  setMaxPrice,
+  onClear,
+  activeCount,
+}) {
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  if (!open) return null;
+
+  const categories = Object.entries(categoryMap).sort((a, b) => b[1].count - a[1].count);
+
+  return (
+      <div
+      className="fixed inset-0 z-[200] bg-black/55 backdrop-blur-sm flex items-end sm:items-stretch sm:justify-start animate-[fadeIn_0.18s_ease]"
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:w-[380px] bg-[#FBF7F2] rounded-t-3xl sm:rounded-none max-h-[88vh] sm:max-h-none sm:h-full overflow-y-auto animate-[slideUp_0.22s_ease] sm:animate-[slideInLeft_0.22s_ease] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#F1E7DC] sticky top-0 bg-[#FBF7F2] z-10">
+          <div>
+            <h2 className="font-serif text-lg font-bold text-[#241014]">Filter Products</h2>
+            {activeCount > 0 && (
+              <p className="text-xs text-[#A67C3D] font-semibold mt-0.5">{activeCount} active filter{activeCount > 1 ? "s" : ""}</p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-white text-[#7A6068] flex items-center justify-center hover:bg-[#F1E7DC] transition-colors shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="px-6 py-5 flex-1">
+          {/* Price range */}
+          <div className="mb-7">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#A67C3D] mb-3">Price Range (₦)</h3>
+            <div className="flex items-center gap-2.5">
+              <input
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="Min"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E4D6C4] text-sm text-[#241014] placeholder:text-[#B7A5AB] focus:outline-none focus:ring-2 focus:ring-[#C9A15A]/50"
+              />
+              <span className="text-[#B7A5AB] text-sm shrink-0">to</span>
+              <input
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="Max"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E4D6C4] text-sm text-[#241014] placeholder:text-[#B7A5AB] focus:outline-none focus:ring-2 focus:ring-[#C9A15A]/50"
+              />
+            </div>
+          </div>
+
+          {/* Category / subcategory checkboxes */}
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#A67C3D] mb-1.5">Category</h3>
+            {categories.length === 0 ? (
+              <p className="text-sm text-[#B7A5AB] py-2">No categories available yet.</p>
+            ) : (
+              <div className="divide-y divide-[#F1E7DC]">
+                {categories.map(([cat, info]) => {
+                  const isChecked = selectedCategories.includes(cat);
+                  const subEntries = Object.entries(info.subCategories);
+                  return (
+                    <div key={cat} className="py-1">
+                      <FilterCheckbox
+                        checked={isChecked}
+                        onChange={() => toggleCategory(cat)}
+                        label={cat}
+                        count={info.count}
+                      />
+                      {isChecked && subEntries.length > 0 && (
+                        <div className="pb-1.5">
+                          {subEntries.map(([sub, count]) => (
+                            <FilterCheckbox
+                              key={sub}
+                              indent
+                              checked={selectedSubCategories.includes(sub)}
+                              onChange={() => toggleSubCategory(sub)}
+                              label={sub}
+                              count={count}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-[#F1E7DC] sticky bottom-0 bg-[#FBF7F2] flex gap-3">
+          <button
+            onClick={onClear}
+            className="flex-1 py-3 rounded-full text-sm font-bold text-[#7A6068] bg-white border border-[#E4D6C4] hover:bg-[#F1E7DC] transition-colors"
+          >
+            Clear All
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-full text-sm font-bold text-[#F3E4C8] bg-[#430F22] hover:bg-[#5C1730] transition-colors"
+          >
+            Show Results
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OjaFlowMarketplace() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -955,6 +363,15 @@ export default function OjaFlowMarketplace() {
   const [selectedMarket, setSelectedMarket] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
+
+  // ── search / filter / sort state ──
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -978,15 +395,90 @@ export default function OjaFlowMarketplace() {
     navigate(`/product/${slug}`, { state: { product } });
   }, [navigate]);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesMarket = selectedMarket ? p.seller?.sellerProfile?.market === selectedMarket.name : true;
-    const matchesSearch = search
-      ? p.name.toLowerCase().includes(search.toLowerCase()) || p.category?.toLowerCase().includes(search.toLowerCase())
-      : true;
-    return matchesMarket && matchesSearch;
-  });
+  // Build category -> { count, subCategories: { name: count } } map from live product data
+  const categoryMap = useMemo(() => {
+    const map = {};
+    products.forEach((p) => {
+      if (!p.category) return;
+      if (!map[p.category]) map[p.category] = { count: 0, subCategories: {} };
+      map[p.category].count += 1;
+      if (p.subCategory) {
+        map[p.category].subCategories[p.subCategory] = (map[p.category].subCategories[p.subCategory] || 0) + 1;
+      }
+    });
+    return map;
+  }, [products]);
+
+  const toggleCategory = useCallback((cat) => {
+    setSelectedCategories((prev) => {
+      const next = prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat];
+      // drop subcategory selections that belong to a category being deselected
+      if (prev.includes(cat)) {
+        const droppedSubs = Object.keys(categoryMap[cat]?.subCategories || {});
+        setSelectedSubCategories((subs) => subs.filter((s) => !droppedSubs.includes(s)));
+      }
+      return next;
+    });
+  }, [categoryMap]);
+
+  const toggleSubCategory = useCallback((sub) => {
+    setSelectedSubCategories((prev) => (prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]));
+  }, []);
+
+  const clearAllFilters = useCallback(() => {
+    setMinPrice("");
+    setMaxPrice("");
+    setSelectedCategories([]);
+    setSelectedSubCategories([]);
+    setSortBy("newest");
+  }, []);
+
+  const activeFilterCount =
+    (minPrice !== "" ? 1 : 0) +
+    (maxPrice !== "" ? 1 : 0) +
+    selectedCategories.length +
+    selectedSubCategories.length;
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const min = minPrice !== "" ? Number(minPrice) : null;
+    const max = maxPrice !== "" ? Number(maxPrice) : null;
+
+    const result = products.filter((p) => {
+      const matchesMarket = selectedMarket ? p.seller?.sellerProfile?.market === selectedMarket.name : true;
+
+      const matchesSearch = q
+        ? p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.subCategory?.toLowerCase().includes(q) ||
+          p.brand?.toLowerCase().includes(q) ||
+          p.tags?.some((t) => t.toLowerCase().includes(q))
+        : true;
+
+      const price = effectivePrice(p);
+      const matchesMin = min !== null ? price >= min : true;
+      const matchesMax = max !== null ? price <= max : true;
+
+      const matchesCategory = selectedCategories.length ? selectedCategories.includes(p.category) : true;
+      const matchesSubCategory = selectedSubCategories.length ? selectedSubCategories.includes(p.subCategory) : true;
+
+      return matchesMarket && matchesSearch && matchesMin && matchesMax && matchesCategory && matchesSubCategory;
+    });
+
+    const sorted = [...result].sort((a, b) => {
+      if (sortBy === "price_low") return effectivePrice(a) - effectivePrice(b);
+      if (sortBy === "price_high") return effectivePrice(b) - effectivePrice(a);
+      if (sortBy === "top_rated") return (b.ratings || 0) - (a.ratings || 0);
+      // newest
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+
+    return sorted;
+  }, [products, search, minPrice, maxPrice, selectedMarket, selectedCategories, selectedSubCategories, sortBy]);
 
   const visibleMarkets = lagosMarkets.slice(0, VISIBLE_MARKETS);
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label;
 
   return (
     <>
@@ -998,6 +490,7 @@ export default function OjaFlowMarketplace() {
         .animate-shimmer { animation: shimmer 1.5s infinite linear; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { scrollbar-width: none; }
       `}</style>
@@ -1032,7 +525,20 @@ export default function OjaFlowMarketplace() {
               Discover thousands of products from verified sellers across Ladipo, Computer Village,
               Balogun, and every major market in Lagos — all in one place.
             </p>
-            <div className="flex gap-8 sm:gap-10 flex-wrap">
+
+            {/* Primary search — the page's main entry point for finding products */}
+            <div className="relative max-w-md">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm">🔍</span>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search product name, brand, or description..."
+                className="w-full pl-10 pr-4 py-3.5 rounded-full bg-white/10 border border-white/20 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#C9A15A]/60 focus:bg-white/15 transition-colors"
+              />
+            </div>
+
+            <div className="flex gap-8 sm:gap-10 flex-wrap mt-8">
               <div>
                 <div className="font-serif text-2xl sm:text-3xl font-bold text-[#D9BA7C]">
                   {products.length > 0 ? `${products.length}+` : "10K+"}
@@ -1051,8 +557,8 @@ export default function OjaFlowMarketplace() {
           </div>
         </section>
 
-        {/* MOBILE SEARCH (search lives in navbar on desktop; keep an accessible one here for mobile-first UX) */}
-        <div className="sm:hidden px-5 py-4 bg-white border-b border-[#F1E7DC]">
+        {/* MOBILE SEARCH (secondary — mirrors hero search for quick access while scrolled past the hero) */}
+        <div className=" px-5 py-4 bg-white border-b border-[#F1E7DC]">
           <div className="relative">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B7A5AB] text-sm">🔍</span>
             <input
@@ -1136,7 +642,7 @@ export default function OjaFlowMarketplace() {
             </div>
           )}
 
-          <div className="flex items-end justify-between flex-wrap gap-3 mb-6">
+          <div className="flex items-end justify-between flex-wrap gap-3 mb-4">
             <div>
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#241014] tracking-tight">
                 {selectedMarket ? `${selectedMarket.name} Products` : "All Products"}
@@ -1152,6 +658,87 @@ export default function OjaFlowMarketplace() {
             )}
           </div>
 
+          {/* CONTROLS ROW — Filters trigger + Sort dropdown */}
+          <div className="flex items-center gap-2.5 mb-3 flex-wrap">
+            <button
+              onClick={() => setFilterPanelOpen(true)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border-2 transition-colors ${
+                activeFilterCount > 0
+                  ? "bg-[#430F22] border-[#430F22] text-white"
+                  : "bg-white border-[#E4D6C4] text-[#241014] hover:border-[#C9A15A]"
+              }`}
+            >
+              <span aria-hidden>⚙️</span>
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="bg-[#C9A15A] text-[#2B0A16] text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Sort dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setSortMenuOpen((o) => !o)}
+                onBlur={() => setTimeout(() => setSortMenuOpen(false), 120)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-white border-2 border-[#E4D6C4] text-[#241014] hover:border-[#C9A15A] transition-colors"
+              >
+                <span aria-hidden>↕️</span>
+                {currentSortLabel}
+                <span className={`text-[10px] transition-transform ${sortMenuOpen ? "rotate-180" : ""}`}>▼</span>
+              </button>
+              {sortMenuOpen && (
+                <div className="absolute left-0 top-[calc(100%+6px)] w-56 bg-white rounded-2xl border border-[#F1E7DC] shadow-[0_10px_32px_rgba(67,15,34,0.15)] py-1.5 z-30">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onMouseDown={() => { setSortBy(opt.value); setSortMenuOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                        sortBy === opt.value ? "text-[#430F22] font-bold bg-[#F3E4C8]/50" : "text-[#4A3B40] hover:bg-[#FBF7F2]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearAllFilters}
+                className="text-sm font-semibold text-[#B5442E] hover:opacity-70 transition-opacity px-2"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+
+          {/* Active filter chips */}
+          {(selectedCategories.length > 0 || selectedSubCategories.length > 0 || minPrice !== "" || maxPrice !== "") && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {selectedCategories.map((cat) => (
+                <span key={cat} className="inline-flex items-center gap-1.5 bg-[#F3E4C8] text-[#5C1730] text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {cat}
+                  <button onClick={() => toggleCategory(cat)} className="hover:opacity-60">✕</button>
+                </span>
+              ))}
+              {selectedSubCategories.map((sub) => (
+                <span key={sub} className="inline-flex items-center gap-1.5 bg-[#F3E4C8]/60 text-[#5C1730] text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {sub}
+                  <button onClick={() => toggleSubCategory(sub)} className="hover:opacity-60">✕</button>
+                </span>
+              ))}
+              {(minPrice !== "" || maxPrice !== "") && (
+                <span className="inline-flex items-center gap-1.5 bg-[#F3E4C8] text-[#5C1730] text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {formatPrice(Number(minPrice) || 0)} – {maxPrice !== "" ? formatPrice(Number(maxPrice)) : "∞"}
+                  <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="hover:opacity-60">✕</button>
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3.5 sm:gap-5">
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
@@ -1165,9 +752,17 @@ export default function OjaFlowMarketplace() {
               <div className="col-span-full text-center py-20 px-5">
                 <div className="text-5xl mb-4">🔍</div>
                 <div className="font-serif text-lg font-bold text-[#241014] mb-2">No products found</div>
-                <p className="text-sm text-[#7A6068]">
-                  {selectedMarket ? `No products from ${selectedMarket.name} yet.` : "Try adjusting your search."}
+                <p className="text-sm text-[#7A6068] mb-4">
+                  {selectedMarket ? `No products from ${selectedMarket.name} match your filters.` : "Try adjusting your search or filters."}
                 </p>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-sm font-bold text-white bg-[#430F22] rounded-full px-5 py-2.5 hover:bg-[#5C1730] transition-colors"
+                  >
+                    Clear all filters
+                  </button>
+                )}
               </div>
             ) : (
               filteredProducts.map((product) => (
@@ -1178,7 +773,41 @@ export default function OjaFlowMarketplace() {
         </main>
 
         <MarketModal open={modalOpen} onClose={() => setModalOpen(false)} onSelect={setSelectedMarket} selectedMarket={selectedMarket} />
+
+        <FilterPanel
+          open={filterPanelOpen}
+          onClose={() => setFilterPanelOpen(false)}
+          categoryMap={categoryMap}
+          selectedCategories={selectedCategories}
+          toggleCategory={toggleCategory}
+          selectedSubCategories={selectedSubCategories}
+          toggleSubCategory={toggleSubCategory}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          setMinPrice={setMinPrice}
+          setMaxPrice={setMaxPrice}
+          onClear={clearAllFilters}
+          activeCount={activeFilterCount}
+        />
       </div>
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
