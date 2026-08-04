@@ -1,7 +1,13 @@
 
 
+
+
+
+
+
+
 // import { useEffect, useState } from "react";
-// import { Users, Eye, ArrowUp, ArrowDown, X, Wallet } from "lucide-react";
+// import { Users, Eye, ArrowUp, ArrowDown, X, Wallet, Lock } from "lucide-react";
 // import { Calendar } from "lucide-react";
 // import { AnimatePresence } from "framer-motion";
 // import { motion } from "framer-motion";
@@ -54,6 +60,8 @@
 // export default function ProductDetails() {
 //   const { slug } = useParams();
 //   const navigate = useNavigate();
+//   const [showVarietyModal, setShowVarietyModal] = useState(false);
+// const [addingVariety, setAddingVariety] = useState(null);
 //   const { addToCart, cart, cartCount } = useCart();
 //   const [showModal, setShowModal] = useState(false);
 //   const [selectedPartnerName, setSelectedPartnerName] = useState("");
@@ -72,6 +80,7 @@
 //   const [activeTab, setActiveTab] = useState("details"); // 'details' | 'history'
 //   const [orders, setOrders] = useState([]);
 //   const [ordersLoading, setOrdersLoading] = useState(false);
+//   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 // const { currency, setCurrency, currencies, format, ratesLoading } = useCurrencyConverter();
 //   const { location: userLocation } = useUserLocation();
 //   const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(
@@ -79,6 +88,29 @@
 //   );
 
 //   const showToast = (message, type = "success") => setToast({ message, type });
+
+//   // Keep login state in sync in case the user logs in/out in another tab
+//   useEffect(() => {
+//     const syncAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
+//     window.addEventListener("storage", syncAuth);
+//     window.addEventListener("focus", syncAuth);
+//     return () => {
+//       window.removeEventListener("storage", syncAuth);
+//       window.removeEventListener("focus", syncAuth);
+//     };
+//   }, []);
+
+//   // Gate any action that requires an authenticated user. Returns true if the
+//   // user is logged in and the action can proceed; otherwise shows a toast,
+//   // redirects to login, and returns false.
+//   const requireAuth = () => {
+//     if (!localStorage.getItem("token")) {
+//       showToast("Please log in to continue", "error");
+//       navigate("/login", { state: { from: `/product/${slug}` } });
+//       return false;
+//     }
+//     return true;
+//   };
 
 //   // Check if this product is already in cart
 //   const cartItem = cart?.items?.find(i =>
@@ -217,6 +249,7 @@
 
 //   // ── Add to cart handler ──────────────────────────────────────────────────
 //   const handleAddToCart = async () => {
+//     if (!requireAuth()) return;
 //     if (!product?._id) return;
 //     if (product.stockQuantity <= 0) {
 //       showToast("This product is out of stock", "error");
@@ -230,6 +263,23 @@
 //       showToast(result.message || "Failed to add to cart", "error");
 //     }
 //     setAddingToCart(false);
+//   };
+
+//   // ── Quantity handlers (login required) ───────────────────────────────────
+//   const decrementQuantity = () => {
+//     if (!requireAuth()) return;
+//     setQuantity((q) => Math.max(1, q - 1));
+//   };
+
+//   const incrementQuantity = () => {
+//     if (!requireAuth()) return;
+//     setQuantity((q) => Math.min(maxQty, q + 1));
+//   };
+
+//   // ── Checkout handler (login required) ────────────────────────────────────
+//   const goToCheckout = () => {
+//     if (!requireAuth()) return;
+//     navigate("/checkout");
 //   };
 
 //   // ── Downstream tree ──────────────────────────────────────────────────────
@@ -253,7 +303,7 @@
 //                       {partner.businessName || `${partner.firstName || ""} ${partner.lastName || ""}`}
 //                     </p>
 //                     <p className="text-sm text-gray-500">@{partner.username}</p>
-//                     <p className="text-sm text-gray-500">{partner.phoneNumber}</p>
+//                     {/* <p className="text-sm text-gray-500">{partner.phoneNumber}</p> */}
 //                     <p className="text-sm text-gray-500">{partner.address}</p>
 //                     <p className="text-sm font-bold text-black">{partner.relationship}</p>
     
@@ -488,7 +538,7 @@
 //                 <p className="text-gray-500 mt-1">Track all your purchases</p>
 //               </div>
 //               <button
-//                 onClick={() => navigate("/checkout")}
+//                 onClick={goToCheckout}
 //                 className="px-5 py-2.5 rounded-2xl text-white text-sm font-bold hover:opacity-90 transition"
 //                 style={{ background: appConfig.colors.primary }}
 //               >
@@ -617,11 +667,11 @@
 
 //               {/* LEFT SIDE — Images */}
 //               <div>
-//                 <div className="bg-gray-100 rounded-3xl overflow-hidden relative">
+//                 <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden relative flex items-center justify-center h-[300px] sm:h-[380px] md:h-[440px]">
 //                   <img
 //                     src={mainImage || "https://via.placeholder.com/700"}
 //                     alt={product?.name}
-//                     className="w-full h-[350px] md:h-[550px] object-cover"
+//                     className="w-full h-full object-contain p-6"
 //                   />
 //                   {product?.salePrice && (
 //                     <div
@@ -646,11 +696,11 @@
 //                     <button
 //                       key={index}
 //                       onClick={() => setMainImage(img.url)}
-//                       className={`border-2 rounded-2xl overflow-hidden min-w-[90px] transition-all ${
+//                       className={`border-2 rounded-2xl overflow-hidden min-w-[90px] transition-all bg-white ${
 //                         mainImage === img.url ? "border-[#8B1E3F]" : "border-transparent"
 //                       }`}
 //                     >
-//                       <img src={img.url} alt="" className="w-20 h-20 object-cover" />
+//                       <img src={img.url} alt="" className="w-20 h-20 object-contain p-1" />
 //                     </button>
 //                   ))}
 //                 </div>
@@ -772,7 +822,7 @@
 //                     <div className="flex items-center gap-4">
 //                       <div className="flex items-center border border-gray-200 rounded-2xl overflow-hidden">
 //                         <button
-//                           onClick={() => setQuantity(q => Math.max(1, q - 1))}
+//                           onClick={decrementQuantity}
 //                           className="px-4 py-3 hover:bg-gray-50 transition text-gray-600"
 //                         >
 //                           <Minus size={16} />
@@ -781,7 +831,7 @@
 //                           {quantity}
 //                         </span>
 //                         <button
-//                           onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+//                           onClick={incrementQuantity}
 //                           className="px-4 py-3 hover:bg-gray-50 transition text-gray-600"
 //                         >
 //                           <Plus size={16} />
@@ -796,6 +846,12 @@
 //   Total: {format(effectivePrice * quantity)}
 // </p>
 //                     </div>
+//                     {!isLoggedIn && (
+//                       <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+//                         <Lock size={12} />
+//                         Log in to adjust quantity, add to cart, or check out
+//                       </p>
+//                     )}
 //                   </div>
 //                 )}
 
@@ -814,6 +870,11 @@
 //                       <>
 //                         <CheckCircle size={22} />
 //                         Added — Update Cart
+//                       </>
+//                     ) : !isLoggedIn ? (
+//                       <>
+//                         <Lock size={20} />
+//                         Log In to Add to Cart
 //                       </>
 //                     ) : (
 //                       <>
@@ -851,10 +912,17 @@
 
 //                 {/* Checkout button */}
 //                 <button
-//                   onClick={() => navigate("/checkout")}
+//                   onClick={goToCheckout}
 //                   className="w-full mt-3 py-4 rounded-2xl font-bold text-lg border-2 text-gray-700 border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 transition"
 //                 >
-//                   ⚡ Checkout Now
+//                   {isLoggedIn ? (
+//                     <>⚡ Checkout Now</>
+//                   ) : (
+//                     <>
+//                       <Lock size={18} />
+//                       Log In to Checkout
+//                     </>
+//                   )}
 //                 </button>
 
 //                 {/* Features */}
@@ -1109,11 +1177,11 @@
 //                       <SwiperSlide key={item._id}>
 //                         <Link to={`/product/${relatedSlug}`}>
 //                           <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group">
-//                             <div className="overflow-hidden relative">
+//                             <div className="overflow-hidden relative bg-white h-48 flex items-center justify-center">
 //                               <img
 //                                 src={item?.images?.[0]?.url || "https://via.placeholder.com/500"}
 //                                 alt={item?.name}
-//                                 className="w-full h-52 object-cover group-hover:scale-105 transition duration-500"
+//                                 className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-500"
 //                               />
 //                               {item?.salePrice && (
 //                                 <div
@@ -1198,64 +1266,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 import { Users, Eye, ArrowUp, ArrowDown, X, Wallet, Lock } from "lucide-react";
 import { Calendar } from "lucide-react";
@@ -1310,6 +1320,8 @@ const STATUS_STYLES = {
 export default function ProductDetails() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [showVarietyModal, setShowVarietyModal] = useState(false);
+const [addingVariety, setAddingVariety] = useState(null);
   const { addToCart, cart, cartCount } = useCart();
   const [showModal, setShowModal] = useState(false);
   const [selectedPartnerName, setSelectedPartnerName] = useState("");
@@ -1496,22 +1508,56 @@ const fetchProduct = async () => {
   useEffect(() => { if (activeTab === "history") fetchOrders(); }, [activeTab]);
 
   // ── Add to cart handler ──────────────────────────────────────────────────
+  // const handleAddToCart = async () => {
+  //   if (!requireAuth()) return;
+  //   if (!product?._id) return;
+  //   if (product.stockQuantity <= 0) {
+  //     showToast("This product is out of stock", "error");
+  //     return;
+  //   }
+  //   setAddingToCart(true);
+  //   const result = await addToCart(product._id, quantity);
+  //   if (result.success) {
+  //     showToast(`${product.name} added to cart!`, "success");
+  //   } else {
+  //     showToast(result.message || "Failed to add to cart", "error");
+  //   }
+  //   setAddingToCart(false);
+  // };
+
+
   const handleAddToCart = async () => {
-    if (!requireAuth()) return;
-    if (!product?._id) return;
-    if (product.stockQuantity <= 0) {
-      showToast("This product is out of stock", "error");
-      return;
-    }
-    setAddingToCart(true);
-    const result = await addToCart(product._id, quantity);
-    if (result.success) {
-      showToast(`${product.name} added to cart!`, "success");
-    } else {
-      showToast(result.message || "Failed to add to cart", "error");
-    }
-    setAddingToCart(false);
-  };
+  if (!requireAuth()) return;
+  if (!product?._id) return;
+  if (product.stockQuantity <= 0) {
+    showToast("This product is out of stock", "error");
+    return;
+  }
+  if (product.hasVariety && product.varieties?.length > 0) {
+    setShowVarietyModal(true);
+    return;
+  }
+  setAddingToCart(true);
+  const result = await addToCart(product._id, quantity);
+  if (result.success) {
+    showToast(`${product.name} added to cart!`, "success");
+  } else {
+    showToast(result.message || "Failed to add to cart", "error");
+  }
+  setAddingToCart(false);
+};
+
+const handleSelectVariety = async (variety) => {
+  setAddingVariety(variety.name);
+  const result = await addToCart(product._id, quantity, variety.name);
+  if (result.success) {
+    showToast(`${product.name} - ${variety.name} added to cart!`, "success");
+    setShowVarietyModal(false);
+  } else {
+    showToast(result.message || "Failed to add to cart", "error");
+  }
+  setAddingVariety(null);
+};
 
   // ── Quantity handlers (login required) ───────────────────────────────────
   const decrementQuantity = () => {
@@ -1709,8 +1755,10 @@ const fetchProduct = async () => {
   }
 
   const maxQty = product.stockQuantity || 1;
-  const effectivePrice = product.salePrice || product.price;
-
+  // const effectivePrice = product.salePrice || product.price;
+const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
+  ? Math.min(...product.varieties.map(v => v.price))
+  : (product.salePrice || product.price);
   return (
     <section className="bg-[#f5f5f7] min-h-screen py-6">
       {/* Toast */}
@@ -1721,6 +1769,63 @@ const fetchProduct = async () => {
           onClose={() => setToast(null)}
         />
       )}
+
+
+      <AnimatePresence>
+  {showVarietyModal && (
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        className="bg-white w-full sm:max-w-lg max-h-[85vh] rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+      >
+        <div className="flex items-center justify-between border-b px-6 py-5">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Choose an option</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{product.name}</p>
+          </div>
+          <button onClick={() => setShowVarietyModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
+            <X size={22} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-4 space-y-3">
+          {product.varieties.map((variety, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSelectVariety(variety)}
+              disabled={addingVariety === variety.name}
+              className="w-full flex items-center gap-4 p-3 rounded-2xl border border-gray-200 hover:border-[#8B1E3F] hover:bg-gray-50 transition text-left disabled:opacity-60"
+            >
+              <img
+                src={variety.image || "https://via.placeholder.com/80"}
+                alt={variety.name}
+                className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900">{variety.name}</p>
+                <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 capitalize">
+                  {variety.type}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <p className="font-bold" style={{ color: appConfig.colors.primary }}>
+                  {format(variety.price)}
+                </p>
+                {addingVariety === variety.name ? (
+                  <Loader2 size={18} className="animate-spin text-gray-400" />
+                ) : (
+                  <Plus size={18} className="text-gray-400" />
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
 
       {/* Floating Cart Button */}
       {cartCount > 0 && (
@@ -2122,12 +2227,14 @@ const fetchProduct = async () => {
                     ) : !isLoggedIn ? (
                       <>
                         <Lock size={20} />
+
                         Log In to Add to Cart
                       </>
                     ) : (
                       <>
                         <ShoppingCart size={22} />
-                        Add To Cart
+                        {product?.hasVariety && product?.varieties?.length > 0 ? "Select Options" : "Add To Cart"}
+                        {/* Add To Cart */}
                       </>
                     )}
                   </button>

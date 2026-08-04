@@ -110,7 +110,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/identity-verification', verificationRoutes);
 
 // Start server
-const port = process.env.PORT || 2020;
+const port = process.env.PORT || 2021;
 
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);

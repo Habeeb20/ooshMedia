@@ -182,10 +182,10 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => { fetchCart(); }, [fetchCart]);
 
-  const addToCart = async (productId, quantity = 1) => {
+  const addToCart = async (productId, quantity = 1, varietyName) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/api/cart/add', { productId, quantity });
+      const { data } = await api.post('/api/cart/add', { productId, quantity, varietyName });
       setCart(normalizeCart(data.cart));
       toast.success('Item added to cart');
       return { success: true };
@@ -196,9 +196,25 @@ export const CartProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  // const addToCart = async (productId, quantity = 1) => {
+  //   setLoading(true);
+  //   try {
+  //     const { data } = await api.post('/api/cart/add', { productId, quantity });
+  //     setCart(normalizeCart(data.cart));
+  //     toast.success('Item added to cart');
+  //     return { success: true };
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || 'Failed to add item to cart');
+  //     return { success: false, message: err.response?.data?.message };
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
 
   const updateItem = async (productId, quantity) => {
-    try {
+    try {``
       const { data } = await api.put(`/api/cart/item/${productId}`, { quantity });
       setCart(normalizeCart(data.cart));
       toast.success('Cart updated');

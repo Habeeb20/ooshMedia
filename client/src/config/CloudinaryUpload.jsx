@@ -1,5 +1,5 @@
 // src/components/CloudinaryUpload.jsx
-import React, { useState, useCallback, useEffect } from 'react';
+import  { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Upload, X, Loader2 } from 'lucide-react';
 

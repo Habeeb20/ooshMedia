@@ -27,6 +27,15 @@ const productSchema = new mongoose.Schema({
     gearTransmission:{type: String},
   fuelType:{type:String},
   maker:{type:String},
+
+  hasVariety: { type: Boolean, default: false },
+varieties: [{
+  name: { type: String },
+  price: { type: Number },
+  type: { type: String, enum: ['food', 'drink'] },
+  image: String,
+  publicId: String,
+}],
   
 
 

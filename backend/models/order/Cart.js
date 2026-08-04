@@ -7,6 +7,12 @@ const cartItemSchema = new mongoose.Schema({
   price: Number,        // snapshot at time of adding
   name: String,
   image: String,
+    variety: {
+    name: String,
+    price: Number,
+    type: { type: String, enum: ['food', 'drink'] },
+    image: String,
+  },
 });
 
 const cartSchema = new mongoose.Schema({
@@ -29,3 +35,8 @@ cartSchema.virtual('totalAmount').get(function () {
 });
 
 export default mongoose.model('Cart', cartSchema);
+
+
+
+
+

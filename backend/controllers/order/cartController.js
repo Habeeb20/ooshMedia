@@ -13,13 +13,72 @@ export const getCart = async (req, res) => {
 };
 
 // POST /cart/add
+// export const addToCart = async (req, res) => {
+//   try {
+//     const { productId, quantity = 1 } = req.body;
+//     const product = await Product.findById(productId).populate('seller', 'bankDetails acceptedPaymentMethods');
+
+//     if (!product) return res.status(404).json({ message: 'Product not found' });
+//     if (product.status !== 'active') return res.status(400).json({ message: 'Product is not available' });
+//     if (product.stockQuantity < quantity) {
+//       return res.status(400).json({ message: `Only ${product.stockQuantity} units available` });
+//     }
+
+//     let cart = await Cart.findOne({ buyer: req.user._id });
+//     if (!cart) cart = new Cart({ buyer: req.user._id, items: [] });
+
+//     const existingIdx = cart.items.findIndex(i => i.product.toString() === productId);
+//     if (existingIdx > -1) {
+//       const newQty = cart.items[existingIdx].quantity + quantity;
+//       if (newQty > product.stockQuantity) {
+//         return res.status(400).json({ message: `Only ${product.stockQuantity} units available` });
+//       }
+//       cart.items[existingIdx].quantity = newQty;
+//     } else {
+//       cart.items.push({
+//         product: product._id,
+//         seller: product.seller._id,
+//         quantity,
+//         price: product.salePrice || product.price,
+//         name: product.name,
+//         image: product.images.find(i => i.isPrimary)?.url || product.images[0]?.url,
+//       });
+//     }
+
+//     await cart.save();
+//     res.json({ message: 'Added to cart', cart });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
 export const addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity = 1, varietyName } = req.body;
     const product = await Product.findById(productId).populate('seller', 'bankDetails acceptedPaymentMethods');
 
     if (!product) return res.status(404).json({ message: 'Product not found' });
     if (product.status !== 'active') return res.status(400).json({ message: 'Product is not available' });
+
+    let selectedVariety = null;
+    let unitPrice = product.salePrice || product.price;
+    let itemImage = product.images.find(i => i.isPrimary)?.url || product.images[0]?.url;
+    let itemName = product.name;
+
+    if (product.hasVariety) {
+      if (!varietyName) {
+        return res.status(400).json({ message: 'Please select an option for this product' });
+      }
+      selectedVariety = product.varieties.find(v => v.name === varietyName);
+      if (!selectedVariety) {
+        return res.status(400).json({ message: 'Selected option is no longer available' });
+      }
+      unitPrice = selectedVariety.price;
+      itemImage = selectedVariety.image || itemImage;
+      itemName = `${product.name} - ${selectedVariety.name}`;
+    }
+
     if (product.stockQuantity < quantity) {
       return res.status(400).json({ message: `Only ${product.stockQuantity} units available` });
     }
@@ -27,7 +86,13 @@ export const addToCart = async (req, res) => {
     let cart = await Cart.findOne({ buyer: req.user._id });
     if (!cart) cart = new Cart({ buyer: req.user._id, items: [] });
 
-    const existingIdx = cart.items.findIndex(i => i.product.toString() === productId);
+    // Match on product AND variety — different varieties of the same product
+    // are separate cart lines, same variety merges quantity.
+    const existingIdx = cart.items.findIndex(i =>
+      i.product.toString() === productId &&
+      (i.variety?.name || null) === (selectedVariety?.name || null)
+    );
+
     if (existingIdx > -1) {
       const newQty = cart.items[existingIdx].quantity + quantity;
       if (newQty > product.stockQuantity) {
@@ -39,9 +104,15 @@ export const addToCart = async (req, res) => {
         product: product._id,
         seller: product.seller._id,
         quantity,
-        price: product.salePrice || product.price,
-        name: product.name,
-        image: product.images.find(i => i.isPrimary)?.url || product.images[0]?.url,
+        price: unitPrice,
+        name: itemName,
+        image: itemImage,
+        variety: selectedVariety ? {
+          name: selectedVariety.name,
+          price: selectedVariety.price,
+          type: selectedVariety.type,
+          image: selectedVariety.image,
+        } : undefined,
       });
     }
 
