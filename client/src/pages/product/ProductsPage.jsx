@@ -93,7 +93,7 @@ function ProductCard({ product, onClick }) {
       </div>
 
       <div className="p-3.5 sm:p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#8B1E3F] mb-1">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-[#A67C3D] mb-1">
           {product.category}
         </p>
         <h3 className="font-serif text-sm sm:text-[0.95rem] font-semibold text-[#241014] leading-snug line-clamp-2 mb-1.5 min-h-[2.5em]">
@@ -105,11 +105,11 @@ function ProductCard({ product, onClick }) {
         <div className="flex items-center gap-2 mb-1">
           {isOnSale ? (
             <>
-              <span className="font-serif text-base font-bold text-[#8B1E3F]">{formatPrice(product.salePrice)}</span>
-              <span className="text-xs text-[#8B1E3F] line-through">{formatPrice(product.price)}</span>
+              <span className="font-serif text-base font-bold text-[#B5442E]">{formatPrice(product.salePrice)}</span>
+              <span className="text-xs text-[#B7A5AB] line-through">{formatPrice(product.price)}</span>
             </>
           ) : (
-            <span className="font-serif text-base  text-[#8B1E3F]">{formatPrice(product.price)}</span>
+            <span className="font-serif text-base font-bold text-[#430F22]">{formatPrice(product.price)}</span>
           )}
         </div>
         {product.ratings > 0 && (
@@ -355,7 +355,7 @@ function FilterPanel({
   );
 }
 
-export default function OjaFlowMarketplace() {
+export default function ProductsPage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -503,7 +503,7 @@ export default function OjaFlowMarketplace() {
       <div className="pt-0 bg-[#FBF7F2] min-h-screen">
 
         {/* HERO */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[#430F22] via-[#4E1129] to-[#2B0A16] px-5 sm:px-8 lg:px-[5%] py-14 sm:py-20">
+        {/* <section className="relative overflow-hidden bg-gradient-to-br from-[#430F22] via-[#4E1129] to-[#2B0A16] px-5 sm:px-8 lg:px-[5%] py-14 sm:py-20">
           <div
             className="absolute inset-0 opacity-[0.06] pointer-events-none"
             style={{
@@ -517,16 +517,16 @@ export default function OjaFlowMarketplace() {
             <span className="inline-flex items-center gap-1.5 bg-[#C9A15A]/15 border border-[#C9A15A]/40 text-[#E9C98A] text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-5">
               🇳🇬 Lagos' Premier Marketplace
             </span>
-            <h1 className="font-serif text-[1.1rem] sm:text-3xl lg:text-[2.4rem] font-semibold text-white leading-[1.08] tracking-tight mb-4">
+            <h1 className="font-serif text-[2.1rem] sm:text-5xl lg:text-[3.4rem] font-bold text-white leading-[1.08] tracking-tight mb-4">
               Shop directly from<br />
-              <em className="not-italic text-white">Lagos' best markets</em>
+              <em className="not-italic text-[#D9BA7C]">Lagos' best markets</em>
             </h1>
             <p className="text-white/70 text-base leading-relaxed max-w-lg mb-8">
               Discover thousands of products from verified sellers across Ladipo, Computer Village,
               Balogun, and every major market in Lagos — all in one place.
             </p>
 
-            {/* Primary search — the page's main entry point for finding products */}
+         
             <div className="relative max-w-md">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm">🔍</span>
               <input
@@ -540,22 +540,22 @@ export default function OjaFlowMarketplace() {
 
             <div className="flex gap-8 sm:gap-10 flex-wrap mt-8">
               <div>
-                <div className="font-serif text-2xl sm:text-3xl font-bold text-white">
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#D9BA7C]">
                   {products.length > 0 ? `${products.length}+` : "10K+"}
                 </div>
                 <div className="text-white/50 text-xs mt-0.5">Products Listed</div>
               </div>
               <div>
-                <div className="font-serif text-2xl sm:text-3xl font-bold text-white">10</div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#D9BA7C]">10</div>
                 <div className="text-white/50 text-xs mt-0.5">Lagos Markets</div>
               </div>
               <div>
-                <div className="font-serif text-2xl sm:text-3xl font-bold text-white">100%</div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#D9BA7C]">100%</div>
                 <div className="text-white/50 text-xs mt-0.5">Verified Sellers</div>
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* MOBILE SEARCH (secondary — mirrors hero search for quick access while scrolled past the hero) */}
         <div className=" px-5 py-4 bg-white border-b border-[#F1E7DC]">

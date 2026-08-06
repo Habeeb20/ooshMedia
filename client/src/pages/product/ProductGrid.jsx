@@ -432,7 +432,7 @@ export default function ProductsGrid() {
                         {/* PRICE */}
                         <div className="flex items-baseline gap-2 flex-wrap">
                           <p
-                            className="text-base md:text-xl font-black"
+                            className="text-base md:text-xl "
                             style={{
                               color: appConfig.colors.primary,
                             }}

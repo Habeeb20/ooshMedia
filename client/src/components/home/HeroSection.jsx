@@ -50,7 +50,7 @@ import PromoCards from "./Promocard";
 
 export default function HeroSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 mt-4 md:mt-6">
+    <section className="max-w-7xl mx-auto px-4 mt-20 md:mt-20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-start">
         {/* Category sidebar - desktop only */}
         <div className="hidden lg:block lg:col-span-3">

@@ -14,7 +14,7 @@ import painting6 from "../assets/Painting/p6.jpeg";
 export const productCategories = [
   {
     id: "electronics",
-    name: "Electronics",
+    name: "Electronics & gadgets",
     icon: "📱",
     subcategories: [
       "Smartphones", "Laptops", "Tablets", "Accessories", 

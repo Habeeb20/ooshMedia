@@ -47,9 +47,9 @@ function TrustBar() {
 
 export default function Home() {
   return (
-    <div className="bg-[#f4f4f6] min-h-screen overflow-x-hidden">
+    <div className="bg-[#f4f4f6]  overflow-x-hidden">
       {/* Nav */}
-      <Topbar />
+      {/* <Topbar /> */}
       <Navbar />
 
       {/* Hero */}

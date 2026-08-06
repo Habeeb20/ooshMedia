@@ -178,7 +178,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-[#8B1E3F] border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -221,8 +221,8 @@ export default function CheckoutPage() {
             <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
           )}
           {cart.fulfillmentType === 'delivery' && (
-            <div className="mt-3 bg-indigo-50 rounded-xl p-3">
-              <p className="text-xs text-indigo-700 font-semibold">
+            <div className="mt-3 bg-[#8B1E3F] rounded-xl p-3">
+              <p className="text-xs text-[#8B1E3F] font-semibold">
                 📦 A 4-digit delivery code will be displayed after checkout.
               </p>
             </div>
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full bg-[#8B1E3F] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#8B1E3F] disabled:opacity-50"
         >
           {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
         </button>

@@ -1364,7 +1364,7 @@ export default function ProductsGrid() {
         {/* ═══════════════════════════════════════════════════════════
             TOP SUBCATEGORY CAROUSEL (new — sidebar kept below as-is)
         ═══════════════════════════════════════════════════════════ */}
-        {subcategories.length > 0 && (
+        {/* {subcategories.length > 0 && (
           <SubcategoryCarousel
             subcategories={subcategories}
             subCounts={subCounts}
@@ -1373,7 +1373,7 @@ export default function ProductsGrid() {
             totalCount={products.length}
             primaryColor={primaryColor}
           />
-        )}
+        )} */}
 
         {/* ═══════════════════════════════════════════════════════════
             STATE CAROUSEL — filter products by seller's state

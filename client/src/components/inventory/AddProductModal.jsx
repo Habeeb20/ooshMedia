@@ -411,6 +411,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
     name: '',
     description: '',
     price: '',
+    grade:'',
     category: '',
     subCategory: '',
     stockQuantity: '',
@@ -697,10 +698,26 @@ const handleToggleVariety = () => {
                   className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
                 />
               </div>
+            
             </div>
 
             {/* Category & Subcategory */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">Grade *</label>
+  <select
+    name="grade"
+    required
+    value={formData.grade}
+    onChange={handleChange}
+    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F] bg-white"
+  >
+    <option value="">Select grade</option>
+    <option value="new">New</option>
+    <option value="foreign used">Foreign Used</option>
+    <option value="nigerian used">Nigerian Used</option>
+  </select>
+</div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
                 <select

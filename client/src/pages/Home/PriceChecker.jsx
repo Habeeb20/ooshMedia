@@ -6,13 +6,8 @@
 
 
 
-
-
-
-
-
-
-// import { useState, useEffect, useCallback } from 'react';
+// import { useState, useEffect, useMemo } from 'react';
+// import { toast } from 'sonner';
 
 // const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/price-checker`;
 
@@ -29,11 +24,13 @@
 //   const [products, setProducts] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [filterOptions, setFilterOptions] = useState({ categories: [], states: [], sellerTypes: [] });
+//   const [filterOptionsLoaded, setFilterOptionsLoaded] = useState(false);
 //   const [selectedSeller, setSelectedSeller] = useState(null);
 //   const [page, setPage] = useState(1);
 //   const [totalPages, setTotalPages] = useState(1);
 //   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
+//   // Raw, immediately-controlled input values (what the user sees as they type)
 //   const [filters, setFilters] = useState({
 //     search: '',
 //     category: '',
@@ -44,43 +41,107 @@
 //     sort: 'newest',
 //   });
 
+//   // Only search + price fields need debouncing — dropdowns/sort are discrete
+//   // selections and should apply immediately.
 //   const debouncedSearch = useDebounce(filters.search);
+//   const debouncedMinPrice = useDebounce(filters.minPrice);
+//   const debouncedMaxPrice = useDebounce(filters.maxPrice);
 
+//   const priceRangeInvalid =
+//     debouncedMinPrice !== '' &&
+//     debouncedMaxPrice !== '' &&
+//     Number(debouncedMinPrice) > Number(debouncedMaxPrice);
+
+//   // The filter set actually used to query the backend. Memoized so it only
+//   // changes reference when a value that matters for the query actually
+//   // changes — this is what keeps the fetch effect from firing on every
+//   // keystroke.
+//   const queryFilters = useMemo(() => ({
+//     search: debouncedSearch,
+//     category: filters.category,
+//     sellerType: filters.sellerType,
+//     state: filters.state,
+//     minPrice: debouncedMinPrice,
+//     maxPrice: debouncedMaxPrice,
+//     sort: filters.sort,
+//   }), [debouncedSearch, debouncedMinPrice, debouncedMaxPrice, filters.category, filters.sellerType, filters.state, filters.sort]);
+
+//   // Reset to page 1 whenever the *applied* filters change (not on every raw
+//   // keystroke before debounce settles).
 //   useEffect(() => {
+//     setPage(1);
+//   }, [queryFilters]);
+
+//   // Load filter option lists once
+//   useEffect(() => {
+//     let cancelled = false;
 //     fetch(`${API_BASE}/filters`)
 //       .then((r) => r.json())
-//       .then((d) => d.success && setFilterOptions(d));
+//       .then((d) => {
+//         if (cancelled) return;
+//         if (d.success) {
+//           setFilterOptions({
+//             categories: d.categories || [],
+//             states: d.states || [],
+//             sellerTypes: d.sellerTypes || [],
+//           });
+//         } else {
+//           toast.error(d.message || 'Could not load filter options');
+//         }
+//       })
+//       .catch((e) => {
+//         if (cancelled) return;
+//         console.error(e);
+//         toast.error('Could not load filter options');
+//       })
+//       .finally(() => {
+//         if (!cancelled) setFilterOptionsLoaded(true);
+//       });
+//     return () => { cancelled = true; };
 //   }, []);
 
-//   const fetchProducts = useCallback(async () => {
-//     setLoading(true);
-//     const params = new URLSearchParams();
-//     Object.entries({ ...filters, search: debouncedSearch }).forEach(([k, v]) => {
-//       if (v) params.append(k, v);
-//     });
-//     params.append('page', page);
-//     params.append('limit', 12);
-
-//     try {
-//       const res = await fetch(`${API_BASE}?${params.toString()}`);
-//       const data = await res.json();
-//       if (data.success) {
-//         setProducts(data.products);
-//         setTotalPages(data.totalPages);
-//       }
-//     } catch (e) {
-//       console.error(e);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [filters, debouncedSearch, page]);
-
+//   // Fetch products whenever the applied filters or page change. Uses an
+//   // AbortController so a slow, now-outdated request can never overwrite the
+//   // result of a newer one.
 //   useEffect(() => {
-//     fetchProducts();
-//   }, [fetchProducts]);
+//     if (priceRangeInvalid) return; // don't query with a nonsensical range
+
+//     const controller = new AbortController();
+
+//     const run = async () => {
+//       setLoading(true);
+//       const params = new URLSearchParams();
+//       Object.entries(queryFilters).forEach(([k, v]) => {
+//         if (v !== '' && v !== null && v !== undefined) params.append(k, v);
+//       });
+//       params.append('page', page);
+//       params.append('limit', 12);
+
+//       try {
+//         const res = await fetch(`${API_BASE}?${params.toString()}`, { signal: controller.signal });
+//         const data = await res.json();
+//         if (data.success) {
+//           setProducts(data.products || []);
+//           setTotalPages(data.totalPages || 1);
+//         } else {
+//           toast.error(data.message || 'Failed to load products');
+//         }
+//       } catch (e) {
+//         if (e.name !== 'AbortError') {
+//           console.error(e);
+//           toast.error('Something went wrong while loading products');
+//         }
+//         return; // aborted or errored — don't touch loading state below via finally on a stale request
+//       } finally {
+//         if (!controller.signal.aborted) setLoading(false);
+//       }
+//     };
+
+//     run();
+//     return () => controller.abort();
+//   }, [queryFilters, page, priceRangeInvalid]);
 
 //   const updateFilter = (key, value) => {
-//     setPage(1);
 //     setFilters((f) => ({ ...f, [key]: value }));
 //   };
 
@@ -88,12 +149,11 @@
 //     setFilters({
 //       search: '', category: '', sellerType: '', state: '', minPrice: '', maxPrice: '', sort: 'newest',
 //     });
-//     setPage(1);
 //   };
 
 //   const activeFilterCount = Object.entries(filters).filter(
 //     ([k, v]) => v && k !== 'sort' && k !== 'search'
-//   ).length;
+//   ).length + (filters.search ? 1 : 0);
 
 //   return (
 //     <div className="min-h-screen bg-gray-50">
@@ -107,7 +167,7 @@
 //               placeholder="Search products..."
 //               value={filters.search}
 //               onChange={(e) => updateFilter('search', e.target.value)}
-//               className="w-full rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//               className="w-full rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
 //             />
 //           </div>
 
@@ -122,11 +182,11 @@
 
 //           <button
 //             onClick={() => setShowMoreFilters((s) => !s)}
-//             className="relative flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-4 py-2.5 text-sm font-medium whitespace-nowrap"
+//             className="relative flex items-center gap-1.5 rounded-full bg-[#8B1E3F] text-white px-4 py-2.5 text-sm font-medium whitespace-nowrap"
 //           >
 //             Filters
 //             {activeFilterCount > 0 && (
-//               <span className="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+//               <span className="bg-white text-[#8B1E3F] text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
 //                 {activeFilterCount}
 //               </span>
 //             )}
@@ -156,23 +216,30 @@
 //               options={filterOptions.states}
 //             />
 
-//             <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-full px-3 py-1.5">
-//               <span className="text-xs text-gray-400">₦</span>
-//               <input
-//                 type="number"
-//                 placeholder="Min"
-//                 value={filters.minPrice}
-//                 onChange={(e) => updateFilter('minPrice', e.target.value)}
-//                 className="w-16 bg-transparent text-sm focus:outline-none"
-//               />
-//               <span className="text-gray-300">–</span>
-//               <input
-//                 type="number"
-//                 placeholder="Max"
-//                 value={filters.maxPrice}
-//                 onChange={(e) => updateFilter('maxPrice', e.target.value)}
-//                 className="w-16 bg-transparent text-sm focus:outline-none"
-//               />
+//             <div className="flex flex-col">
+//               <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-full px-3 py-1.5">
+//                 <span className="text-xs text-gray-400">₦</span>
+//                 <input
+//                   type="number"
+//                   min="0"
+//                   placeholder="Min"
+//                   value={filters.minPrice}
+//                   onChange={(e) => updateFilter('minPrice', e.target.value)}
+//                   className="w-16 bg-transparent text-sm focus:outline-none"
+//                 />
+//                 <span className="text-gray-300">–</span>
+//                 <input
+//                   type="number"
+//                   min="0"
+//                   placeholder="Max"
+//                   value={filters.maxPrice}
+//                   onChange={(e) => updateFilter('maxPrice', e.target.value)}
+//                   className="w-16 bg-transparent text-sm focus:outline-none"
+//                 />
+//               </div>
+//               {priceRangeInvalid && (
+//                 <span className="text-[10px] text-red-500 mt-1 px-1">Min price is higher than max</span>
+//               )}
 //             </div>
 
 //             <select
@@ -205,7 +272,11 @@
 //             ))}
 //           </div>
 //         ) : products.length === 0 ? (
-//           <div className="text-center py-20 text-gray-500">No products match your filters.</div>
+//           <div className="text-center py-20 text-gray-500">
+//             {filterOptionsLoaded && activeFilterCount > 0
+//               ? 'No products match your filters.'
+//               : 'No products available right now.'}
+//           </div>
 //         ) : (
 //           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 auto-rows-fr">
 //             {products.map((p) => (
@@ -215,13 +286,13 @@
 //         )}
 
 //         {totalPages > 1 && (
-//           <div className="flex justify-center gap-2 mt-8">
+//           <div className="flex justify-center flex-wrap gap-2 mt-8">
 //             {Array.from({ length: totalPages }).map((_, i) => (
 //               <button
 //                 key={i}
 //                 onClick={() => setPage(i + 1)}
 //                 className={`w-9 h-9 rounded-full text-sm font-medium ${
-//                   page === i + 1 ? 'bg-emerald-600 text-white' : 'bg-white border border-gray-300 text-gray-700'
+//                   page === i + 1 ? 'bg-[#8B1E3F] text-white' : 'bg-white border border-gray-300 text-gray-700'
 //                 }`}
 //               >
 //                 {i + 1}
@@ -239,16 +310,17 @@
 // }
 
 // function FilterSelect({ placeholder, value, onChange, options, capitalize }) {
+//   const safeOptions = options || [];
 //   return (
 //     <select
 //       value={value}
 //       onChange={(e) => onChange(e.target.value)}
 //       className={`rounded-full border px-3 py-1.5 text-sm bg-white ${
-//         value ? 'border-emerald-500 text-emerald-700 font-medium' : 'border-gray-300 text-gray-600'
+//         value ? 'border-[#8B1E3F] text-[#8B1E3F] font-medium' : 'border-gray-300 text-gray-600'
 //       } ${capitalize ? 'capitalize' : ''}`}
 //     >
 //       <option value="">{placeholder}</option>
-//       {options.map((opt) => (
+//       {safeOptions.map((opt) => (
 //         <option key={opt} value={opt}>
 //           {capitalize ? opt.charAt(0).toUpperCase() + opt.slice(1) : opt}
 //         </option>
@@ -305,7 +377,7 @@
 //         </p>
 
 //         <div className="mt-1 flex items-baseline gap-1.5">
-//           <span className="text-xs sm:text-sm font-bold text-emerald-700">
+//           <span className="text-xs sm:text-sm font-bold text-[#8B1E3F]">
 //             ₦{(hasDiscount ? product.salePrice : product.price)?.toLocaleString()}
 //           </span>
 //           {hasDiscount && (
@@ -318,7 +390,7 @@
 //         </div>
 
 //         {/* Seller: pinned to bottom, fixed height, ellipsis */}
-//         <p className="mt-auto pt-1.5 text-[11px] sm:text-xs font-medium text-emerald-600 truncate">
+//         <p className="mt-auto pt-1.5 text-[11px] sm:text-xs font-medium text-[#8B1E3F] truncate">
 //           {product.seller?.businessProfile?.businessName || product.seller?.username} →
 //         </p>
 //       </div>
@@ -351,12 +423,12 @@
 //         {sp.sellerTypes?.length > 0 && (
 //           <div className="flex flex-wrap gap-1.5 mb-4">
 //             {sp.sellerTypes.map((t) => (
-//               <span key={t} className="text-xs capitalize bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full font-medium">
+//               <span key={t} className="text-xs capitalize bg-emerald-50 text-[#8B1E3F] px-2 py-1 rounded-full font-medium">
 //                 {t}
 //               </span>
 //             ))}
 //             {sp.verifiedSeller && (
-//               <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">✓ Verified</span>
+//               <span className="text-xs bg-[#8B1E3F]-50 text-[#8B1E3F]-700 px-2 py-1 rounded-full font-medium">✓ Verified</span>
 //             )}
 //           </div>
 //         )}
@@ -394,7 +466,7 @@
 
 //                 {c.purchaseHistory?.length > 0 && (
 //                   <details className="mt-2">
-//                     <summary className="text-xs text-emerald-600 cursor-pointer">
+//                     <summary className="text-xs text-[#8B1E3F] cursor-pointer">
 //                       Purchase history ({c.purchaseHistory.length})
 //                     </summary>
 //                     <div className="mt-2 space-y-1">
@@ -433,26 +505,49 @@
 
 
 
-
-
-
-
-
-
-
-
-
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 
 const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/price-checker`;
+const SEARCH_DEBOUNCE = 400;
 
-function useDebounce(value, delay = 400) {
+// Fixed dropdown for product grade (product.grade is a free-text field in
+// the schema, so the allowed values live here on the frontend).
+const GRADE_OPTIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'foreign_used', label: 'Foreign Used' },
+  { value: 'nigeria_used', label: 'Nigeria Used' },
+];
+
+// Fixed dropdown for seller type, mirrors sellerProfile.sellerTypes enum on
+// the User schema (kept hardcoded here so it can't drift from what the
+// filter UI needs, independent of whatever the backend /filters endpoint
+// happens to return).
+const SELLER_TYPE_OPTIONS = [
+  { value: 'manufacturer', label: 'Manufacturer' },
+  { value: 'wholesaler', label: 'Wholesaler' },
+  { value: 'distributor', label: 'Distributor' },
+  { value: 'retailer', label: 'Retailer' },
+];
+
+// Debounced mirror of `value` that can also be force-synced immediately by
+// bumping `flushToken` (used by the explicit Search button).
+function useDebouncedValue(value, delay, flushToken) {
   const [debounced, setDebounced] = useState(value);
+
   useEffect(() => {
     const t = setTimeout(() => setDebounced(value), delay);
     return () => clearTimeout(t);
   }, [value, delay]);
+
+  // Whenever flushToken changes, apply the latest raw value right away,
+  // skipping whatever's left of the debounce delay.
+  useEffect(() => {
+    if (flushToken === 0) return; // skip on mount
+    setDebounced(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flushToken]);
+
   return debounced;
 }
 
@@ -464,7 +559,10 @@ export default function PriceCheckers() {
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
+  // Bumped by the Search button to force-apply whatever is currently typed,
+  // instead of waiting out the debounce.
+  const [flushToken, setFlushToken] = useState(0);
 
   // Raw, immediately-controlled input values (what the user sees as they type)
   const [filters, setFilters] = useState({
@@ -472,16 +570,18 @@ export default function PriceCheckers() {
     category: '',
     sellerType: '',
     state: '',
+    grade: '',
     minPrice: '',
     maxPrice: '',
     sort: 'newest',
   });
 
-  // Only search + price fields need debouncing — dropdowns/sort are discrete
-  // selections and should apply immediately.
-  const debouncedSearch = useDebounce(filters.search);
-  const debouncedMinPrice = useDebounce(filters.minPrice);
-  const debouncedMaxPrice = useDebounce(filters.maxPrice);
+  // Only search + price fields need debouncing for real-time typing —
+  // dropdowns/sort are discrete selections and should apply the instant
+  // they're picked, no debounce needed.
+  const debouncedSearch = useDebouncedValue(filters.search, SEARCH_DEBOUNCE, flushToken);
+  const debouncedMinPrice = useDebouncedValue(filters.minPrice, SEARCH_DEBOUNCE, flushToken);
+  const debouncedMaxPrice = useDebouncedValue(filters.maxPrice, SEARCH_DEBOUNCE, flushToken);
 
   const priceRangeInvalid =
     debouncedMinPrice !== '' &&
@@ -491,16 +591,27 @@ export default function PriceCheckers() {
   // The filter set actually used to query the backend. Memoized so it only
   // changes reference when a value that matters for the query actually
   // changes — this is what keeps the fetch effect from firing on every
-  // keystroke.
+  // keystroke, while dropdown changes (category/sellerType/state/grade/sort)
+  // flow straight through and trigger a fetch immediately.
   const queryFilters = useMemo(() => ({
     search: debouncedSearch,
     category: filters.category,
     sellerType: filters.sellerType,
     state: filters.state,
+    grade: filters.grade,
     minPrice: debouncedMinPrice,
     maxPrice: debouncedMaxPrice,
     sort: filters.sort,
-  }), [debouncedSearch, debouncedMinPrice, debouncedMaxPrice, filters.category, filters.sellerType, filters.state, filters.sort]);
+  }), [
+    debouncedSearch,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    filters.category,
+    filters.sellerType,
+    filters.state,
+    filters.grade,
+    filters.sort,
+  ]);
 
   // Reset to page 1 whenever the *applied* filters change (not on every raw
   // keystroke before debounce settles).
@@ -583,9 +694,14 @@ export default function PriceCheckers() {
 
   const clearFilters = () => {
     setFilters({
-      search: '', category: '', sellerType: '', state: '', minPrice: '', maxPrice: '', sort: 'newest',
+      search: '', category: '', sellerType: '', state: '', grade: '', minPrice: '', maxPrice: '', sort: 'newest',
     });
   };
+
+  // Explicit "Search" trigger — applies whatever's currently typed right
+  // now, in addition to the real-time debounced search that's already
+  // running. Handy for a fast "Enter" / button-press submit.
+  const runSearchNow = () => setFlushToken((t) => t + 1);
 
   const activeFilterCount = Object.entries(filters).filter(
     ([k, v]) => v && k !== 'sort' && k !== 'search'
@@ -593,18 +709,27 @@ export default function PriceCheckers() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top navbar with search + filters */}
+      {/* Top navbar with search + filters — filters are always visible now,
+          no click-to-reveal step */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        {/* Row 1: search + sort + toggle */}
-        <div className="max-w-7xl mx-auto px-4 py-3  flex items-center gap-3 mt-5">
-          <div className="relative flex-1">
+        {/* Row 1: search + sort */}
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 mt-5">
+          <div className="relative flex-1 flex items-center gap-2">
             <input
               type="text"
               placeholder="Search products..."
               value={filters.search}
               onChange={(e) => updateFilter('search', e.target.value)}
-              className="w-full rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearchNow(); }}
+              className="w-full rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
             />
+            <button
+              type="button"
+              onClick={runSearchNow}
+              className="rounded-full bg-[#8B1E3F] text-white px-4 py-2.5 text-sm font-medium whitespace-nowrap hover:bg-[#8B1E3F]"
+            >
+              Search
+            </button>
           </div>
 
           <select
@@ -616,87 +741,86 @@ export default function PriceCheckers() {
             <option value="oldest">Oldest first</option>
           </select>
 
-          <button
-            onClick={() => setShowMoreFilters((s) => !s)}
-            className="relative flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-4 py-2.5 text-sm font-medium whitespace-nowrap"
-          >
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+          {activeFilterCount > 0 && (
+            <span className="hidden sm:flex bg-[#8B1E3F] text-white text-[10px] font-bold rounded-full w-5 h-5 items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
         </div>
 
-        {/* Row 2: filter bar — wraps on small screens, scrolls horizontally on mobile if needed */}
-        {showMoreFilters && (
-          <div className="max-w-7xl mx-auto px-4 pb-3 flex flex-wrap gap-2 items-center border-t border-gray-100 pt-3">
-            <FilterSelect
-              placeholder="Category"
-              value={filters.category}
-              onChange={(v) => updateFilter('category', v)}
-              options={filterOptions.categories}
-            />
-            <FilterSelect
-              placeholder="Seller type"
-              value={filters.sellerType}
-              onChange={(v) => updateFilter('sellerType', v)}
-              options={filterOptions.sellerTypes}
-              capitalize
-            />
-            <FilterSelect
-              placeholder="State"
-              value={filters.state}
-              onChange={(v) => updateFilter('state', v)}
-              options={filterOptions.states}
-            />
+        {/* Row 2: filter bar — always shown, wraps on small screens */}
+        <div className="max-w-7xl mx-auto px-4 pb-3 flex flex-wrap gap-2 items-center border-t border-gray-100 pt-3">
+          <FilterSelect
+            placeholder="Category"
+            value={filters.category}
+            onChange={(v) => updateFilter('category', v)}
+            options={filterOptions.categories}
+          />
+          <FilterSelect
+            placeholder="Seller type"
+            value={filters.sellerType}
+            onChange={(v) => updateFilter('sellerType', v)}
+            options={SELLER_TYPE_OPTIONS}
+          />
+          <FilterSelect
+            placeholder="Grade"
+            value={filters.grade}
+            onChange={(v) => updateFilter('grade', v)}
+            options={GRADE_OPTIONS}
+          />
+          <FilterSelect
+            placeholder="State"
+            value={filters.state}
+            onChange={(v) => updateFilter('state', v)}
+            options={filterOptions.states}
+          />
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-full px-3 py-1.5">
-                <span className="text-xs text-gray-400">₦</span>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Min"
-                  value={filters.minPrice}
-                  onChange={(e) => updateFilter('minPrice', e.target.value)}
-                  className="w-16 bg-transparent text-sm focus:outline-none"
-                />
-                <span className="text-gray-300">–</span>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Max"
-                  value={filters.maxPrice}
-                  onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                  className="w-16 bg-transparent text-sm focus:outline-none"
-                />
-              </div>
-              {priceRangeInvalid && (
-                <span className="text-[10px] text-red-500 mt-1 px-1">Min price is higher than max</span>
-              )}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-full px-3 py-1.5">
+              <span className="text-xs text-gray-400">₦</span>
+              <input
+                type="number"
+                min="0"
+                placeholder="Min"
+                value={filters.minPrice}
+                onChange={(e) => updateFilter('minPrice', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearchNow(); }}
+                className="w-16 bg-transparent text-sm focus:outline-none"
+              />
+              <span className="text-gray-300">–</span>
+              <input
+                type="number"
+                min="0"
+                placeholder="Max"
+                value={filters.maxPrice}
+                onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearchNow(); }}
+                className="w-16 bg-transparent text-sm focus:outline-none"
+              />
             </div>
-
-            <select
-              value={filters.sort}
-              onChange={(e) => updateFilter('sort', e.target.value)}
-              className="sm:hidden rounded-full border border-gray-300 px-3 py-1.5 text-sm bg-white"
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearFilters}
-                className="text-xs text-red-500 font-medium px-2 py-1.5 whitespace-nowrap"
-              >
-                Clear all
-              </button>
+            {priceRangeInvalid && (
+              <span className="text-[10px] text-red-500 mt-1 px-1">Min price is higher than max</span>
             )}
           </div>
-        )}
+
+          <select
+            value={filters.sort}
+            onChange={(e) => updateFilter('sort', e.target.value)}
+            className="sm:hidden rounded-full border border-gray-300 px-3 py-1.5 text-sm bg-white"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearFilters}
+              className="text-xs text-red-500 font-medium px-2 py-1.5 whitespace-nowrap"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Product grid */}
@@ -728,7 +852,7 @@ export default function PriceCheckers() {
                 key={i}
                 onClick={() => setPage(i + 1)}
                 className={`w-9 h-9 rounded-full text-sm font-medium ${
-                  page === i + 1 ? 'bg-emerald-600 text-white' : 'bg-white border border-gray-300 text-gray-700'
+                  page === i + 1 ? 'bg-[#8B1E3F] text-white' : 'bg-white border border-gray-300 text-gray-700'
                 }`}
               >
                 {i + 1}
@@ -745,20 +869,27 @@ export default function PriceCheckers() {
   );
 }
 
+// Accepts either plain strings (["Lagos", "Abuja"]) or {value, label} pairs
+// (for fixed dropdowns like grade/sellerType where the stored value and the
+// display label differ).
 function FilterSelect({ placeholder, value, onChange, options, capitalize }) {
-  const safeOptions = options || [];
+  const rawOptions = options || [];
+  const normalized = rawOptions.map((opt) =>
+    typeof opt === 'string' ? { value: opt, label: capitalize ? opt.charAt(0).toUpperCase() + opt.slice(1) : opt } : opt
+  );
+
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={`rounded-full border px-3 py-1.5 text-sm bg-white ${
-        value ? 'border-emerald-500 text-emerald-700 font-medium' : 'border-gray-300 text-gray-600'
-      } ${capitalize ? 'capitalize' : ''}`}
+        value ? 'border-[#8B1E3F] text-[#8B1E3F] font-medium' : 'border-gray-300 text-gray-600'
+      }`}
     >
       <option value="">{placeholder}</option>
-      {safeOptions.map((opt) => (
-        <option key={opt} value={opt}>
-          {capitalize ? opt.charAt(0).toUpperCase() + opt.slice(1) : opt}
+      {normalized.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
         </option>
       ))}
     </select>
@@ -807,13 +938,13 @@ function ProductCard({ product, onViewSeller }) {
           {product.name}
         </h4>
 
-        {/* Category: fixed height, single line, ellipsis */}
+        {/* Category + grade: fixed height, single line, ellipsis */}
         <p className="text-[11px] text-gray-400 mt-0.5 truncate leading-4 h-4">
-          {product.category}
+          {product.category}{product.grade ? ` · ${product.grade}` : ''}
         </p>
 
         <div className="mt-1 flex items-baseline gap-1.5">
-          <span className="text-xs sm:text-sm font-bold text-emerald-700">
+          <span className="text-xs sm:text-sm font-bold text-[#8B1E3F]">
             ₦{(hasDiscount ? product.salePrice : product.price)?.toLocaleString()}
           </span>
           {hasDiscount && (
@@ -826,7 +957,7 @@ function ProductCard({ product, onViewSeller }) {
         </div>
 
         {/* Seller: pinned to bottom, fixed height, ellipsis */}
-        <p className="mt-auto pt-1.5 text-[11px] sm:text-xs font-medium text-emerald-600 truncate">
+        <p className="mt-auto pt-1.5 text-[11px] sm:text-xs font-medium text-[#8B1E3F] truncate">
           {product.seller?.businessProfile?.businessName || product.seller?.username} →
         </p>
       </div>
@@ -859,12 +990,12 @@ function SellerModal({ seller, onClose }) {
         {sp.sellerTypes?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {sp.sellerTypes.map((t) => (
-              <span key={t} className="text-xs capitalize bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full font-medium">
+              <span key={t} className="text-xs capitalize bg-emerald-50 text-[#8B1E3F] px-2 py-1 rounded-full font-medium">
                 {t}
               </span>
             ))}
             {sp.verifiedSeller && (
-              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">✓ Verified</span>
+              <span className="text-xs bg-[#8B1E3F]-50 text-[#8B1E3F]-700 px-2 py-1 rounded-full font-medium">✓ Verified</span>
             )}
           </div>
         )}
@@ -902,7 +1033,7 @@ function SellerModal({ seller, onClose }) {
 
                 {c.purchaseHistory?.length > 0 && (
                   <details className="mt-2">
-                    <summary className="text-xs text-emerald-600 cursor-pointer">
+                    <summary className="text-xs text-[#8B1E3F] cursor-pointer">
                       Purchase history ({c.purchaseHistory.length})
                     </summary>
                     <div className="mt-2 space-y-1">

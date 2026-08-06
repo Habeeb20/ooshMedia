@@ -834,7 +834,7 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
           <SidebarContent />
         </div>
-
+{/* 
         <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100">
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-gray-50">
             <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
@@ -850,7 +850,7 @@ export default function Dashboard() {
             </div>
             <div className="ml-auto flex-shrink-0 w-2 h-2 rounded-full bg-green-400" title="Online" />
           </div>
-        </div>
+        </div> */}
       </aside>
 
       {/* Main Content */}

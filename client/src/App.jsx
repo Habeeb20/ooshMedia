@@ -52,6 +52,8 @@ import InventoryAccessCallback from "./pages/vendor/Inventoryaccesscallback";
 import VerifyCallback from "./pages/VerifyCallback";
 
 import AutoParts from "./pages/others/Autoparts";
+import Topbar from "./components/home/Topbar";
+import ProductsPage from "./pages/product/ProductsPage";
 
 const App = () => {
   useScrollToTop();
@@ -66,6 +68,7 @@ const App = () => {
     <>
       <CartProvider>
         <Toaster richColors position="top-right" />
+     
         <Navbar />
         {/* Your other content with pt-20 */}
         <div className="pt-20">
@@ -157,7 +160,7 @@ const App = () => {
             <Route path="/admin/login" element={<AdminLogin />} />
 
             <Route path="/marketplace" element={<MarketPlace />} />
-            <Route path="/products" element={<MarketPlace />} />
+            <Route path="/products" element={<ProductsPage/>} />
             <Route path="/signup" element={<Signup />} />
             {/* <Route path="/price-checker" element={<PriceChecker />} /> */}
             <Route path="/price-checker" element={<PriceCheckers />} />
@@ -167,6 +170,8 @@ const App = () => {
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/business/*" element={<FeedPage />} />
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
+           
+<Route path="/category/:categorySlug/:subCategorySlug" element={<ProductsGrid />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />

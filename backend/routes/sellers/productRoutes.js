@@ -36,3 +36,7 @@ router.post('/:productId/view', viewProduct);
 router.post('/:productId/rate', verifyToken, rateProduct);
 
 export default router;
+
+
+
+
