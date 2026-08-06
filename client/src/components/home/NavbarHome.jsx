@@ -177,7 +177,8 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="bg-white fixed top-0 mt-18 left-0 right-0 w-full z-50 border-b border-gray-100 shadow-sm">
+
+      <div className="bg-white fixed top-0 mt-20 left-0 right-0 w-full z-50 border-b border-gray-100 shadow-sm ">
         <div className="max-w-7xl mx-auto px-3 md:px-4">
           <div className="flex items-center gap-2 md:gap-3 py-3">
             {/* Logo */}
