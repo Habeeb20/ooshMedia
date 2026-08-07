@@ -99,7 +99,7 @@ export const productCategories = [
     name: "Groceries & Food",
     icon: "🛒",
     subcategories: [
-      "Rice", "Beans", "Cooking Oil", "Spices", "Snacks", "Beverages"
+      "fast food", "swallow", "Cooking Oil", "Spices", "Snacks", "cakes", "drink", "Beverages"
     ]
   },
   {

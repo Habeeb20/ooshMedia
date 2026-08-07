@@ -1,26 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import { swaggerSpec } from "./utills/swagger.js";
+import swaggerUi from "swagger-ui-express"
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -52,6 +31,7 @@ dotenv.config();
 connectDb();
 
 const app = express();
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /**
  * Security / caching control
@@ -116,3 +96,19 @@ app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

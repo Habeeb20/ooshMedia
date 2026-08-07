@@ -59,14 +59,14 @@ export default function Home() {
       <TrustBar />
 
       {/* Feature grid */}
-      <FeatureGrid />
+   
 
       {/* Promo banner */}
       <PromoBanner />
 
       {/* Products */}
       <ProductsGrid />
-
+   <FeatureGrid />
       {/* Fashion deals */}
       <FashionDeals />
 

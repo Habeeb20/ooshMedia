@@ -30,6 +30,8 @@
     "otp-generator": "^4.0.1",
     "paystack": "^2.0.1",
     "socket.io": "^4.8.3",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.0"
   }
 }

@@ -54,9 +54,17 @@ import VerifyCallback from "./pages/VerifyCallback";
 import AutoParts from "./pages/others/Autoparts";
 import Topbar from "./components/home/Topbar";
 import ProductsPage from "./pages/product/ProductsPage";
+import { trackPageView } from "./pages/analytics";
+import HeroSection from "./pages/others/food/FoodHeroSection";
+import HomePage from "./pages/others/food/FoodHomepage";
 
 const App = () => {
   useScrollToTop();
+   const location = useLocation();
+
+    useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
 
   useEffect(() => {
     loadGoogleMaps().catch((err) =>
@@ -169,7 +177,10 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/business/*" element={<FeedPage />} />
+            <Route path="/food" element={<HomePage />} />
+
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
+
            
 <Route path="/category/:categorySlug/:subCategorySlug" element={<ProductsGrid />} />
             <Route path="/search" element={<SearchResults />} />

@@ -28,6 +28,40 @@ const toClientUser = (user) => ({
   referralPoints: user.referralPoints,
   businessProfileCompleted: user.businessProfileCompleted,
 });
+
+/**
+ * @swagger
+ * /api/auth/send-otp:
+ *   post:
+ *     summary: Send an OTP to email or phone
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [type]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Required if phone is not provided
+ *               phone:
+ *                 type: string
+ *                 description: Required if email is not provided
+ *               type:
+ *                 type: string
+ *                 enum: [email, phone]
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       400:
+ *         description: Contact and type are required
+ *       500:
+ *         description: Failed to send OTP
+ */
+
+
 // ==================== SEND OTP ====================
 export const sendOTP = async (req, res) => {
   try {
@@ -57,6 +91,34 @@ export const sendOTP = async (req, res) => {
   }
 };
 
+
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify a previously sent OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [contact, otp]
+ *             properties:
+ *               contact:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *       400:
+ *         description: Invalid or expired OTP
+ *       500:
+ *         description: Server error
+ */
 export const verifyOtp = async (req, res) => {
   try {
     const { contact, otp } = req.body;
@@ -72,6 +134,59 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     summary: Create a new user account
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [password]
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               alternateContact:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               lga:
+ *                 type: string
+ *               dateOfBirth:
+ *                 type: string
+ *                 format: date
+ *               role:
+ *                 type: string
+ *               profilePicture:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               referralCode:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Account created successfully, returns a JWT token
+ *       400:
+ *         description: User already exists, or email/phone missing
+ *       500:
+ *         description: Failed to create account
+ */
+
 
 export const signup = async (req, res) => {
   try {
@@ -158,6 +273,35 @@ const existingUser = await User.findOne({ $or: orConditions });
 
 
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Log in with email, phone, or username
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [contact, password]
+ *             properties:
+ *               contact:
+ *                 type: string
+ *                 description: Email, phone number, or username
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Login successful, returns a JWT token
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Login failed
+ */
+
 
 // ==================== NEW: LOGIN ====================
 export const login = async (req, res) => {
@@ -193,51 +337,34 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
-// ── Contact login (email, phone, or username + password) ───────────
 
+/**
+ * @swagger
+ * /api/auth/e-auth/request:
+ *   post:
+ *     summary: Request an e-Auth (email OTP) login code
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification code sent to email
+ *       400:
+ *         description: Email is required
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Server error while sending code
+ */
 
-// export const login = async (req, res) => {
-//   try {
-//     const { contact, password } = req.body;
-
-//     if (!contact || !password) {
-//       return res.status(400).json({ success: false, message: 'Contact and password are required' });
-//     }
-
-//     const normalizedContact = contact.trim().toLowerCase();
-
-//     const user = await User.findOne({
-//       $or: [
-//         { email: normalizedContact },
-//         { phoneNumber: contact.trim() },
-//         { username: normalizedContact },
-//       ],
-//     }).select('+password');
-
-//     if (!user) {
-//       return res.status(401).json({ success: false, message: 'Invalid credentials' });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(401).json({ success: false, message: 'Invalid credentials' });
-//     }
-
-//     const token = generateToken(user);
-
-//     res.status(200).json({
-//       success: true,
-//       message: 'Login successful',
-//       token,
-//       user: toClientUser(user),
-//     });
-//   } catch (error) {
-//     console.error('Login error:', error);
-//     res.status(500).json({ success: false, message: 'Server error during login' });
-//   }
-// };
-
-// ── e-Auth step 1: request a code (email only — OTP needs an inbox) ─
 export const requestEAuthOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -270,6 +397,39 @@ export const requestEAuthOtp = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error while sending code' });
   }
 };
+
+
+/**
+ * @swagger
+ * /api/auth/e-auth/verify:
+ *   post:
+ *     summary: Verify e-Auth code and complete login
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code]
+ *             properties:
+ *               email:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful, returns a JWT token and user object
+ *       400:
+ *         description: Email and code are required
+ *       401:
+ *         description: Invalid, expired, or incorrect code
+ *       429:
+ *         description: Too many attempts — request a new code
+ *       500:
+ *         description: Server error during verification
+ */
+
 
 // ── e-Auth step 2: verify the code and log in ───────────────────────
 export const verifyEAuthOtp = async (req, res) => {
@@ -320,6 +480,38 @@ export const verifyEAuthOtp = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during verification' });
   }
 };
+
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [contact, type]
+ *             properties:
+ *               contact:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [email, phone]
+ *     responses:
+ *       200:
+ *         description: Reset OTP sent successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+
+
+
 // ==================== NEW: FORGOT PASSWORD ====================
 export const forgotPassword = async (req, res) => {
   try {
@@ -338,6 +530,39 @@ export const forgotPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password using a verified OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [contact, otp, newPassword]
+ *             properties:
+ *               contact:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid or expired OTP
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to reset password
+ */
+
 
 export const resetPassword = async (req, res) => {
   try {
@@ -362,7 +587,22 @@ export const resetPassword = async (req, res) => {
 };
 
 
-
+/**
+ * @swagger
+ * /api/auth/dashboard:
+ *   get:
+ *     summary: Get the logged-in user's dashboard data
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data including profile completion and business profile
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to load dashboard
+ */
 export const getDashboard = async (req, res) => {
   try {
     const userId = req.user._id;   // Make sure you're using req.user._id (not userId)
@@ -448,6 +688,62 @@ const calculateProfileCompletion = (user) => {
   return Math.round((completed / total) * 100);
 };
 
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     summary: Update the logged-in user's business profile (supports video gallery uploads)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               lga:
+ *                 type: string
+ *               profilePicture:
+ *                 type: string
+ *               isRider:
+ *                 type: boolean
+ *               businessName:
+ *                 type: string
+ *               businessAddress:
+ *                 type: string
+ *               entityCategory:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               yearsInBusiness:
+ *                 type: integer
+ *               staffCount:
+ *                 type: integer
+ *               registeredBusiness:
+ *                 type: boolean
+ *               openingHours:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               gallery:
+ *                 type: files
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully, returns completion percentage
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to update profile
+ */
 
 
 
@@ -585,6 +881,24 @@ const calculateBusinessProfileCompletion = (profile) => {
 const WALLET_BASE = 'https://api-ewallet.eroot.ng/api';
 
 
+/**
+ * @swagger
+ * /api/auth/create:
+ *   post:
+ *     summary: Create a dedicated wallet account for the logged-in user
+ *     tags: [Wallet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Wallet created successfully
+ *       400:
+ *         description: Wallet already created, or missing valid phone number
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to create wallet
+ */
 
 export const createWallet = async (req, res) => {
   try {
@@ -682,7 +996,20 @@ export const createWallet = async (req, res) => {
   }
 };
 
-
+/**
+ * @swagger
+ * /api/auth/status:
+ *   get:
+ *     summary: Get the logged-in user's wallet status and details
+ *     tags: [Wallet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wallet status and account details
+ *       500:
+ *         description: Server error
+ */
 
 export const getWalletStatus = async (req, res) => {
   try {
@@ -692,6 +1019,21 @@ export const getWalletStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

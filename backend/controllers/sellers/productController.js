@@ -4,6 +4,27 @@ import mongoose from 'mongoose';
 import User from '../../models/user.js';
 
 // Create Product
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Create a new product (seller only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductInput'
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *       500:
+ *         description: Server error
+ */
 export const createProduct = async (req, res) => {
   try {
     const sellerId = req.user._id;
@@ -23,6 +44,30 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Get all products belonging to the logged-in seller
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [active, inactive, draft, out_of_stock] }
+ *     responses:
+ *       200:
+ *         description: Paginated list of the seller's products
+ *       500:
+ *         description: Server error
+ */
 
 // Get All Seller Products
 export const getSellerProducts = async (req, res) => {
@@ -55,6 +100,35 @@ export const getSellerProducts = async (req, res) => {
 };
 
 // Update Product
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Update a product (must belong to the logged-in seller)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductInput'
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -79,6 +153,28 @@ export const updateProduct = async (req, res) => {
 };
 
 // Delete Product
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   delete:
+ *     summary: Delete a product (must belong to the logged-in seller)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,6 +191,41 @@ export const deleteProduct = async (req, res) => {
 };
 
 // Update Stock
+/**
+ * @swagger
+ * /api/products/{id}/stock:
+ *   patch:
+ *     summary: Add or subtract stock quantity for a product
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [quantity, action]
+ *             properties:
+ *               quantity:
+ *                 type: number
+ *               action:
+ *                 type: string
+ *                 enum: [add, subtract]
+ *     responses:
+ *       200:
+ *         description: Stock updated successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
 export const updateStock = async (req, res) => {
   try {
     const { id } = req.params;
@@ -132,50 +263,21 @@ export const updateStock = async (req, res) => {
 };
 
 
+/**
+ * @swagger
+ * /api/products/stats:
+ *   get:
+ *     summary: Get inventory statistics for the logged-in seller
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Inventory stats — totals, stock value, low/out-of-stock counts, monthly sales
+ *       500:
+ *         description: Failed to fetch inventory statistics
+ */
 
-// export const getProductStats = async (req, res) => {
-//   try {
-//     const sellerId = req.user._id;
-
-//     // Get all products for this seller
-//     const products = await Product.find({ seller: sellerId });
-
-//     const totalProducts = products.length;
-//     const totalStockValue = products.reduce((sum, p) => sum + (p.price * p.stockQuantity), 0);
-    
-//     const lowStock = products.filter(p => p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0).length;
-//     const outOfStock = products.filter(p => p.stockQuantity === 0).length;
-//     const activeProducts = products.filter(p => p.status === 'active').length;
-
-//     // Monthly sales simulation (you can replace with real order data later)
-//     const monthlySales = [
-//       { name: 'Jan', sales: 4200000 },
-//       { name: 'Feb', sales: 3800000 },
-//       { name: 'Mar', sales: 5100000 },
-//       { name: 'Apr', sales: 4600000 },
-//       { name: 'May', sales: 5900000 },
-//     ];
-
-//     res.json({
-//       success: true,
-//       stats: {
-//         totalProducts,
-//         totalStockValue,
-//         lowStock,
-//         outOfStock,
-//         activeProducts,
-//         monthlySales
-//       }
-//     });
-
-//   } catch (error) {
-//     console.error("Stats Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to fetch inventory statistics"
-//     });
-//   }
-// };
 
 export const getProductStats = async (req, res) => {
   try {
@@ -244,6 +346,31 @@ export const getProductStats = async (req, res) => {
   }
 };
 
+
+
+/**
+ * @swagger
+ * /api/products/all:
+ *   get:
+ *     summary: Get all products across all sellers
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of all products with populated seller info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Failed to fetch products
+ */
+
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -281,6 +408,19 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+
+/**
+ * @swagger
+ * /api/products/parts:
+ *   get:
+ *     summary: Get all products flagged as car/machine parts
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of part products with populated seller info
+ *       500:
+ *         description: Failed to fetch products
+ */
 export const getAllPartProducts = async (req, res) => {
   try {
     const products = await Product.find({ part: true })
@@ -319,7 +459,25 @@ export const getAllPartProducts = async (req, res) => {
 };
 
 
-
+/**
+ * @swagger
+ * /api/products/{productId}/like:
+ *   post:
+ *     summary: Increment a product's like count
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Product liked, returns new like count
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
 // Like a Product
 export const likeProduct = async (req, res) => {
   try {
@@ -347,6 +505,28 @@ export const likeProduct = async (req, res) => {
 };
 
 // View a Product (Increment Views)
+
+/**
+ * @swagger
+ * /api/products/{productId}/view:
+ *   post:
+ *     summary: Increment a product's view count
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: View recorded, returns new view count
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+
 export const viewProduct = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -372,6 +552,38 @@ export const viewProduct = async (req, res) => {
 };
 
 // Optional: Record Rating for Product
+/**
+ * @swagger
+ * /api/products/{productId}/rate:
+ *   post:
+ *     summary: Add a rating to a product
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [rating]
+ *             properties:
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *     responses:
+ *       200:
+ *         description: Rating recorded
+ *       400:
+ *         description: Invalid rating
+ *       500:
+ *         description: Server error
+ */
+
 export const rateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -405,6 +617,46 @@ export const rateProduct = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /api/products/category:
+ *   get:
+ *     summary: Get products filtered by category and subcategory, with pagination and price filters
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: subCategory
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: [newest, price_asc, price_desc, popular], default: newest }
+ *       - in: query
+ *         name: minPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: maxPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, default: active }
+ *     responses:
+ *       200:
+ *         description: Filtered, paginated product list with flattened seller storefront info
+ *       400:
+ *         description: category query parameter is required
+ *       500:
+ *         description: Failed to fetch products
+ */
 
 
 export const getProductsByCategory = async (req, res) => {
@@ -518,6 +770,18 @@ export const getProductsByCategory = async (req, res) => {
 };
 
 
+/**
+ * @swagger
+ * /api/products/building-materials:
+ *   get:
+ *     summary: Get all products in the building-materials category
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of building materials products, sorted by name
+ *       500:
+ *         description: Error fetching products
+ */
 
 export const getBuildMaterialsProducts = async (req, res) => {
  try {
@@ -562,3 +826,26 @@ function shapeSeller(seller) {
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
