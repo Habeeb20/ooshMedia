@@ -2,6 +2,14 @@ import  User from "../models/user.js";
 import jwt from "jsonwebtoken";
 
 
+// middleware/isAdmin.js
+export const isAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Admin access required' });
+  }
+  next();
+};
+
 export const verifyToken = async (req, res, next) => {
   let token;
 

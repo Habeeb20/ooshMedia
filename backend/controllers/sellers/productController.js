@@ -551,6 +551,58 @@ export const viewProduct = async (req, res) => {
   }
 };
 
+// Share a Product
+
+/**
+ * @swagger
+ * /api/products/{productId}/share:
+ *   post:
+ *     summary: Increment a product's share count
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Share recorded, returns new share count
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+export const shareProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { $inc: { shares: 1 } },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Product shared",
+      shares: product.shares
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
 // Optional: Record Rating for Product
 /**
  * @swagger

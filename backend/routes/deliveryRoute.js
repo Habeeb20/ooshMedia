@@ -13,6 +13,40 @@ import { getIO } from '../socket.js';
 dotenv.config()
 const router = express.Router();
 
+
+/**
+ * @swagger
+ * /api/delivery/riders:
+ *   get:
+ *     summary: Get all riders on the platform
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of riders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 riders:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id: { type: string }
+ *                       firstName: { type: string }
+ *                       lastName: { type: string }
+ *                       username: { type: string }
+ *                       profileImage: { type: string }
+ *                       phone: { type: string }
+ *                       averageRating: { type: number }
+ */
+
+
 // ─── GET ALL RIDERS ───────────────────────────────────────────────────────────
 router.get('/riders', verifyToken, async (req, res) => {
   try {
@@ -23,6 +57,53 @@ router.get('/riders', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+
+/**
+ * @swagger
+ * /api/delivery/calculate-distance:
+ *   post:
+ *     summary: Calculate distance, ETA, and a suggested delivery fee between two addresses
+ *     description: Uses the Google Maps Distance Matrix API. Suggested fee is ₦150 per km.
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [origin, destination]
+ *             properties:
+ *               origin:
+ *                 type: string
+ *                 example: "12 Allen Avenue, Ikeja, Lagos"
+ *               destination:
+ *                 type: string
+ *                 example: "45 Admiralty Way, Lekki Phase 1, Lagos"
+ *     responses:
+ *       200:
+ *         description: Distance/duration/fee calculated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 distanceKm: { type: number, example: 14.2 }
+ *                 durationMinutes: { type: integer, example: 32 }
+ *                 suggestedFee: { type: number, example: 2130 }
+ *                 distanceText: { type: string, example: "14.2 km" }
+ *                 durationText: { type: string, example: "32 mins" }
+ *       400:
+ *         description: Missing origin/destination, or Google could not calculate a route
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 
 router.post('/calculate-distance', verifyToken, async (req, res) => {
   try {
@@ -69,6 +150,59 @@ router.post('/calculate-distance', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+
+/**
+ * @swagger
+ * /api/delivery/request:
+ *   post:
+ *     summary: Seller sends a delivery request to a rider
+ *     description: >
+ *       Cancels any existing pending requests from this seller to this rider for the same
+ *       order, creates a new one, and notifies the rider via Socket.io (`delivery:new_request`
+ *       on room `user_{riderId}`) and email.
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [orderId, riderId, offeredAmount, sellerAddress]
+ *             properties:
+ *               orderId: { type: string }
+ *               riderId: { type: string }
+ *               offeredAmount: { type: number, example: 2000 }
+ *               sellerAddress: { type: string }
+ *               distanceKm: { type: number }
+ *               durationMinutes: { type: integer }
+ *     responses:
+ *       201:
+ *         description: Delivery request created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 deliveryRequest: { type: object }
+ *       400:
+ *         description: Rider is invalid or not a rider
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
+
 // ─── SEND DELIVERY REQUEST (Seller → Rider) ───────────────────────────────────
 router.post('/request', verifyToken, async (req, res) => {
   try {
@@ -162,6 +296,26 @@ console.log(req.body)
   }
 });
 
+
+/**
+ * @swagger
+ * /api/delivery/my-requests:
+ *   get:
+ *     summary: Rider — get all delivery requests sent to me
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of delivery requests, newest first
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 requests: { type: array, items: { type: object } }
+ */
 // ─── RIDER: GET MY REQUESTS ───────────────────────────────────────────────────
 router.get('/my-requests', verifyToken, async (req, res) => {
   try {
@@ -176,6 +330,34 @@ router.get('/my-requests', verifyToken, async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /api/delivery/order/{orderId}:
+ *   get:
+ *     summary: Seller — get all delivery requests sent for a given order
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of delivery requests for this order, newest first
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 requests: { type: array, items: { type: object } }
+ */
+
+
 // ─── SELLER: GET REQUESTS FOR AN ORDER ───────────────────────────────────────
 router.get('/order/:orderId', verifyToken, async (req, res) => {
   try {
@@ -187,6 +369,70 @@ router.get('/order/:orderId', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+/**
+ * @swagger
+ * /api/delivery/{requestId}/respond:
+ *   put:
+ *     summary: Rider — accept, reject, or negotiate a delivery request
+ *     description: >
+ *       On accept, assigns the rider to the order and notifies seller + buyer by email and
+ *       Socket.io. On negotiate, appends a counter-offer to the negotiations history.
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [action]
+ *             properties:
+ *               action:
+ *                 type: string
+ *                 enum: [accept, reject, negotiate]
+ *               counterAmount:
+ *                 type: number
+ *                 description: Required when action is "negotiate"
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Request updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 request: { type: object }
+ *       400:
+ *         description: counterAmount missing for a negotiate action
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Not the rider on this request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 
 // ─── RIDER: RESPOND (accept / reject / negotiate) ────────────────────────────
 router.put('/:requestId/respond', verifyToken, async (req, res) => {
@@ -299,6 +545,54 @@ router.put('/:requestId/respond', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/delivery/{requestId}/counter:
+ *   put:
+ *     summary: Seller — counter-negotiate on a delivery request
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [counterAmount]
+ *             properties:
+ *               counterAmount: { type: number }
+ *               message: { type: string }
+ *     responses:
+ *       200:
+ *         description: Counter-offer recorded, rider notified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 request: { type: object }
+ *       403:
+ *         description: Not the seller on this request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ─── SELLER: COUNTER-NEGOTIATE ────────────────────────────────────────────────
 router.put('/:requestId/counter', verifyToken, async (req, res) => {
   try {
@@ -339,6 +633,63 @@ router.put('/:requestId/counter', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+
+/**
+ * @swagger
+ * /api/delivery/{requestId}/tracking:
+ *   put:
+ *     summary: Rider — update the coarse tracking status of a delivery
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [trackingStatus]
+ *             properties:
+ *               trackingStatus:
+ *                 type: string
+ *                 enum: [awaiting_pickup, on_the_way, arrived]
+ *     responses:
+ *       200:
+ *         description: Status updated, seller/buyer notified by email + socket
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 trackingStatus: { type: string }
+ *       400:
+ *         description: Invalid status value
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Not the rider on this request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 
 // ─── RIDER: UPDATE TRACKING STATUS ───────────────────────────────────────────
 router.put('/:requestId/tracking', verifyToken, async (req, res) => {
@@ -390,6 +741,54 @@ router.put('/:requestId/tracking', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/delivery/{requestId}/location:
+ *   put:
+ *     summary: Rider — push a real-time GPS location update
+ *     description: Broadcasts to the seller's and buyer's Socket.io rooms via `delivery:location_update`.
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [lat, lng]
+ *             properties:
+ *               lat: { type: number }
+ *               lng: { type: number }
+ *     responses:
+ *       200:
+ *         description: Location saved and broadcast
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *       403:
+ *         description: Not the rider on this request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ─── RIDER: UPDATE LOCATION (real-time) ──────────────────────────────────────
 router.put('/:requestId/location', verifyToken, async (req, res) => {
   try {
@@ -411,6 +810,58 @@ router.put('/:requestId/location', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+/**
+ * @swagger
+ * /api/delivery/{requestId}/verify-code:
+ *   post:
+ *     summary: Rider — verify the delivery code to complete the drop-off
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code: { type: string, example: "4821" }
+ *     responses:
+ *       200:
+ *         description: Order marked delivered, seller + buyer notified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *       400:
+ *         description: Incorrect delivery code
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Not the rider on this request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 // ─── RIDER: VERIFY DELIVERY CODE ─────────────────────────────────────────────
 router.post('/:requestId/verify-code', verifyToken, async (req, res) => {
@@ -466,6 +917,38 @@ router.post('/:requestId/verify-code', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+/**
+ * @swagger
+ * /api/delivery/{requestId}:
+ *   get:
+ *     summary: Get a single delivery request (for the tracking page)
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Delivery request with populated order, seller, rider, and buyer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 request: { type: object }
+ *       404:
+ *         description: Request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 // ─── GET SINGLE REQUEST (for tracking page) ───────────────────────────────────
 router.get('/:requestId', verifyToken, async (req, res) => {
@@ -523,3 +1006,38 @@ function buyerAssignedEmailHtml(request, amount) {
 }
 
 export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

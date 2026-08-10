@@ -16,6 +16,38 @@ const POPULATE_ORIGINAL = {
   populate: { path: 'author', select: 'firstName lastName username profilePicture businessProfile.businessName' }
 };
 
+/**
+ * @swagger
+ * /api/posts:
+ *   post:
+ *     summary: Create a post, contract listing, or supply request
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreatePostRequest'
+ *     responses:
+ *       201:
+ *         description: Post created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Post' }
+ *       400:
+ *         description: Content is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ====================== CREATE POST ======================
 export const createPost = async (req, res) => {
   try {
@@ -54,6 +86,52 @@ export const createPost = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
+/**
+ * @swagger
+ * /api/posts/feed:
+ *   get:
+ *     summary: Get the paginated post feed
+ *     description: Results are cached for 60 seconds per postType/category/page/limit combination.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *       - in: query
+ *         name: postType
+ *         schema: { type: string, enum: [post, contract, supply] }
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Feed page
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 fromCache: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Post' }
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page: { type: integer }
+ *                     limit: { type: integer }
+ *                     total: { type: integer }
+ *                     pages: { type: integer }
+ */
+
 
 // ====================== GET FEED ======================
 export const getFeed = async (req, res) => {
@@ -98,6 +176,110 @@ export const getFeed = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *   get:
+ *     summary: Get a single post by ID
+ *     description: Increments the post's view count on every read.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Post found, with author, original post, reviews, and applications populated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Post' }
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *   put:
+ *     summary: Update a post
+ *     description: Only the author can update. Only whitelisted fields are applied.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreatePostRequest'
+ *     responses:
+ *       200:
+ *         description: Post updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Post' }
+ *       403:
+ *         description: Not the author
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *   delete:
+ *     summary: Delete a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Post deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *       403:
+ *         description: Not the author
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 
 // ====================== GET SINGLE POST ======================
 export const getPost = async (req, res) => {
@@ -164,6 +346,38 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/posts/{id}/like:
+ *   post:
+ *     summary: Toggle a like on a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Like toggled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 liked: { type: boolean }
+ *                 likeCount: { type: integer }
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ====================== LIKE / UNLIKE ======================
 export const toggleLike = async (req, res) => {
   try {
@@ -186,6 +400,50 @@ export const toggleLike = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+/**
+ * @swagger
+ * /api/posts/{id}/repost:
+ *   post:
+ *     summary: Repost an existing post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               repostComment: { type: string }
+ *     responses:
+ *       201:
+ *         description: Repost created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Post' }
+ *       400:
+ *         description: Already reposted this post
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Original post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 // ====================== REPOST ======================
 export const repostPost = async (req, res) => {
@@ -230,6 +488,31 @@ export const repostPost = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/posts/{id}/share:
+ *   post:
+ *     summary: Record a share on a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Share recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ */
+
 // ====================== SHARE ======================
 export const sharePost = async (req, res) => {
   try {
@@ -239,6 +522,56 @@ export const sharePost = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+/**
+ * @swagger
+ * /api/posts/{id}/review:
+ *   post:
+ *     summary: Add a 1–5 star review with an optional comment
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [rating]
+ *             properties:
+ *               rating: { type: integer, minimum: 1, maximum: 5 }
+ *               comment: { type: string }
+ *     responses:
+ *       201:
+ *         description: Review added
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Review' }
+ *       400:
+ *         description: Invalid rating, or already reviewed this post
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 
 // ====================== ADD REVIEW ======================
 export const addReview = async (req, res) => {
@@ -265,6 +598,48 @@ export const addReview = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+/**
+ * @swagger
+ * /api/posts/{id}/apply:
+ *   post:
+ *     summary: Apply to a contract or supply post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApplyToPostRequest'
+ *     responses:
+ *       201:
+ *         description: Application submitted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *       400:
+ *         description: Wrong post type, own post, post closed, or already applied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 // ====================== APPLY TO POST ======================
 export const applyToPost = async (req, res) => {
@@ -305,6 +680,39 @@ export const applyToPost = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/posts/my-applications:
+ *   get:
+ *     summary: Get posts I've applied to, alongside my own application on each
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: List of { post, application } pairs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       post: { $ref: '#/components/schemas/Post' }
+ *                       application: { $ref: '#/components/schemas/Application' }
+ */
+
 // ====================== GET MY APPLICATIONS (as applicant) ======================
 export const getMyApplications = async (req, res) => {
   try {
@@ -333,6 +741,46 @@ export const getMyApplications = async (req, res) => {
   }
 };
 
+
+/**
+ * @swagger
+ * /api/posts/{id}/applications:
+ *   get:
+ *     summary: Post owner — get all applications received on a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Applications with applicant profile populated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Application' }
+ *       403:
+ *         description: Not the post owner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ====================== GET APPLICATIONS FOR MY POST (as post owner) ======================
 export const getPostApplications = async (req, res) => {
   try {
@@ -352,6 +800,65 @@ export const getPostApplications = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
+/**
+ * @swagger
+ * /api/posts/{id}/applications/{applicationId}/status:
+ *   put:
+ *     summary: Post owner — update an application's status
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, accepted, rejected, shortlisted]
+ *     responses:
+ *       200:
+ *         description: Application status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Application' }
+ *       400:
+ *         description: Invalid status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Not the post owner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post or application not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 // ====================== UPDATE APPLICATION STATUS (post owner) ======================
 export const updateApplicationStatus = async (req, res) => {
@@ -382,6 +889,47 @@ export const updateApplicationStatus = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/posts/{id}/applications/{applicationId}/withdraw:
+ *   delete:
+ *     summary: Applicant — withdraw my own application
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Application withdrawn
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *       403:
+ *         description: Not the applicant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post or application not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ====================== WITHDRAW APPLICATION (applicant) ======================
 export const withdrawApplication = async (req, res) => {
   try {
@@ -405,6 +953,75 @@ export const withdrawApplication = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+/**
+ * @swagger
+ * /api/posts/user/{userId}:
+ *   get:
+ *     summary: Get a specific user's posts
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of the user's non-draft posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Post' }
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page: { type: integer }
+ *                     limit: { type: integer }
+ *                     total: { type: integer }
+ *                     pages: { type: integer }
+ *
+ * /api/posts/my-posts:
+ *   get:
+ *     summary: Get the authenticated user's own posts
+ *     description: Uses the same handler as GET /api/posts/user/{userId}, defaulting userId to req.user._id.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of my non-draft posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Post' }
+ */
+// ====================== GET USER POSTS ======================
+
 
 // ====================== GET USER POSTS ======================
 export const getUserPosts = async (req, res) => {
@@ -457,6 +1074,51 @@ export const getUserPosts = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /api/posts/{id}/finalize:
+ *   put:
+ *     summary: Toggle a post between active and closed
+ *     description: Draft posts must be published (status changed to active) before they can be closed.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Post status toggled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Post' }
+ *       400:
+ *         description: Post is still a draft
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Not the author
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
+
 export const finalizePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -478,3 +1140,50 @@ export const finalizePost = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

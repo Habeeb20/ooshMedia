@@ -57,6 +57,7 @@ import ProductsPage from "./pages/product/ProductsPage";
 import { trackPageView } from "./pages/analytics";
 import HeroSection from "./pages/others/food/FoodHeroSection";
 import HomePage from "./pages/others/food/FoodHomepage";
+import BlacklistedSellers from "./pages/BlacklistedUsers";
 
 const App = () => {
   useScrollToTop();
@@ -93,6 +94,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+            <Route  path="/blacklisted-sellers" element={<BlacklistedSellers />}/>
 
             <Route
               path="/checkout"
@@ -205,3 +208,10 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+
+

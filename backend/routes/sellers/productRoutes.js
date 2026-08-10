@@ -8,7 +8,8 @@ import { createProduct,  getSellerProducts,
   viewProduct,
   rateProduct,
   getProductsByCategory,
-  getBuildMaterialsProducts} from '../../controllers/sellers/productController.js';
+  getBuildMaterialsProducts,
+  shareProduct} from '../../controllers/sellers/productController.js';
 import { verifyToken } from '../../middleware/verifyToken.js';
 import { upload } from '../../middleware/multer.js';
 import { getAllProducts, getAllPartProducts } from '../../controllers/sellers/productController.js';
@@ -34,6 +35,9 @@ router.put('/:id/stock', verifyToken, updateStock);
 router.post('/:productId/like', verifyToken, likeProduct);
 router.post('/:productId/view', viewProduct);
 router.post('/:productId/rate', verifyToken, rateProduct);
+// routes/productRoutes.js
+         // no auth needed
+router.post("/:productId/share", shareProduct);           // no auth needed
 
 export default router;
 

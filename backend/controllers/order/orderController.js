@@ -14,130 +14,50 @@ const PLATFORM_FEE_RATE = 0.01; // 1%
 
 const generateDeliveryCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
-// ── CHECKOUT ───────────────────────────────────────────────
-// POST /orders/checkout
-// export const checkout = async (req, res) => {
-//   try {
-//     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
-//     if (!cart || cart.items.length === 0) {
-//       return res.status(400).json({ message: 'Cart is empty' });
-//     }
 
-//     // Validate stock & payment method
-//     for (const item of cart.items) {
-//       const product = item.product;
-//       if (!product || product.status !== 'active') {
-//         return res.status(400).json({ message: `${item.name} is no longer available` });
-//       }
-//       if (product.stockQuantity < item.quantity) {
-//         return res.status(400).json({ message: `Insufficient stock for ${item.name}` });
-//       }
-
-//       // Check seller's accepted payment methods
-//       const seller = await User.findById(item.seller);
-//       if (cart.paymentMethod === 'on_delivery' && !seller?.acceptsPaymentOnDelivery) {
-//         return res.status(400).json({
-//           message: `Seller of "${item.name}" does not accept payment on delivery`,
-//         });
-//       }
-//     }
-
-//     // Build order items with fee calculations
-//     let totalAmount = 0;
-//     let totalPlatformFee = 0;
-//     const orderItems = cart.items.map(item => {
-//       const subtotal = item.price * item.quantity;
-//       const platformFee = +(subtotal * PLATFORM_FEE_RATE).toFixed(2);
-//       const sellerAmount = +(subtotal - platformFee).toFixed(2);
-//       totalAmount += subtotal;
-//       totalPlatformFee += platformFee;
-//       return {
-//         product: item.product._id,
-//         seller: item.seller,
-//         name: item.name,
-//         image: item.image,
-//         price: item.price,
-//         quantity: item.quantity,
-//         subtotal,
-//         platformFee,
-//         sellerAmount,
-//       };
-//     });
-
-//     const deliveryCode = cart.fulfillmentType === 'delivery' ? generateDeliveryCode() : undefined;
-
-//     // Create order
-//     const order = new Order({
-//       buyer: req.user._id,
-//       seller:seller?._id,
-//       items: orderItems,
-//       fulfillmentType: cart.fulfillmentType,
-//       pickup: cart.pickup,
-//       delivery: {
-//         address: cart.delivery?.address,
-//         deliveryCode,
-//         isCodeVerified: false,
-//       },
-//       paymentMethod: cart.paymentMethod,
-//       paymentStatus: cart.paymentMethod === 'on_delivery' ? 'pending' : 'pending',
-//       status: 'pending',
-//       totalAmount: +totalAmount.toFixed(2),
-//       totalPlatformFee: +totalPlatformFee.toFixed(2),
-//       totalSellerAmount: +(totalAmount - totalPlatformFee).toFixed(2),
-//     });
-
-//     await order.save();
-
-//     // If paying online, initialize Paystack
-//     if (cart.paymentMethod === 'online') {
-//       const buyer = await User.findById(req.user._id);
-
-//       const paystackRes = await axios.post(
-//         'https://api.paystack.co/transaction/initialize',
-//         {
-//           email: buyer.email || buyer.alternateContact,
-//           amount: Math.round(totalAmount * 100), // kobo
-//           reference: `ORD-${order._id}-${Date.now()}`,
-//           metadata: { orderId: order._id.toString() },
-//           callback_url: `${process.env.FRONTEND_URL}/payment/verify`,
-//         },
-//         { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
-//       );
-//       order.paystackReference = paystackRes.data.data.reference;
-//       order.paystackAccessCode = paystackRes.data.data.access_code;
-//       await order.save();
-
-//       // Reduce stock optimistically
-//       await decreaseStock(cart.items);
-
-//       return res.json({
-//         order,
-//         paymentUrl: paystackRes.data.data.authorization_url,
-//         reference: paystackRes.data.data.reference,
-//         deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
-//       });
-//     }
-
-//     // Pay on delivery — just confirm order
-//     await decreaseStock(cart.items);
-//     order.status = 'confirmed';
-//     await order.save();
-
-//     // Create transaction record
-//     await createTransaction(order, 'pending');
-
-//     await Cart.findOneAndDelete({ buyer: req.user._id });
-
-//     res.json({
-//       order,
-//       deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
-//     });
-//   } catch (err) {
-//     console.error('Checkout error:', err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
-
+/**
+ * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Checkout the authenticated buyer's cart and create an order
+ *     description: >
+ *       Validates stock and each seller's payment-method support, builds the order with
+ *       per-item platform fee/seller amount, then either initializes a Paystack transaction
+ *       (paymentMethod = "online") or confirms the order immediately (paymentMethod = "on_delivery").
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order created. Includes a Paystack payment URL when paying online.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *                 paymentUrl:
+ *                   type: string
+ *                   description: Only present when paymentMethod is "online"
+ *                 reference:
+ *                   type: string
+ *                 deliveryCode:
+ *                   type: string
+ *                   description: 4-digit code the buyer shares with the rider on delivery
+ *       400:
+ *         description: Cart is empty, an item is out of stock, or the seller doesn't accept pay-on-delivery
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server or Paystack initialization error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 
 export const checkout = async (req, res) => {
   try {
@@ -275,6 +195,52 @@ export const checkout = async (req, res) => {
 
 // ── PAYSTACK VERIFY ────────────────────────────────────────
 // GET /orders/verify-payment/:reference
+
+/**
+ * @swagger
+ * /api/orders/verify-payment/{reference}:
+ *   get:
+ *     summary: Verify a Paystack payment and finalize the order
+ *     description: >
+ *       Confirms the transaction with Paystack, marks the order paid/confirmed, awards
+ *       loyalty points (1 point per ₦100), creates the seller transaction, kicks off
+ *       seller transfers, and clears the buyer's cart.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reference
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Paystack transaction reference
+ *     responses:
+ *       200:
+ *         description: Payment verified and order finalized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Payment was not successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: No order found for this reference
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 export const verifyPayment = async (req, res) => {
   try {
     const { reference } = req.params;
@@ -316,6 +282,40 @@ export const verifyPayment = async (req, res) => {
 
 // ── PAYSTACK WEBHOOK ───────────────────────────────────────
 // POST /orders/webhook
+
+
+/**
+ * @swagger
+ * /api/orders/webhook:
+ *   post:
+ *     summary: Paystack webhook — auto-confirms orders on charge.success
+ *     description: >
+ *       Not authenticated with a bearer token. Instead verifies the `x-paystack-signature`
+ *       header against an HMAC SHA-512 hash of the raw body, using PAYSTACK_SECRET_KEY.
+ *       Mounted **before** `router.use(verifyToken)` in orderRoutes.js.
+ *     tags: [Orders]
+ *     security: []
+ *     parameters:
+ *       - in: header
+ *         name: x-paystack-signature
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Raw Paystack event payload
+ *     responses:
+ *       200:
+ *         description: Event received and processed (or ignored if not charge.success)
+ *       401:
+ *         description: Signature mismatch
+ */
+
+
 export const paystackWebhook = async (req, res) => {
   const hash = crypto
     .createHmac('sha512', PAYSTACK_SECRET)
@@ -345,6 +345,60 @@ export const paystackWebhook = async (req, res) => {
 
 // ── DELIVERY CODE VERIFY ───────────────────────────────────
 // POST /orders/:orderId/verify-delivery
+/**
+ * @swagger
+ * /api/orders/{orderId}/verify-delivery:
+ *   post:
+ *     summary: Verify the delivery code to mark an order as delivered
+ *     description: >
+ *       If the order was pay-on-delivery and unpaid, this also marks it paid, awards
+ *       loyalty points, creates the transaction, and kicks off seller transfers.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: "4821"
+ *     responses:
+ *       200:
+ *         description: Delivery confirmed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Not a delivery order, or the code is invalid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 export const verifyDeliveryCode = async (req, res) => {
   try {
     const { code } = req.body;
@@ -378,6 +432,42 @@ export const verifyDeliveryCode = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /api/orders/{orderId}:
+ *   get:
+ *     summary: Get a single order by ID
+ *     description: Only accessible to the buyer on the order, or a seller with at least one item in it.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       403:
+ *         description: Not the buyer or a seller on this order
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // ── GET SINGLE ORDER ───────────────────────────────────────
 export const getOrderById = async (req, res) => {
   try {
@@ -396,40 +486,26 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// ── SELLER ORDER MANAGEMENT ───────────────────────────────
-// export const getSellerOrders = async (req, res) => {
-//   try {
-//     const { status, paymentMethod, from, to } = req.query;
-//     const match = { 'items.seller': req.user._id };
-//     if (status) match.status = status;
-//     if (paymentMethod) match.paymentMethod = paymentMethod;
-//     if (from || to) {
-//       match.createdAt = {};
-//       if (from) match.createdAt.$gte = new Date(from);
-//       if (to) match.createdAt.$lte = new Date(to);
-//     }
-
-//     const orders = await Order.find(match)
-//       .populate('buyer', 'firstName lastName email phoneNumber')
-//       .populate('items.product', 'name images')
-//       .populate('items.seller', 'firstName lastName email phoneNumber businessName state lga businessAddress')
-//       .sort({ createdAt: -1 });
-// console.log(orders.items?.seller)
-//     // Only include items that belong to this seller
-//     const filtered = orders.map(o => ({
-//       ...o.toObject(),
-//       items: o.items.filter(i => i.seller.toString() === req.user._id.toString()),
-//     }));
-
-//     res.json(filtered);
-//   } catch (err) {
-//     console.log(err)
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 
 
-// ── GET BUYER ORDERS ───────────────────────────────────────
+/**
+ * @swagger
+ * /api/orders/my:
+ *   get:
+ *     summary: Get the authenticated buyer's orders
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of the buyer's orders, newest first
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
 export const getBuyerOrders = async (req, res) => {
   try {
     const orders = await Order.find({ buyer: req.user._id })
@@ -442,6 +518,53 @@ export const getBuyerOrders = async (req, res) => {
   }
 };
 // ── SELLER ORDER MANAGEMENT ───────────────────────────────
+
+
+// ── SELLER ORDER MANAGEMENT ───────────────────────────────
+
+/**
+ * @swagger
+ * /api/orders/seller:
+ *   get:
+ *     summary: Get orders containing the authenticated seller's items
+ *     description: >
+ *       Requires the `sellerOnly` middleware. Each order is filtered down to only the
+ *       items belonging to this seller, and `sellerInfo` is attached at the order level.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, confirmed, in_progress, delivered, cancelled]
+ *       - in: query
+ *         name: paymentMethod
+ *         schema:
+ *           type: string
+ *           enum: [online, on_delivery]
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Orders containing this seller's items, filtered to just their items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
+
 export const getSellerOrders = async (req, res) => {
   try {
     const { status, paymentMethod, from, to } = req.query;
@@ -634,166 +757,12 @@ async function initiateSellerTransfers(order) {
 
 
 
-// import { useState, useEffect } from 'react';
-// import { useCart } from '../../context/CartContext';
-// import { useNavigate } from 'react-router-dom';
-// import api from "../../config/api";
 
-// const PLATFORM_FEE_RATE = 0.01; // 1%
 
-// export default function CheckoutPage() {
-//   const cartHook = useCart();
-//   const navigate = useNavigate();
 
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState('');
 
-//   const cart = cartHook?.cart || null;
-//   const cartTotal = cartHook?.cartTotal || 0;
 
-//   // Calculate Platform Fee (1%)
-//   const platformFee = +(cartTotal * PLATFORM_FEE_RATE).toFixed(2);
-//   const finalTotal = cartTotal + platformFee;
 
-//   // Redirect if cart is empty
-//   useEffect(() => {
-//     if (cartHook && (!cart || cart.items?.length === 0)) {
-//       const timer = setTimeout(() => {
-//         navigate('/cart', { replace: true });
-//       }, 800);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [cartHook, cart, navigate]);
 
-//   const handleCheckout = async () => {
-//     if (!cart || cart.items?.length === 0) return;
 
-//     setError('');
-//     setLoading(true);
-//     try {
-//       const { data } = await api.post('/api/orders/checkout');
-//       const { order, paymentUrl, deliveryCode } = data;
 
-//       if (deliveryCode) {
-//         sessionStorage.setItem('deliveryCode', deliveryCode);
-//         sessionStorage.setItem('orderId', order._id);
-//       }
-
-//       if (paymentUrl) {
-//         window.location.href = paymentUrl;
-//       } else {
-//         navigate(`/order/${order._id}`, { state: { deliveryCode, order } });
-//       }
-//     } catch (err) {
-//       setError(err.response?.data?.message || 'Checkout failed. Please try again.');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   if (!cartHook) {
-//     return (
-//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-//         <div className="text-center">
-//           <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
-//           <p className="mt-4 text-gray-600">Loading...</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (!cart || cart.items?.length === 0) {
-//     return (
-//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-//         <div className="text-center">
-//           <p className="text-gray-600">Redirecting to cart...</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const fulfillmentLabel = cart.fulfillmentType === 'delivery' ? 'Delivery' : 'Pickup';
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h1>
-
-//       <div className="max-w-lg mx-auto space-y-4">
-//         {/* Items */}
-//         <div className="bg-white rounded-2xl p-5 shadow-sm">
-//           <h2 className="font-bold text-gray-700 mb-3">Items ({cart.items.length})</h2>
-//           {cart.items.map(item => (
-//             <div key={item.product} className="flex justify-between text-sm py-2 border-b last:border-b-0">
-//               <span className="text-gray-700">{item.name} × {item.quantity}</span>
-//               <span className="font-semibold">₦{(item.price * item.quantity).toLocaleString()}</span>
-//             </div>
-//           ))}
-//         </div>
-
-//         {/* Fulfillment */}
-//         <div className="bg-white rounded-2xl p-5 shadow-sm">
-//           <h2 className="font-bold text-gray-700 mb-2">Fulfillment</h2>
-//           <p className="text-sm text-gray-600">Method: <span className="font-medium">{fulfillmentLabel}</span></p>
-          
-//           {cart.fulfillmentType === 'delivery' && cart.delivery?.address && (
-//             <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
-//           )}
-
-//           {cart.fulfillmentType === 'delivery' && (
-//             <div className="mt-3 bg-indigo-50 rounded-xl p-3">
-//               <p className="text-xs text-indigo-700 font-semibold">
-//                 📦 A 4-digit delivery code will be displayed after checkout. Share it only with the delivery rider.
-//               </p>
-//             </div>
-//           )}
-//         </div>
-
-//         {/* Payment */}
-//         <div className="bg-white rounded-2xl p-5 shadow-sm">
-//           <h2 className="font-bold text-gray-700 mb-2">Payment</h2>
-//           <p className="text-sm text-gray-600">
-//             Method: <span className="font-medium capitalize">
-//               {cart.paymentMethod === 'online' ? 'Online (Paystack)' : 'Pay on Delivery'}
-//             </span>
-//           </p>
-
-//           <div className="mt-4 space-y-2 text-sm">
-//             <div className="flex justify-between text-gray-600">
-//               <span>Subtotal</span>
-//               <span>₦{cartTotal.toLocaleString()}</span>
-//             </div>
-
-//             <div className="flex justify-between text-gray-600">
-//               <span>Platform Fee (1%)</span>
-//               <span>₦{platformFee.toLocaleString()}</span>
-//             </div>
-
-//             <div className="flex justify-between font-bold text-gray-800 text-base border-t pt-3 mt-2">
-//               <span>Total</span>
-//               <span>₦{finalTotal.toLocaleString()}</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         {error && (
-//           <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>
-//         )}
-
-//         <button
-//           onClick={handleCheckout}
-//           disabled={loading}
-//           className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
-//         >
-//           {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
-//         </button>
-
-//         <button 
-//           onClick={() => navigate('/cart')} 
-//           className="w-full text-gray-500 text-sm text-center py-2"
-//         >
-//           ← Back to Cart
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }

@@ -28,6 +28,23 @@ const userSchema = new mongoose.Schema({
     referralCount: { type: Number, default: 0 },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
+
+    // ==================== BLACKLIST ====================
+  isBlacklisted: { type: Boolean, default: false, index: true },
+  blacklist: {
+    reason: String,
+    blacklistedAt: Date,
+    blacklistedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    unblacklistedAt: Date,
+    unblacklistedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    history: [{
+      action: { type: String, enum: ['blacklisted', 'unblacklisted'] },
+      reason: String,
+      by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      at: { type: Date, default: Date.now },
+    }],
+  },
+
    // ==================== wallet profile ====================
     // Inside userSchema
 isWallet: { type: Boolean, default: false },

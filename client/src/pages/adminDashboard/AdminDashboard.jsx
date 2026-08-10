@@ -45,6 +45,7 @@ import OrdersTable from '../../components/admin/OrderTable.jsx';
 import PostsTable from '../../components/admin/PostTable.jsx';
 import RidersTable from '../../components/admin/RiderTable.jsx';
 import SellersTable from '../../components/admin/SellerTable.jsx';
+import AdminReports from "../../components/admin/AdminReports.jsx";
 // import RewardRules from './RewardRules';
 // import Reports from './Reports';
 
@@ -77,6 +78,7 @@ const NAV = [
   { key: "products", label: "Products", icon: Package },
   { key: "orders", label: "Orders", icon: ShoppingBag },
   { key: "posts", label: "Posts", icon: FileText },
+  { key: "reports", label: "Reports", icon: FileText },
 ];
 
 export default function AdminDashboard() {
@@ -206,8 +208,8 @@ export default function AdminDashboard() {
           {active === "products" && <ProductsTable />}
           {active === "orders" && <OrdersTable />}
           {active === "posts" && <PostsTable />}
-          {/* {active === "analytics" && <RewardRules />}
-          {active === "reports" && <Reports />} */}
+      
+          {active === "reports" && <AdminReports/>} 
         </div>
       </main>
 

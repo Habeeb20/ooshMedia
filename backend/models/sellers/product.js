@@ -72,6 +72,7 @@ varieties: [{
 
   views: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
+  shares:{type:Number, default:0},
   ratings:{ type: Number, default: 0 },
   sold: { type: Number, default: 0 },
 
