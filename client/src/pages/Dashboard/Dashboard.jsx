@@ -520,6 +520,8 @@ import InventoryPaywall from '../vendor/inventorypaywall';
 import ControlRoom from '../vendor/Controlroom';
 import ControlRoomAccess from '../vendor/ControlRoomAccess';
 import VerificationHub from '../IdentityVerification';
+import ProductVideoUploadForm from '../vendor/UploadFakeProductVideo';
+import MyProductVideos from '../vendor/MyproductVideo';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -572,6 +574,8 @@ const pages = {
   riderProfile: RiderProfile,
   controlRoom: () => <ControlRoomAccess isActivated={!!dashboardData?.user?.sellerProfile?.controlRoom?.activatedAt} />,
   IdentityVerification: VerificationHub,
+  uploadFakeProductVideo: ProductVideoUploadForm,
+  myproductvideo: MyProductVideos,
   sellerChain: PurchaseHistoryManager,
   sellerDelivery: SellerDeliveryPanel,
   deliveryTracking: BuyerOrderTracking,
@@ -689,6 +693,9 @@ export default function Dashboard() {
     { label: 'Delivery Tracking', page: 'deliveryTracking' },
     { label: 'seller Chain History', page: 'sellerChain' },
     { label: 'Products', page: 'products' },
+  
+    { label: 'Upload fake products', page: 'uploadFakeProductVideo' },
+      { label: 'my product videos', page: 'myproductvideo' },
     { label: 'Sales analytics', page: 'customerAnalytics' },
     { label: 'Verify', page: 'IdentityVerification' },
     { label: 'Orders', page: null },

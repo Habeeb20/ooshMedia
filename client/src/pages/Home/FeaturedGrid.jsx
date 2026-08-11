@@ -360,12 +360,22 @@ export default function FeatureGrid() {
   return (
     <section className="max-w-7xl mx-auto px-4 mt-10">
       {/* GRID — 2 per row mobile, 4 per row desktop */}
+          <h2
+              className="text-xl md:text-3xl pb-5 font-black flex items-center gap-3"
+              // style={{
+              //   color: appConfig.colors.primary,
+              // }}
+            >
+              Our other services
+            </h2>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {visibleFeatures.map((item, index) => {
           const Icon = item.icon;
 
           return (
-            <Link
+            <>
+               <Link
               key={index}
               to={item.link}
               target="_blank"
@@ -417,6 +427,8 @@ export default function FeatureGrid() {
                 />
               </div>
             </Link>
+            </>
+         
           );
         })}
 

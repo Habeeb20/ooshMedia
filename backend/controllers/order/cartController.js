@@ -2,6 +2,20 @@ import Cart from '../../models/order/Cart.js';
 import Product from "../../models/sellers/product.js"
 
 // GET /cart
+
+/**
+ * @swagger
+ * /api/cart:
+ *   get:
+ *     summary: Get the logged-in user's server-side cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Returns the user's cart
+ */
+
 export const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product', 'name images price stockQuantity status seller acceptedPaymentMethods');
@@ -191,5 +205,157 @@ export const clearCart = async (req, res) => {
     res.json({ message: 'Cart cleared' });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+
+
+
+
+/**
+ * @swagger
+ * /api/cart/sync:
+ *   post:
+ *     summary: Merge a guest (localStorage) cart into the logged-in user's server-side cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     productId: { type: string }
+ *                     varietyName: { type: string, nullable: true }
+ *                     qty: { type: number }
+ *     responses:
+ *       200:
+ *         description: Cart synced, returns the merged cart
+ *       400:
+ *         description: Invalid payload
+ *       500:
+ *         description: Server error
+ */
+export const syncCart = async (req, res) => {
+  try {
+    const buyerId = req.user.id || req.user._id;
+    const { items } = req.body;
+
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: 'items must be an array' });
+    }
+
+    // dedupe/normalize incoming lines first — client could theoretically send
+    // duplicate productId+varietyName pairs across separate cart entries
+    const incoming = new Map();
+    for (const raw of items) {
+      const productId = raw?.productId;
+      const varietyName = raw?.varietyName || null;
+      const qty = Number(raw?.qty) || 0;
+
+      if (!productId || qty <= 0) continue;
+
+      const key = `${productId}::${varietyName || ''}`;
+      incoming.set(key, {
+        productId,
+        varietyName,
+        qty: (incoming.get(key)?.qty || 0) + qty,
+      });
+    }
+
+    // resolve real product data server-side — never trust client-sent price/name/image
+    const productIds = [...new Set([...incoming.values()].map((i) => i.productId))];
+    const products = await Product.find({ _id: { $in: productIds } });
+    const productMap = new Map(products.map((p) => [String(p._id), p]));
+
+    const resolvedItems = [];
+    const skipped = [];
+
+    for (const { productId, varietyName, qty } of incoming.values()) {
+      const product = productMap.get(String(productId));
+
+      if (!product || product.status !== 'active') {
+        skipped.push({ productId, reason: 'Product not found or inactive' });
+        continue;
+      }
+
+      let price = product.salePrice || product.price;
+      let name = product.name;
+      let image = product.images?.find((img) => img.isPrimary)?.url || product.images?.[0]?.url;
+      let variety; // subdocument shape: { name, price, type, image }
+
+      if (varietyName) {
+        const varietyDoc = product.varieties?.find((v) => v.name === varietyName);
+        if (!varietyDoc) {
+          skipped.push({ productId, varietyName, reason: 'Variety no longer available' });
+          continue;
+        }
+        price = varietyDoc.price;
+        name = `${product.name} - ${varietyDoc.name}`;
+        image = varietyDoc.image || image;
+        variety = {
+          name: varietyDoc.name,
+          price: varietyDoc.price,
+          type: varietyDoc.type, // must be 'food' or 'drink' per schema enum
+          image: varietyDoc.image,
+        };
+      }
+
+      resolvedItems.push({
+        product: product._id,
+        variety,
+        name,
+        price,
+        image,
+        seller: product.seller,
+        quantity: qty,
+      });
+    }
+
+    // merge into existing server cart rather than overwrite — a second sync
+    // (e.g. logging in on another device) shouldn't wipe out items already saved
+    let cart = await Cart.findOne({ buyer: buyerId });
+
+    if (!cart) {
+      cart = new Cart({ buyer: buyerId, items: resolvedItems });
+    } else {
+      for (const newItem of resolvedItems) {
+        const existing = cart.items.find(
+          (i) =>
+            String(i.product) === String(newItem.product) &&
+            (i.variety?.name || null) === (newItem.variety?.name || null)
+        );
+
+        if (existing) {
+          existing.quantity += newItem.quantity;
+          existing.price = newItem.price; // keep price current
+          if (newItem.variety) existing.variety = newItem.variety; // keep variety snapshot current
+        } else {
+          cart.items.push(newItem);
+        }
+      }
+    }
+
+    await cart.save();
+
+    res.json({
+      success: true,
+      message: 'Cart synced',
+      cart,
+      skipped: skipped.length ? skipped : undefined,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };

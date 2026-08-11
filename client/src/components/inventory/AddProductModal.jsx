@@ -814,6 +814,7 @@ const handleToggleVariety = () => {
                 >
                   <option value="food">Food</option>
                   <option value="drink">Drink</option>
+                  <option value="package">Package</option>
                 </select>
               </div>
             </div>

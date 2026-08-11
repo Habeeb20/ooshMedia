@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
 varieties: [{
   name: { type: String },
   price: { type: Number },
-  type: { type: String, enum: ['food', 'drink'] },
+  type: { type: String, enum: ['food', 'drink', 'package'] },
   image: String,
   publicId: String,
 }],

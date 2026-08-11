@@ -17,6 +17,7 @@ import { FlashSaleSection,
  } from "../ads/EcommerceAdsBanner";
 import Food from "../../components/home/Food";
 import Footer from "../../components/Footer";
+import ProductVideoSection from "../../components/home/ProductVideoSection";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -71,6 +72,7 @@ export default function Home() {
       <FashionDeals />
 
 <Food/>
+<ProductVideoSection />
 <CarParts/>
         <FlashSaleSection />
     <DiscountDealsSection />

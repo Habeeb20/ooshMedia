@@ -58,6 +58,9 @@ import { trackPageView } from "./pages/analytics";
 import HeroSection from "./pages/others/food/FoodHeroSection";
 import HomePage from "./pages/others/food/FoodHomepage";
 import BlacklistedSellers from "./pages/BlacklistedUsers";
+import SellerStorefront from "./pages/others/food/foodSellerStorefront";
+import VideoGridPage from "./components/home/VideoGridPage";
+
 
 const App = () => {
   useScrollToTop();
@@ -183,6 +186,9 @@ const App = () => {
             <Route path="/food" element={<HomePage />} />
 
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
+            
+<Route path="/seller/:sellerId" element={<SellerStorefront />} />
+<Route path="/videos" element={<VideoGridPage />} />
 
            
 <Route path="/category/:categorySlug/:subCategorySlug" element={<ProductsGrid />} />

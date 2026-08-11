@@ -221,12 +221,20 @@ export default function Login() {
   }, [resendCooldown]);
 
   const completeLogin = (token, user) => {
+    const redirectTo = localStorage.getItem("redirectAfterLogin");
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     login(token, user);
     toast.success(`Welcome back, ${user.firstName}!`);
-    const from = location.state?.from || '/dashboard';
+
+if (redirectTo) {
+  localStorage.removeItem("redirectAfterLogin");
+  navigate(redirectTo);
+} else {
+  const from = location.state?.from || '/dashboard';
     navigate(from, { replace: true });
+}
+   
   };
 
   const handleLogin = async (e) => {
@@ -625,3 +633,39 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
