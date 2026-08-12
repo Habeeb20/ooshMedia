@@ -31,6 +31,7 @@ const ProductVideoSection = () => {
           params: { page: 1, limit: 4 },
         });
         setVideos(res.data.videos);
+        console.log(res.data.videos)
       } catch (err) {
         console.log('Failed to load product videos', err);
       } finally {
@@ -58,7 +59,7 @@ const ProductVideoSection = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-6 sm:gap-5">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <VideoCardSkeleton key={i} />)
           : videos.map((video) => (
@@ -83,6 +84,9 @@ const ProductVideoSection = () => {
                 <div className="p-4">
                   <p className="text-[15px] font-medium text-slate-900 leading-snug line-clamp-2">
                     {video.description}
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-900 leading-snug line-clamp-2">
+                  {video.tags}
                   </p>
                   <span className="inline-block mt-2 text-sm font-medium text-[#7B2038]">
                     View More

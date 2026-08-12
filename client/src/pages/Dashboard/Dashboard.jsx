@@ -522,6 +522,7 @@ import ControlRoomAccess from '../vendor/ControlRoomAccess';
 import VerificationHub from '../IdentityVerification';
 import ProductVideoUploadForm from '../vendor/UploadFakeProductVideo';
 import MyProductVideos from '../vendor/MyproductVideo';
+import ContactSupport from '../../components/dashboard/ContactSupport';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -567,6 +568,7 @@ const pages = {
   verify: AdVerifyPage,
   stock: SellerDashboard,
   POS: POSPage,
+  support: ContactSupport,
   cart: CartPage,
   products: ProductsGrid,
   orderBreakdown: BuyerDashboard,
@@ -595,6 +597,7 @@ const navItems = [
   { id: 'orderBreakdown', label: 'Orders', icon: Package },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'wallet', label: 'Set up wallet', icon: User },
+  { id: 'support', label: 'Support Desk', icon: User },
   { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
 ];
 

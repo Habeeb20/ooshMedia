@@ -157,6 +157,9 @@ const VideoGridPage = () => {
                   <p className="text-[15px] font-medium text-slate-900 leading-snug line-clamp-2">
                     {video.description}
                   </p>
+                  <p className="text-[15px] font-medium text-slate-900 leading-snug line-clamp-2">
+                   category:  {video.tags}
+                  </p>
                 </div>
               </button>
             ))}

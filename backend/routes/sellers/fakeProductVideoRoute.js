@@ -14,7 +14,7 @@ router.get('/', getProductVideos);
 // Seller-only — order matters: /mine before /:id
 router.get('/mine', verifyToken, getMyProductVideos);
 router.post('/', verifyToken, createProductVideo);
-router.patch('/:id', verifyToken, updateProductVideo);
+router.put('/:id', verifyToken, updateProductVideo);
 router.delete('/:id', verifyToken, deleteProductVideo);
 
 export default router;

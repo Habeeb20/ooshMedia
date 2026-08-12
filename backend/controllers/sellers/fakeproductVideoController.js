@@ -137,7 +137,7 @@ export const getProductVideos = async (req, res) => {
         .skip(skip)
         .limit(limit)
         .populate('seller', 'firstName lastName username profilePicture businessProfile.businessName')
-        .populate('product', 'name'),
+        .populate('product', 'name category price'),
       ProductVideo.countDocuments(filter),
     ]);
 

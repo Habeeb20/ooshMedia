@@ -25,7 +25,7 @@ const EditModal = ({ video, onClose, onSaved }) => {
     try {
       const token = localStorage.getItem('token');
       const tags = tagsInput.split(',').map((t) => t.trim()).filter(Boolean);
-      const res = await axios.patch(
+      const res = await axios.put(
         `${BACKEND_URL}/api/product-videos/${video._id}`,
         { description: description.trim(), tags },
         { headers: { Authorization: `Bearer ${token}` } }
