@@ -771,6 +771,8 @@ export const updateBusinessProfile = async (req, res) => {
       lga,
       profilePicture,
       isRider,
+      phoneNumber,
+      
 
       // Business Profile Fields
       businessName,
@@ -779,7 +781,9 @@ export const updateBusinessProfile = async (req, res) => {
       yearsInBusiness,
       staffCount,
       registeredBusiness,
+        businessDocuments, 
       openingHours,
+      
     } = req.body;
 
     // ==================== UPDATE BASIC USER INFO ====================
@@ -787,6 +791,7 @@ export const updateBusinessProfile = async (req, res) => {
     if (lastName) user.lastName = lastName;
     if (state) user.state = state;
     if (lga) user.lga = lga;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
     if (isRider) user.isRider = isRider;
     if (profilePicture) user.profilePicture = profilePicture;
 
@@ -797,6 +802,14 @@ export const updateBusinessProfile = async (req, res) => {
       gallery = [...gallery, ...req.body.gallery];
     }
 
+    let parsedBusinessDocuments = user.businessProfile?.businessDocuments || [];
+if (businessDocuments !== undefined) {
+  try {
+    parsedBusinessDocuments = JSON.parse(businessDocuments);
+  } catch (e) {
+    return res.status(400).json({ success: false, message: "Invalid businessDocuments format" });
+  }
+}
     if (req.files && req.files.length > 0) {
       const videoUploads = await Promise.all(
         req.files.map(file => uploadVideoToS3(file, 'business-gallery'))
@@ -822,6 +835,7 @@ export const updateBusinessProfile = async (req, res) => {
       staffCount: staffCount !== undefined ? Number(staffCount) : user.businessProfile?.staffCount,
       registeredBusiness: registeredBusiness !== undefined ? registeredBusiness : user.businessProfile?.registeredBusiness,
       openingHours: openingHours || user.businessProfile?.openingHours || [],
+        businessDocuments: parsedBusinessDocuments,  
       gallery: gallery,
     };
 
@@ -843,7 +857,8 @@ export const updateBusinessProfile = async (req, res) => {
         state: user.state,
         lga: user.lga,
         profilePicture: user.profilePicture,
-        isRider: user.isRider
+        isRider: user.isRider,
+        phoneNumber:user.phoneNumber
       },
       businessProfile: user.businessProfile,
       completionPercentage,

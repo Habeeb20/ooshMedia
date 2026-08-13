@@ -38,7 +38,7 @@ export const generateAndSendOTP = async ({ contact, type }) => {
     });
 
   } else if (type === 'phone') {
-    const message = `Your ${process.env.APP_NAME || 'MediaPulse'} verification code is: ${otp}. Valid for 10 minutes.`;
+    const message = `Your ${process.env.APP_NAME || 'Estores'} verification code is: ${otp}. Valid for 10 minutes.`;
 
     await sendSMSViaKudi(contact, message);
   }
@@ -56,11 +56,24 @@ export const sendSMSViaKudi = async (phone, message) => {
     });
 
     if (response.data.status !== 'success') {
-      throw new Error(response.data || 'SMS failed');
+      throw new Error(
+        typeof response.data === 'string'
+          ? response.data
+          : JSON.stringify(response.data)
+      );
     }
+
+    return response.data;
   } catch (error) {
-    console.error('Kudi SMS Error:', error.response?.data.message || error.message);
-    throw new Error('Failed to send SMS');
+    const kudiErrorDetail =
+      error.response?.data
+        ? (typeof error.response.data === 'string'
+            ? error.response.data
+            : JSON.stringify(error.response.data))
+        : error.message;
+
+    console.error('Kudi SMS Error:', kudiErrorDetail);
+    throw new Error(`Failed to send SMS: ${kudiErrorDetail}`);
   }
 };
 

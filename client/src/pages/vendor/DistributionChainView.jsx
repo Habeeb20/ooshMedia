@@ -544,6 +544,7 @@ const DistributionChainView = () => {
   };
 
   return (
+    
     <div className="bg-gray-50 mt-5 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -580,43 +581,44 @@ const DistributionChainView = () => {
                 className="w-full px-5 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:border-rose-900 text-base"
               />
 
+       
               {showSuggestions && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-80 overflow-y-auto z-30">
-                  {!productsLoaded ? (
-                    <div className="flex items-center justify-center gap-2 py-6 text-gray-400 text-sm">
-                      <Loader2 className="w-4 h-4 animate-spin" /> Loading suggestions...
-                    </div>
-                  ) : suggestions.length > 0 ? (
-                    suggestions.map((product) => (
-                      <button
-                        key={product._id}
-                        onClick={() => handleSuggestionClick(product)}
-                        className="w-full flex items-center gap-3 px-5 py-3 hover:bg-rose-50 transition-colors text-left border-b border-gray-50 last:border-0"
-                      >
-                        <img
-                          src={product.images?.[0]?.url || 'https://via.placeholder.com/48'}
-                          alt={product.name}
-                          className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
-                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
-                            <span className="text-emerald-600 font-bold">
-                              ₦{product.price?.toLocaleString()}
-                            </span>
-                            <span>{product.category}</span>
-                            <span>Stock: {product.stockQuantity}</span>
-                          </div>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="py-6 text-center text-sm text-gray-400">
-                      No products match "{searchQuery}"
-                    </p>
-                  )}
-                </div>
-              )}
+  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-80 overflow-y-auto z-30">
+    {!productsLoaded ? (
+      <div className="flex items-center justify-center gap-2 py-6 text-gray-400 text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading suggestions...
+      </div>
+    ) : suggestions.length > 0 ? (
+      suggestions.map((product) => (
+        <button
+          key={product._id}
+          onClick={() => handleSuggestionClick(product)}
+          className="w-full flex items-center gap-3 px-5 py-3 hover:bg-rose-50 transition-colors text-left border-b border-gray-50 last:border-0"
+        >
+          <img
+            src={product.images?.[0]?.url || 'https://via.placeholder.com/48'}
+            alt={product.name}
+            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
+            <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+              <span className="text-emerald-600 font-bold">
+                ₦{product.price?.toLocaleString()}
+              </span>
+              <span>{product.category}</span>
+              <span>Stock: {product.stockQuantity}</span>
+            </div>
+          </div>
+        </button>
+      ))
+    ) : (
+      <p className="py-6 text-center text-sm text-gray-400">
+        No products match "{searchQuery}"
+      </p>
+    )}
+  </div>
+)}
             </div>
 
             <div className="flex gap-2">
@@ -652,7 +654,7 @@ const DistributionChainView = () => {
                     <div
                       key={product._id}
                       onClick={() => navigate(`/product/${product._id}`)}
-                      className="bg-white rounded-3xl overflow-hidden shadow hover:shadow-xl transition-all cursor-pointer group"
+                      className=" rounded-3xl overflow-hidden shadow hover:shadow-xl transition-all cursor-pointer group"
                     >
                       <img
                         src={product.images?.[0]?.url || "https://via.placeholder.com/400x300"}

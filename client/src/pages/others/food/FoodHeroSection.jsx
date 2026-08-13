@@ -2,12 +2,6 @@
 
 
 
-
-
-
-
-
-
 // import { useNavigate } from "react-router-dom";
 // import appConfig from "../../../config/appConfig";
 
@@ -22,12 +16,11 @@
 //   const navigate = useNavigate();
 
 //   return (
-//     <section className="relative overflow-hidden">
-//       {/* Curved red shape — a true circle, centered past the right edge so only
-//           its left arc shows inside the section = covers roughly half the width */}
+//     <section className=" mb-10">
+//       {/* Curved red shape — pushed further right/down on mobile so it clears the text entirely */}
 //       <div
-//         className="absolute -top-[220px] -right-[220px]
-//           w-[520px] h-[520px]
+//         className="absolute -top-[160px] -right-[260px]
+//           w-[440px] h-[440px]
 //           sm:-top-[300px] sm:-right-[280px] sm:w-[700px] sm:h-[700px]
 //           md:-top-[360px] md:-right-[300px] md:w-[900px] md:h-[900px]
 //           lg:-top-[400px] lg:-right-[320px] lg:w-[1000px] lg:h-[1000px]
@@ -37,20 +30,24 @@
 
 //       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-10 sm:pb-16">
 //         <div className="flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-4">
-//           {/* Copy — stays clear of the curve, left-aligned */}
-//           <div className="relative z-10 w-full md:max-w-md md:pt-16 text-left pl-1 sm:pl-2">
-//             <h1 className="text-2xl sm:text-4xl md:text-5xl font-black leading-[1.1] text-gray-900">
-//               Delicious
-//               <br />
-//               Quench the Hunger
+//           {/* Copy — capped narrow on mobile so it never touches the curve; single line on desktop */}
+//           <div className="relative z-10 w-full md:max-w-xl md:pt-16 text-left pl-1 sm:pl-2">
+//             <h1 className="text-2xl sm:text-4xl md:text-5xl font-black leading-[1.1] text-gray-900 max-w-[180px] sm:max-w-none md:whitespace-nowrap">
+//               {/* Delicious */}
+//               <br className="md:hidden" />
+//               <br/>
+//               <span className="">Quench the Hunger</span>
 //             </h1>
-//             <p className="mt-3 text-xs sm:text-sm md:text-base text-gray-500 max-w-[220px] sm:max-w-xs">
+//             <p className=" mt-3 text-xs font-semibold sm:text-sm md:text-base text-gray-500 max-w-[170px] sm:max-w-xs">
+//              Browse our menu, order in minutes, and enjoy fresh food wherever you are.
+//             </p>
+//             <p className="mt-3 text-xs sm:text-sm md:text-base text-gray-500 max-w-[170px] sm:max-w-xs">
 //               Restaurants &nbsp;·&nbsp; Abula &nbsp;·&nbsp; FastFood
 //             </p>
 
 //             <button
 //               onClick={() => navigate("/category/groceries-food")}
-//               className="mt-5 sm:mt-6 px-6 py-2.5 rounded-full text-white text-xs sm:text-sm font-bold tracking-wide uppercase shadow-lg hover:scale-105 active:scale-95 transition-transform"
+//               className="mt-5 sm:mt-6 px-15 py-4.5 rounded-full text-white text-xs sm:text-sm  tracking-wide uppercase shadow-lg hover:scale-105 active:scale-95 transition-transform"
 //               style={{ backgroundColor: appConfig.colors.primary }}
 //             >
 //               Order Now
@@ -58,7 +55,7 @@
 //           </div>
 
 //           {/* Floating plate cluster — sits over the red half only */}
-//           <div className="relative z-10 w-full flex-1 h-[240px] sm:h-[380px] md:h-[480px] mt-4 md:mt-0">
+//           <div className="relative z-10 w-full flex-1 h-[240px] sm:h-[380px] md:h-[480px] mt-4 md:mt-0 ">
 //             <img
 //               src={plate1}
 //               alt=""
@@ -82,12 +79,12 @@
 //             <img
 //               src={plate5}
 //               alt=""
-//               className="plate plate-5 absolute top-[48%] right-[2%] w-[50px] sm:w-[75px] md:w-[90px] rounded-full shadow-xl object-cover aspect-square border-4 border-white cursor-pointer hidden sm:block"
+//               className="plate plate-5 absolute top-[30%] right-[4%] w-[50px] sm:w-[75px] md:w-[90px] rounded-full shadow-xl object-cover aspect-square border-4 border-white cursor-pointer hidden sm:block"
 //             />
 //             <img
 //               src={plate6}
 //               alt="Featured dish"
-//               className="plate plate-6 absolute bottom-0 left-1/2 -translate-x-1/2 sm:left-[56%] sm:translate-x-0 w-[150px] sm:w-[220px] md:w-[260px] rounded-full shadow-2xl object-cover aspect-square border-4 border-white cursor-pointer"
+//               className="plate plate-6 absolute bottom-15 left-2/3 -translate-x-1/2 sm:left-[36%] sm:translate-x-0 w-[150px] sm:w-[220px] md:w-[260px] rounded-full shadow-2xl object-cover aspect-square border-4 border-white cursor-pointer"
 //             />
 //           </div>
 //         </div>
@@ -125,10 +122,6 @@
 // }
 
 
-
-
-
-
 import { useNavigate } from "react-router-dom";
 import appConfig from "../../../config/appConfig";
 
@@ -142,8 +135,26 @@ import plate6 from "../../../assets/dinner.jpeg";
 export default function HeroSection() {
   const navigate = useNavigate();
 
+  const handleOrderNowClick = () => {
+    const popularFoodSection = document.getElementById("popular-food");
+
+    if (popularFoodSection) {
+      // Already on the homepage — just smooth-scroll to the section.
+      popularFoodSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      // Not on the homepage (e.g. someone lands on HeroSection from another route) —
+      // navigate home with a hash, then scroll once the page has rendered.
+      navigate("/#popular-food");
+      setTimeout(() => {
+        document
+          .getElementById("popular-food")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  };
+
   return (
-    <section className="relative overflow-hidden">
+    <section className=" mb-10">
       {/* Curved red shape — pushed further right/down on mobile so it clears the text entirely */}
       <div
         className="absolute -top-[160px] -right-[260px]
@@ -173,7 +184,7 @@ export default function HeroSection() {
             </p>
 
             <button
-              onClick={() => navigate("/category/groceries-food")}
+              onClick={handleOrderNowClick}
               className="mt-5 sm:mt-6 px-15 py-4.5 rounded-full text-white text-xs sm:text-sm  tracking-wide uppercase shadow-lg hover:scale-105 active:scale-95 transition-transform"
               style={{ backgroundColor: appConfig.colors.primary }}
             >
@@ -182,7 +193,7 @@ export default function HeroSection() {
           </div>
 
           {/* Floating plate cluster — sits over the red half only */}
-          <div className="relative z-10 w-full flex-1 h-[240px] sm:h-[380px] md:h-[480px] mt-4 md:mt-0">
+          <div className="relative z-10 w-full flex-1 h-[240px] sm:h-[380px] md:h-[480px] mt-4 md:mt-0 ">
             <img
               src={plate1}
               alt=""
@@ -211,7 +222,10 @@ export default function HeroSection() {
             <img
               src={plate6}
               alt="Featured dish"
-              className="plate plate-6 absolute bottom-0 left-1/2 -translate-x-1/2 sm:left-[56%] sm:translate-x-0 w-[150px] sm:w-[220px] md:w-[260px] rounded-full shadow-2xl object-cover aspect-square border-4 border-white cursor-pointer"
+              className="plate plate-6 absolute -top-[110px] right-[2%] left-auto translate-x-0
+                sm:top-auto sm:bottom-15 sm:left-[36%] sm:right-auto sm:translate-x-0
+                w-[120px] sm:w-[220px] md:w-[260px]
+                rounded-full shadow-2xl object-cover aspect-square border-4 border-white cursor-pointer"
             />
           </div>
         </div>

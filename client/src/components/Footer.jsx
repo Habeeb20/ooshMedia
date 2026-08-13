@@ -56,8 +56,8 @@ export default function Footer() {
               {/* <li><a href="/shipping" className="hover:text-white transition">Shipping Policy</a></li>
               <li><a href="/returns" className="hover:text-white transition">Returns & Refunds</a></li> */}
               {/* <li><a href="/faq" className="hover:text-white transition">FAQs</a></li> */}
-                 <li><a href="/about" className="hover:text-white transition">About Us</a></li>
-              <li><a href="/contact" className="hover:text-white transition">Contact Us</a></li>
+                 {/* <li><a href="/about" className="hover:text-white transition">About Us</a></li> */}
+              {/* <li><a href="/contact" className="hover:text-white transition">Contact Us</a></li> */}
               <li><a href="/blacklisted-sellers" className="hover:text-white transition">Blacklisted sellers</a></li>
             </ul>
           </div>

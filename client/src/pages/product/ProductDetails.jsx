@@ -1010,7 +1010,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                 </div>
 
                 {/* Checkout button */}
-                <button
+                {/* <button
                   onClick={goToCheckout}
                   className="w-full mt-3 py-4 rounded-2xl font-bold text-lg border-2 text-gray-700 border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 transition"
                 >
@@ -1022,7 +1022,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                       Log In to Checkout
                     </>
                   )}
-                </button>
+                </button> */}
 
                 {/* Features */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">

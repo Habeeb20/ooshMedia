@@ -1,85 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useState, useEffect } from 'react';
 import appConfig from '../../config/AppConfig';
 import { entityCategories } from './../../categories/entityCategories';
@@ -130,6 +48,7 @@ export default function BusinessProfileUpdate() {
     firstName: '',
     lastName: '',
     state: '',
+      phoneNumber: '',
     lga: '',
     isRider: false,
     profilePicture: '',
@@ -139,6 +58,7 @@ export default function BusinessProfileUpdate() {
     yearsInBusiness: '',
     staffCount: '',
     registeredBusiness: false,
+      cacNumber: '', 
     openingHours: ['Monday - Friday: 8:00 AM - 6:00 PM'],
   });
 
@@ -163,6 +83,7 @@ export default function BusinessProfileUpdate() {
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             state: user.state || '',
+              phoneNumber: user.phoneNumber || '', 
             lga: user.lga || '',
             isRider: user.isRider || false,
             profilePicture: user.profilePicture || '',
@@ -172,6 +93,7 @@ export default function BusinessProfileUpdate() {
             yearsInBusiness: bp.yearsInBusiness || '',
             staffCount: bp.staffCount || '',
             registeredBusiness: bp.registeredBusiness || false,
+             cacNumber: bp.businessDocuments?.[0] || '', 
             openingHours: bp.openingHours?.length > 0 ? bp.openingHours : ['Monday - Friday: 8:00 AM - 6:00 PM'],
           });
           if (bp.gallery?.length > 0) setGalleryImages(bp.gallery.filter(i => i.type === 'image'));
@@ -232,6 +154,7 @@ export default function BusinessProfileUpdate() {
     payload.append('firstName', formData.firstName);
     payload.append('lastName', formData.lastName);
     payload.append('state', formData.state);
+    payload.append('phoneNumber', formData.phoneNumber);  
     payload.append('lga', formData.lga);
     payload.append('isRider', formData.isRider);
     payload.append('profilePicture', formData.profilePicture);
@@ -244,6 +167,11 @@ export default function BusinessProfileUpdate() {
       payload.append('registeredBusiness', formData.registeredBusiness);
       payload.append('entityCategory', JSON.stringify(formData.entityCategory));
       payload.append('openingHours', JSON.stringify(formData.openingHours));
+        const businessDocuments = formData.registeredBusiness && formData.cacNumber
+    ? [formData.cacNumber]
+    : [];
+  payload.append('businessDocuments', JSON.stringify(businessDocuments));
+
       if (galleryImages.length > 0) payload.append('gallery', JSON.stringify(galleryImages));
       videoFiles.forEach(f => payload.append('gallery', f));
     }
@@ -306,6 +234,15 @@ export default function BusinessProfileUpdate() {
             <Field label="Last Name">
               <TextInput type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Last name" required />
             </Field>
+            <Field label="Phone Number">
+  <TextInput
+    type="tel"
+    name="phoneNumber"
+    value={formData.phoneNumber}
+    onChange={handleChange}
+    placeholder="e.g. 08012345678"
+  />
+</Field>
             <Field label="State">
               <TextInput type="text" name="state" value={formData.state} onChange={handleChange} placeholder="e.g. Lagos" />
             </Field>
@@ -315,7 +252,7 @@ export default function BusinessProfileUpdate() {
 
             <div className="flex items-center justify-between">
   <label className="text-sm font-medium text-gray-700">
-    Are you a disput rider?
+    Are you a dispatch rider?
   </label>
   
   <label className="relative inline-flex items-center cursor-pointer">
@@ -379,6 +316,20 @@ export default function BusinessProfileUpdate() {
                   }`} />
                 </button>
               </div>
+
+              {formData.registeredBusiness && (
+  <div className="mt-4">
+    <Field label="CAC Registration Number">
+      <TextInput
+        type="text"
+        name="cacNumber"
+        value={formData.cacNumber}
+        onChange={handleChange}
+        placeholder="e.g. RC1234567"
+      />
+    </Field>
+  </div>
+)}
             </SectionCard>
 
             {/* Staff & Hours */}
@@ -456,13 +407,13 @@ export default function BusinessProfileUpdate() {
 
               {/* Videos */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Videos</p>
+                {/* <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Videos</p>
                 <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#8B1E3F] hover:bg-rose-50 transition-all group">
                   <Camera size={24} className="text-gray-300 group-hover:text-[#8B1E3F] mb-2 transition-colors" />
                   <p className="text-xs font-semibold text-gray-400 group-hover:text-[#8B1E3F] transition-colors">Click to upload videos</p>
                   <p className="text-[10px] text-gray-300 mt-0.5">MP4, MOV · Max 100MB each</p>
                   <input type="file" multiple accept="video/*" className="hidden" onChange={handleVideoSelect} />
-                </label>
+                </label> */}
 
                 {videoFiles.length > 0 && (
                   <div className="mt-3 space-y-2">

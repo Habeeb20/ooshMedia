@@ -174,7 +174,7 @@ export default function PopularFood() {
   }, [products, activeFilter, searchTerm]);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-16 sm:mt-24">
+    <section id="popular-food" className="max-w-7xl mx-auto px-4 sm:px-6 mt-16 sm:mt-24">
       <h2 className="text-center text-xl sm:text-2xl font-extrabold text-gray-900">
         Popular Food
       </h2>

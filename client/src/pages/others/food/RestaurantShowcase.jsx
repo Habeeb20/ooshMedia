@@ -2,7 +2,7 @@ import restaurantImg from "../../../assets/restaurant.jpeg";
 
 export default function RestaurantShowcase() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-16 sm:mt-24">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-16 sm:mt-24 mb-30">
       <h2 className="text-center text-xl sm:text-2xl font-extrabold text-gray-900">
         Place Of Our Restaurant
       </h2>

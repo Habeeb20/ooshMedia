@@ -2,6 +2,51 @@ import User from '../models/user.js';
 import axios from 'axios';
 import Product from '../models/sellers/product.js';
 // ====================== CREATE / UPDATE SELLER PROFILE ======================
+// export const updateSellerProfile = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const user = await User.findById(userId);
+
+//     if (!user || user.role !== 'entity') {
+//       return res.status(403).json({ success: false, message: "Only entities can become sellers" });
+//     }
+
+//     const { sellerTypes, productCategories, shopName, shopDescription, market,    bankDetails  } = req.body;
+
+//     user.isSeller = true;
+//     user.sellerProfile.shopName = user.bussinessProfile?.businessName || shopName;
+//     user.sellerProfile = {
+//       ...user.sellerProfile,
+//       sellerTypes: sellerTypes || user.sellerProfile?.sellerTypes || [],
+//       market: market || user.sellerProfile?.market || [],
+//       productCategories: productCategories || user.sellerProfile?.productCategories || [],
+//     //   shopName: shopName || user.sellerProfile?.shopName,
+//       shopDescription: shopDescription || user.sellerProfile?.shopDescription,
+
+//        bankDetails: {
+//         bankName: bankDetails?.bankName || user.sellerProfile.bankDetails?.bankName || "",
+//         accountNumber: bankDetails?.accountNumber || user.sellerProfile.bankDetails?.accountNumber || "",
+//         accountName: bankDetails?.accountName || user.sellerProfile.bankDetails?.accountName || "",
+//         isVerified: user.sellerProfile.bankDetails?.isVerified || false,
+//         verifiedAt: user.sellerProfile.bankDetails?.verifiedAt
+//       }
+//     };
+
+//     await user.save();
+
+//     res.json({
+//       success: true,
+//       message: "Seller profile updated successfully",
+//       sellerProfile: user.sellerProfile
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: "Failed to update seller profile" });
+//   }
+// };
+
+
 export const updateSellerProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -11,25 +56,27 @@ export const updateSellerProfile = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only entities can become sellers" });
     }
 
-    const { sellerTypes, productCategories, shopName, shopDescription, market,    bankDetails  } = req.body;
+    const { sellerTypes, productCategories, shopName, shopDescription, market, bankDetails } = req.body;
 
     user.isSeller = true;
-    user.sellerProfile.shopName = user.bussinessProfile?.businessName || shopName;
-    user.sellerProfile = {
-      ...user.sellerProfile,
-      sellerTypes: sellerTypes || user.sellerProfile?.sellerTypes || [],
-      market: market || user.sellerProfile?.market || [],
-      productCategories: productCategories || user.sellerProfile?.productCategories || [],
-    //   shopName: shopName || user.sellerProfile?.shopName,
-      shopDescription: shopDescription || user.sellerProfile?.shopDescription,
 
-       bankDetails: {
-        bankName: bankDetails?.bankName || user.sellerProfile.bankDetails?.bankName || "",
-        accountNumber: bankDetails?.accountNumber || user.sellerProfile.bankDetails?.accountNumber || "",
-        accountName: bankDetails?.accountName || user.sellerProfile.bankDetails?.accountName || "",
-        isVerified: user.sellerProfile.bankDetails?.isVerified || false,
-        verifiedAt: user.sellerProfile.bankDetails?.verifiedAt
-      }
+    // Ensure sellerProfile exists as a subdocument before touching nested paths
+    if (!user.sellerProfile) {
+      user.sellerProfile = {};
+    }
+
+    user.sellerProfile.shopName = shopName || user.bussinessProfile?.businessName || user.sellerProfile.shopName;
+    user.sellerProfile.sellerTypes = sellerTypes || user.sellerProfile.sellerTypes || [];
+    user.sellerProfile.market = market || user.sellerProfile.market || [];
+    user.sellerProfile.productCategories = productCategories || user.sellerProfile.productCategories || [];
+    user.sellerProfile.shopDescription = shopDescription || user.sellerProfile.shopDescription;
+
+    user.sellerProfile.bankDetails = {
+      bankName: bankDetails?.bankName || user.sellerProfile.bankDetails?.bankName || "",
+      accountNumber: bankDetails?.accountNumber || user.sellerProfile.bankDetails?.accountNumber || "",
+      accountName: bankDetails?.accountName || user.sellerProfile.bankDetails?.accountName || "",
+      isVerified: user.sellerProfile.bankDetails?.isVerified || false,
+      verifiedAt: user.sellerProfile.bankDetails?.verifiedAt
     };
 
     await user.save();
@@ -45,9 +92,6 @@ export const updateSellerProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update seller profile" });
   }
 };
-
-
-
 
 // ====================== ADD TO SELLER CHAIN ======================
 export const addSellerChain = async (req, res) => {

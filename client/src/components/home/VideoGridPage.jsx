@@ -36,7 +36,7 @@ const VideoLightbox = ({ video, onClose }) => {
           src={video.video.url}
           controls
           autoPlay
-          className="w-full max-h-[75vh] bg-black"
+          className="w-full max-h-[55vh] bg-black"
         />
         <div className="p-4 bg-white">
           <p className="text-slate-800">{video.description}</p>
@@ -45,6 +45,12 @@ const VideoLightbox = ({ video, onClose }) => {
               by {video.seller.businessProfile.businessName}
             </p>
           )}
+             <button
+            onClick={onClose}
+            className="mt-4 w-full py-2.5 rounded-xl bg-[#7B2038] text-white text-sm font-medium hover:bg-[#611829] transition"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -186,3 +192,31 @@ const VideoGridPage = () => {
 };
 
 export default VideoGridPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
