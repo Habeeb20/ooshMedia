@@ -96,5 +96,37 @@ export const verifyOTP = (contact, enteredOtp) => {
 
 
 
+export const peekOTP = (contact, enteredOtp) => {
+  const record = otpStore.get(contact);
+  if (!record) return { success: false, message: "OTP expired or invalid" };
+
+  if (Date.now() > record.expiresAt) {
+    otpStore.delete(contact);
+    return { success: false, message: "OTP has expired" };
+  }
+
+  if (record.otp !== enteredOtp) {
+    return { success: false, message: "Invalid OTP" };
+  }
+
+  return { success: true };
+};
+
+
+
 // utils/generateCode.js
 export const generate4DigitCode = () => String(Math.floor(1000 + Math.random() * 9000));
+
+
+
+
+
+
+
+
+
+
+
+
+
+

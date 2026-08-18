@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js'
-import { generateAndSendOTP, verifyOTP } from '../utills/sendOtp.js';
+import { generateAndSendOTP, peekOTP, verifyOTP } from '../utills/sendOtp.js';
 import axios from "axios"
 import { uploadVideoToS3 } from '../utills/s3BucketUpload.js';
 import { generateFallbackEmail } from './walletController.js';
@@ -135,6 +135,48 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify a reset OTP without consuming it
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [contact, otp]
+ *             properties:
+ *               contact:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP is valid
+ *       400:
+ *         description: Invalid or expired OTP
+ */
+export const verifyResetOtp = async (req, res) => {
+  try {
+    const { contact, otp } = req.body;
+
+    if (!contact || !otp) {
+      return res.status(400).json({ message: "Contact and OTP are required" });
+    }
+
+    const result = peekOTP(contact, otp);
+    if (!result.success) return res.status(400).json({ message: result.message });
+
+    res.json({ success: true, message: "OTP verified" });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Failed to verify OTP" });
+  }
+};
 
 /**
  * @swagger

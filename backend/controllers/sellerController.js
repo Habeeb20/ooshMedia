@@ -1,6 +1,14 @@
 import User from '../models/user.js';
 import axios from 'axios';
 import Product from '../models/sellers/product.js';
+
+const PAYSTACK_BASE_URL = 'https://api.paystack.co';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+const LIVE_PAYSTACK_SECRET_KEY= process.env.LIVE_PAYSTACK_SECRET_KEY
+let bankListCache = null;
+let bankListCachedAt = 0;
+const BANK_LIST_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 // ====================== CREATE / UPDATE SELLER PROFILE ======================
 // export const updateSellerProfile = async (req, res) => {
 //   try {
@@ -204,10 +212,12 @@ export const deleteSellerChain = async (req, res) => {
 export const getSellerProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const user = await User.findById(userId).select('isSeller sellerProfile');
-console.log(user.sellerProfile.sellerChain)
+    const user = await User.findById(userId)
+    // const user = await User.findById(userId).select('isSeller sellerProfile');
+
     res.json({
       success: true,
+      user: user,
       isSeller: user.isSeller,
       sellerProfile: user.sellerProfile || null
     });
@@ -837,3 +847,66 @@ export const getPurchaseHistory = async (req, res) => {
     });
   }
 };
+
+
+export const sellerBanks = async(req, res) => {
+    try {
+    const now = Date.now();
+    if (bankListCache && now - bankListCachedAt < BANK_LIST_TTL_MS) {
+      return res.json({ success: true, banks: bankListCache });
+    }
+
+    const response = await fetch(`${PAYSTACK_BASE_URL}/bank?country=nigeria&currency=NGN`, {
+      headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+    });
+    const data = await response.json();
+
+    if (!data.status) {
+      return res.status(502).json({ success: false, message: 'Could not fetch bank list from Paystack' });
+    }
+
+    const banks = data.data
+      .map((b) => ({ name: b.name, code: b.code }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    bankListCache = banks;
+    bankListCachedAt = now;
+
+    return res.json({ success: true, banks });
+  } catch (err) {
+    console.error('Fetch banks error:', err);
+    return res.status(500).json({ success: false, message: 'Something went wrong fetching banks' });
+  }
+}
+
+
+
+export const verifyBanks = async(req, res) => {
+    try {
+    const { accountNumber, bankCode } = req.query;
+
+    if (!accountNumber || !bankCode || accountNumber.length !== 10) {
+      return res.status(400).json({ success: false, message: 'A valid 10-digit account number and bank are required' });
+    }
+
+    const response = await fetch(
+      `${PAYSTACK_BASE_URL}/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+      { headers: { Authorization: `Bearer ${LIVE_PAYSTACK_SECRET_KEY}` } }
+    );
+    const data = await response.json();
+
+    if (!data.status) {
+      // Paystack returns status:false with a message like "Could not resolve account name"
+      return res.status(422).json({ success: false, message: data.message || 'Could not verify this account' });
+    }
+
+    return res.json({
+      success: true,
+      accountName: data.data.account_name,
+      accountNumber: data.data.account_number,
+    });
+  } catch (err) {
+    console.error('Verify account error:', err);
+    return res.status(500).json({ success: false, message: 'Something went wrong verifying the account' });
+  }
+}

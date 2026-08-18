@@ -118,7 +118,7 @@ export default function Step2_PersonalInfo({ formData, updateForm, nextStep, pre
         )} */}
 
         {/* Alternate Contact */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {formData.contactType === 'email' ? 'Phone Number' : 'Email Address'} (Optional)
           </label>
@@ -129,7 +129,21 @@ export default function Step2_PersonalInfo({ formData, updateForm, nextStep, pre
             onChange={(e) => updateForm({ alternateContact: e.target.value })}
             placeholder={formData.contactType === 'email' ? '+234 801 234 5678' : 'example@gmail.com'}
           />
-        </div>
+        </div> */}
+
+        <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    {formData.contactType === 'email' ? 'Phone Number' : 'Email Address'}
+  </label>
+  <input
+    type={formData.contactType === 'email' ? 'tel' : 'email'}
+    required
+    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+    value={formData.alternateContact}
+    onChange={(e) => updateForm({ alternateContact: e.target.value })}
+    placeholder={formData.contactType === 'email' ? '+234 801 234 5678' : 'example@gmail.com'}
+  />
+</div>
 
         {/* State & LGA */}
         <StateAndLga 

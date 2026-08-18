@@ -81,7 +81,7 @@ export default function PromoBanner() {
             </span>
 
             <h1 className="text-xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tight">
-              Quench the Hunger
+              Order from our partner restaurants food menus
             </h1>
 
             <p className="mt-2 sm:mt-3 text-white/80 text-xs sm:text-base md:text-lg leading-relaxed">

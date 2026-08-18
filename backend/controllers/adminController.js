@@ -445,6 +445,91 @@ export const deleteUserAdmin = async (req, res) => {
   }
 };
 
+
+
+// GET /api/admin/sellers/inspections
+// Returns every seller who has paid for inspection, with enough context for
+// the admin to decide whether to activate addressVerified.
+export const getInspectionSellers = async (req, res) => {
+  try {
+    const sellers = await User.find({ 'sellerProfile.inspectionPayment.paid': true })
+      .select(
+        'firstName lastName email phoneNumber ' +
+        'sellerProfile.shopName sellerProfile.market sellerProfile.verifiedSeller ' +
+        'sellerProfile.isSuperVerify sellerProfile.addressVerified sellerProfile.addressVerifiedAt ' +
+        'sellerProfile.inspectionPayment businessProfile.businessAddress'
+      )
+      .sort({ 'sellerProfile.inspectionPayment.paidAt': -1 });
+
+    return res.json({ success: true, sellers });
+  } catch (err) {
+    console.error('Get inspection sellers error:', err);
+    return res.status(500).json({ success: false, message: 'Something went wrong fetching sellers' });
+  }
+};
+
+// PATCH /api/admin/sellers/:id/address-verify
+// body: { action: 'activate' | 'deactivate' }
+export const updateAddressVerification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (!['activate', 'deactivate'].includes(action)) {
+      return res.status(400).json({ success: false, message: "Action must be 'activate' or 'deactivate'" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Seller not found' });
+    }
+
+    if (!user.sellerProfile?.inspectionPayment?.paid) {
+      return res.status(400).json({ success: false, message: 'This seller has not paid for inspection yet' });
+    }
+
+    user.sellerProfile.addressVerified = action === 'activate';
+    user.sellerProfile.addressVerifiedAt = new Date();
+    user.sellerProfile.addressVerifiedBy = req.user._id;
+    await user.save();
+
+    return res.json({
+      success: true,
+      addressVerified: user.sellerProfile.addressVerified,
+      addressVerifiedAt: user.sellerProfile.addressVerifiedAt,
+    });
+  } catch (err) {
+    console.error('Update address verification error:', err);
+    return res.status(500).json({ success: false, message: 'Something went wrong updating verification' });
+  }
+};
+
+// PATCH /api/admin/sellers/:id/super-verify
+// body: { action: 'activate' | 'deactivate' }
+export const updateSuperVerify = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (!['activate', 'deactivate'].includes(action)) {
+      return res.status(400).json({ success: false, message: "Action must be 'activate' or 'deactivate'" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Seller not found' });
+    }
+
+    user.sellerProfile.isSuperVerify = action === 'activate';
+    await user.save();
+
+    return res.json({ success: true, isSuperVerify: user.sellerProfile.isSuperVerify });
+  } catch (err) {
+    console.error('Update super verify error:', err);
+    return res.status(500).json({ success: false, message: 'Something went wrong updating verification' });
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

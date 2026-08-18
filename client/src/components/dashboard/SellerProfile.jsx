@@ -2,28 +2,60 @@
 
 
 
-// import { useState, useEffect } from 'react';
+
+// import { useState, useEffect, useRef } from 'react';
 // import appConfig from '../../config/AppConfig';
 // import Loading from '../../config/Loading';
 // import {lagosMarkets} from "../../categories/locationCategories"
 // import { toast } from 'sonner';
 // import {
 //   Users, Save, Edit2, Trash2, Plus, Building2,
-//   Mail, Phone, MapPin, ChevronDown, ChevronUp, CheckCircle2, Store, Factory, ShoppingBag
+//   Mail, Phone, MapPin, ChevronDown, ChevronUp, CheckCircle2, Store, Factory, ShoppingBag, Truck,
+//   AlertTriangle, Loader2, ShieldCheck, XCircle
 // } from 'lucide-react';
 // import { productCategories } from '../../categories/productCategories';
+// import InspectionPaymentButton from './InspectionButton';
+// // Order matters here — index position defines seniority in the supply chain
+// // (0 = most upstream, higher index = further downstream toward the end customer)
+// const HIERARCHY = ['manufacturer', 'distributor', 'wholesaler', 'retailer'];
 
 // const SELLER_TYPES = [
-//   { id: 'manufacturer', label: 'Manufacturer', icon: Factory, desc: 'I produce goods', color: 'blue' },
+//   { id: 'manufacturer', label: 'Manufacturer/Importer', icon: Factory, desc: 'I produce or import goods', color: 'blue' },
+//   { id: 'distributor', label: 'Distributor', icon: Truck, desc: 'I distribute goods', color: 'indigo' },
 //   { id: 'wholesaler', label: 'Wholesaler', icon: Store, desc: 'I sell in bulk', color: 'violet' },
 //   { id: 'retailer', label: 'Retailer', icon: ShoppingBag, desc: 'I sell to end users', color: 'emerald' },
 // ];
 
 // const COLOR_MAP = {
 //   blue: { active: 'border-blue-400 bg-blue-50', icon: 'bg-blue-100 text-blue-600', text: 'text-blue-700', check: 'text-blue-500' },
+//   indigo: { active: 'border-indigo-400 bg-indigo-50', icon: 'bg-indigo-100 text-indigo-600', text: 'text-indigo-700', check: 'text-indigo-500' },
 //   violet: { active: 'border-violet-400 bg-violet-50', icon: 'bg-violet-100 text-violet-600', text: 'text-violet-700', check: 'text-violet-500' },
 //   emerald: { active: 'border-emerald-400 bg-emerald-50', icon: 'bg-emerald-100 text-emerald-600', text: 'text-emerald-700', check: 'text-emerald-500' },
 // };
+
+// const ALL_RELATIONSHIP_OPTIONS = ['manufacturer', 'distributor', 'wholesaler', 'retailer'];
+
+// // Returns the relationship options a seller is allowed to add to their distribution
+// // network, based on the most senior (most upstream) role they've selected for
+// // themselves. E.g. a wholesaler can't add a manufacturer or distributor — only
+// // wholesaler, retailer, and agent remain available.
+// function getAllowedRelationshipOptions(sellerTypes) {
+//   if (!sellerTypes || sellerTypes.length === 0) return ALL_RELATIONSHIP_OPTIONS;
+
+//   const indices = sellerTypes
+//     .map((t) => HIERARCHY.indexOf(t))
+//     .filter((i) => i !== -1);
+
+//   if (indices.length === 0) return ALL_RELATIONSHIP_OPTIONS;
+
+//   const minIndex = Math.min(...indices);
+
+//   return ALL_RELATIONSHIP_OPTIONS.filter((opt) => {
+//     const idx = HIERARCHY.indexOf(opt);
+//     if (idx === -1) return true; // 'agent' isn't ranked, always allowed
+//     return idx >= minIndex;
+//   });
+// }
 
 // function SectionCard({ title, subtitle, children }) {
 //   return (
@@ -56,18 +88,30 @@
 //     shopName: '',
 //     shopDescription: '',
 //     market: '',
-//     bankDetails: {  
+//     bankDetails: {
 //       bankName: '',
+//       bankCode: '',
 //       accountNumber: '',
 //       accountName: '',
 //     }
 //   });
+//   const [showCustomMarket, setShowCustomMarket] = useState(false);
 //   const [sellerChain, setSellerChain] = useState([]);
 //   const [editingChainIndex, setEditingChainIndex] = useState(null);
 //   const [chainForm, setChainForm] = useState({ businessName: '', email: '', phoneNumber: '', address: '', relationship: 'wholesaler' });
 //   const [loading, setLoading] = useState(false);
 //   const [initialLoading, setInitialLoading] = useState(true);
 //   const [showChainForm, setShowChainForm] = useState(false);
+
+//   // ---- Paystack bank verification state ----
+//   const [banks, setBanks] = useState([]);
+//   const [banksLoading, setBanksLoading] = useState(true);
+//   const [banksError, setBanksError] = useState(false);
+//   const [verifyingAccount, setVerifyingAccount] = useState(false);
+//   const [accountVerified, setAccountVerified] = useState(false);
+//   const [verifyError, setVerifyError] = useState('');
+//   const verifyTimeoutRef = useRef(null);
+//   const verifyRequestIdRef = useRef(0);
 
 //   useEffect(() => {
 //     const fetchSellerProfile = async () => {
@@ -78,24 +122,65 @@
 //         const data = await res.json();
 //         console.log("Seller Profile Data:", data);
 //         if (data.success && data.sellerProfile) {
+//           const marketVal = data.sellerProfile.market || '';
+//           const isKnownMarket = lagosMarkets.some((m) => m.name === marketVal);
+//           setShowCustomMarket(marketVal !== '' && !isKnownMarket);
+
+//           const savedBankDetails = {
+//             bankName: data.sellerProfile.bankDetails?.bankName || '',
+//             bankCode: data.sellerProfile.bankDetails?.bankCode || '',
+//             accountNumber: data.sellerProfile.bankDetails?.accountNumber || '',
+//             accountName: data.sellerProfile.bankDetails?.accountName || '',
+//           };
+
 //           setFormData({
 //             sellerTypes: data.sellerProfile.sellerTypes || [],
 //             productCategories: data.sellerProfile.productCategories || [],
 //             shopName: data.sellerProfile.shopName || '',
 //             shopDescription: data.sellerProfile.shopDescription || '',
-//             market: data.sellerProfile.market || '',
-//               bankDetails: {
-//       bankName: data.sellerProfile.bankDetails?.bankName || '',
-//       accountNumber: data.sellerProfile.bankDetails?.accountNumber || '',
-//       accountName: data.sellerProfile.bankDetails?.accountName || '',
-//     }
+//             market: marketVal,
+//             bankDetails: savedBankDetails,
 //           });
 //           setSellerChain(data.sellerProfile.sellerChain || []);
+
+//           // If we're loading a profile that already has a verified-looking
+//           // account (all three fields present), treat it as verified so we
+//           // don't immediately show the "unverified" warning on page load.
+//           if (savedBankDetails.bankCode && savedBankDetails.accountNumber?.length >= 10 && savedBankDetails.accountName) {
+//             setAccountVerified(true);
+//           }
 //         }
 //       } catch (err) { console.error(err); }
 //       finally { setInitialLoading(false); }
 //     };
 //     fetchSellerProfile();
+//   }, []);
+
+//   // Fetch the list of Nigerian banks (name + Paystack bank code) from our
+//   // backend, which proxies Paystack's /bank endpoint since it requires the
+//   // secret key.
+//   useEffect(() => {
+//     const fetchBanks = async () => {
+//       setBanksLoading(true);
+//       setBanksError(false);
+//       try {
+//         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/banks`, {
+//           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+//         });
+//         const data = await res.json();
+//         if (data.success) {
+//           setBanks(data.banks || []);
+//         } else {
+//           setBanksError(true);
+//         }
+//       } catch (err) {
+//         console.error(err);
+//         setBanksError(true);
+//       } finally {
+//         setBanksLoading(false);
+//       }
+//     };
+//     fetchBanks();
 //   }, []);
 
 //   const toggleSellerType = (type) => setFormData(prev => ({
@@ -108,7 +193,31 @@
 //     productCategories: prev.productCategories.includes(id) ? prev.productCategories.filter(c => c !== id) : [...prev.productCategories, id]
 //   }));
 
+//   const handleMarketSelectChange = (e) => {
+//     const val = e.target.value;
+//     if (val === 'Others') {
+//       setShowCustomMarket(true);
+//       setFormData({ ...formData, market: '' });
+//     } else {
+//       setShowCustomMarket(false);
+//       setFormData({ ...formData, market: val });
+//     }
+//   };
+
 //   const handleChainChange = (e) => setChainForm({ ...chainForm, [e.target.name]: e.target.value });
+
+//   // Relationship options allowed for this seller's distribution network,
+//   // filtered based on the seller's own selected roles.
+//   const allowedRelationshipOptions = getAllowedRelationshipOptions(formData.sellerTypes);
+
+//   const openAddChainForm = () => {
+//     setChainForm({
+//       businessName: '', email: '', phoneNumber: '', address: '',
+//       relationship: allowedRelationshipOptions[0] || 'retailer',
+//     });
+//     setEditingChainIndex(null);
+//     setShowChainForm(true);
+//   };
 
 //   const addOrUpdateChain = async () => {
 //     if (!chainForm.businessName || !chainForm.email) { toast.error("Business name and email are required"); return; }
@@ -137,7 +246,7 @@
 //         const profileData = await profileRes.json();
 //         if (profileData.success) setSellerChain(profileData.sellerProfile.sellerChain || []);
 //         setEditingChainIndex(null);
-//         setChainForm({ businessName: '', email: '', phoneNumber: '', address: '', relationship: 'wholesaler' });
+//         setChainForm({ businessName: '', email: '', phoneNumber: '', address: '', relationship: allowedRelationshipOptions[0] || 'retailer' });
 //         setShowChainForm(false);
 //       } else { toast.error(data.message || "Operation failed"); }
 //     } catch { toast.error("Something went wrong"); }
@@ -165,8 +274,101 @@
 //     finally { setLoading(false); }
 //   };
 
+//   // ---- Bank details handlers ----
+
+//   const handleBankSelectChange = (e) => {
+//     const code = e.target.value;
+//     const selected = banks.find((b) => b.code === code);
+//     setAccountVerified(false);
+//     setVerifyError('');
+//     setFormData(prev => ({
+//       ...prev,
+//       bankDetails: {
+//         ...prev.bankDetails,
+//         bankCode: code,
+//         bankName: selected ? selected.name : '',
+//         accountName: '', // bank changed — any previously resolved name is stale
+//       }
+//     }));
+//   };
+
+//   const handleAccountNumberChange = (e) => {
+//     // Paystack account numbers are numeric NUBAN, 10 digits
+//     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+//     setAccountVerified(false);
+//     setVerifyError('');
+//     setFormData(prev => ({
+//       ...prev,
+//       bankDetails: { ...prev.bankDetails, accountNumber: val, accountName: '' }
+//     }));
+//   };
+
+//   // Debounced auto-verification: fires 600ms after the seller stops typing,
+//   // once we have both a 10-digit account number and a selected bank.
+//   useEffect(() => {
+//     const { bankCode, accountNumber } = formData.bankDetails;
+
+//     if (verifyTimeoutRef.current) clearTimeout(verifyTimeoutRef.current);
+
+//     if (!bankCode || accountNumber.length !== 10) {
+//       setVerifyingAccount(false);
+//       return;
+//     }
+
+//     verifyTimeoutRef.current = setTimeout(() => {
+//       verifyAccount(bankCode, accountNumber);
+//     }, 600);
+
+//     return () => clearTimeout(verifyTimeoutRef.current);
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [formData.bankDetails.bankCode, formData.bankDetails.accountNumber]);
+
+//   const verifyAccount = async (bankCode, accountNumber) => {
+//     const requestId = ++verifyRequestIdRef.current;
+//     setVerifyingAccount(true);
+//     setVerifyError('');
+//     try {
+//       const res = await fetch(
+//         `${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-account?accountNumber=${accountNumber}&bankCode=${bankCode}`,
+//         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+//       );
+//       const data = await res.json();
+
+//       // Ignore stale responses if the seller kept typing/changed bank
+//       if (requestId !== verifyRequestIdRef.current) return;
+
+//       if (data.success && data.accountName) {
+//         setFormData(prev => ({
+//           ...prev,
+//           bankDetails: { ...prev.bankDetails, accountName: data.accountName }
+//         }));
+//         setAccountVerified(true);
+//       } else {
+//         setAccountVerified(false);
+//         setVerifyError(data.message || "Couldn't verify this account number. Double-check it and the bank.");
+//       }
+//     } catch (err) {
+//       if (requestId !== verifyRequestIdRef.current) return;
+//       console.error(err);
+//       setAccountVerified(false);
+//       setVerifyError("Couldn't reach the verification service. Try again.");
+//     } finally {
+//       if (requestId === verifyRequestIdRef.current) setVerifyingAccount(false);
+//     }
+//   };
+
+//   const bankDetailsIncomplete = !formData.bankDetails.bankCode
+//     || formData.bankDetails.accountNumber.length !== 10
+//     || !formData.bankDetails.accountName
+//     || !accountVerified;
+
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
+
+//     if (bankDetailsIncomplete) {
+//       toast.error("Add and verify your bank account before saving, or orders will pay out to the estore's default account.");
+//     }
+
 //     setLoading(true);
 //     try {
 //       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/profile`, {
@@ -182,8 +384,6 @@
 //   };
 
 //   if (initialLoading) return <Loading text="Loading seller profile..." />;
-
-//   const RELATIONSHIP_OPTIONS = ['manufacturer', 'wholesaler', 'distributor', 'retailer', 'agent'];
 
 //   return (
 //     <div className="w-full px-0 py-2 pb-10">
@@ -202,7 +402,7 @@
 
 //         {/* Seller Type */}
 //         <SectionCard title="I am a..." subtitle="Select all roles that apply to you">
-//           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+//           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 //             {SELLER_TYPES.map(({ id, label, icon: Icon, desc, color }) => {
 //               const isActive = formData.sellerTypes.includes(id);
 //               const c = COLOR_MAP[color];
@@ -235,8 +435,8 @@
 //         Market Location
 //       </label>
 //       <select
-//         value={formData.market}
-//         onChange={(e) => setFormData({ ...formData, market: e.target.value })}
+//         value={showCustomMarket ? 'Others' : formData.market}
+//         onChange={handleMarketSelectChange}
 //         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all bg-white"
 //       >
 //         <option value="">Select Market (Optional)</option>
@@ -245,7 +445,20 @@
 //             {market.name} — {market.location}
 //           </option>
 //         ))}
+//         <option value="Others">Others (type your own)</option>
 //       </select>
+
+//       {showCustomMarket && (
+//         <input
+//           type="text"
+//           autoFocus
+//           value={formData.market}
+//           onChange={(e) => setFormData({ ...formData, market: e.target.value })}
+//           placeholder="Enter your market/location"
+//           className="w-full mt-2 px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all"
+//         />
+//       )}
+
 //       <p className="text-xs text-gray-400 mt-1.5">
 //         Where is your shop located? (Ladipo, Computer Village, Alaba, etc.)
 //       </p>
@@ -299,49 +512,97 @@
 //         </SectionCard>
 
 //         {/* ==================== BANK DETAILS ==================== */}
-// <SectionCard 
-//   title="Bank Information" 
-//   subtitle="For receiving payments from sales"
+// <SectionCard
+//   title="Bank Information"
+//   subtitle="For receiving payments from sales — verified via Paystack"
 // >
+//   {/* Persistent warning if bank details aren't complete + verified */}
+//   {bankDetailsIncomplete && (
+//     <div className="mb-4 flex items-start gap-2.5 p-3.5 rounded-xl border border-amber-200 bg-amber-50">
+//       <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+//       <p className="text-xs text-amber-700 leading-relaxed">
+//         <span className="font-bold">No verified account on file.</span> Until you add and verify a bank
+//         account, payments for goods ordered from your store will be settled into the estore's default
+//         account instead of yours.
+//       </p>
+//     </div>
+//   )}
+
 //   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-//     <InputField 
-//       label="Bank Name" 
-//       type="text" 
-//       value={formData.bankDetails.bankName}
-//       onChange={(e) => setFormData(prev => ({
-//         ...prev,
-//         bankDetails: { ...prev.bankDetails, bankName: e.target.value }
-//       }))}
-//       placeholder="e.g. GTBank, Zenith Bank"
-//     />
+//     {/* Bank Name — select from Paystack's bank list */}
+//     <div>
+//       <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Bank Name</label>
+//       <select
+//         value={formData.bankDetails.bankCode}
+//         onChange={handleBankSelectChange}
+//         disabled={banksLoading}
+//         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all bg-white disabled:opacity-50"
+//       >
+//         <option value="">{banksLoading ? 'Loading banks...' : 'Select your bank'}</option>
+//         {banks.map((bank) => (
+//           <option key={bank.code} value={bank.code}>{bank.name}</option>
+//         ))}
+//       </select>
+//       {banksError && (
+//         <p className="text-xs text-red-500 mt-1.5">Couldn't load the bank list. Refresh the page to try again.</p>
+//       )}
+//     </div>
 
-//     <InputField 
-//       label="Account Number" 
-//       type="text" 
-//       // maxLength={10}
-//       value={formData.bankDetails.accountNumber}
-//       onChange={(e) => setFormData(prev => ({
-//         ...prev,
-//         bankDetails: { ...prev.bankDetails, accountNumber: e.target.value }
-//       }))}
-//       placeholder="0123456789"
-//     />
+//     {/* Account Number */}
+//     <div>
+//       <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Account Number</label>
+//       <div className="relative">
+//         <input
+//           type="text"
+//           inputMode="numeric"
+//           value={formData.bankDetails.accountNumber}
+//           onChange={handleAccountNumberChange}
+//           disabled={!formData.bankDetails.bankCode}
+//           placeholder="0123456789"
+//           className="w-full px-4 py-3 pr-10 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all disabled:opacity-50"
+//         />
+//         <div className="absolute right-3 top-1/2 -translate-y-1/2">
+//           {verifyingAccount && <Loader2 size={16} className="text-gray-400 animate-spin" />}
+//           {!verifyingAccount && accountVerified && <ShieldCheck size={16} className="text-emerald-500" />}
+//           {!verifyingAccount && !accountVerified && verifyError && <XCircle size={16} className="text-red-400" />}
+//         </div>
+//       </div>
+//       {!formData.bankDetails.bankCode && (
+//         <p className="text-xs text-gray-400 mt-1.5">Select a bank first</p>
+//       )}
+//     </div>
 
+//     {/* Account Name — auto-filled and read-only, resolved by Paystack */}
 //     <div className="sm:col-span-2">
-//       <InputField 
-//         label="Account Name" 
-//         type="text" 
-//         value={formData.bankDetails.accountName}
-//         onChange={(e) => setFormData(prev => ({
-//           ...prev,
-//           bankDetails: { ...prev.bankDetails, accountName: e.target.value }
-//         }))}
-//         placeholder="Account name as registered on bank"
+//       <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Account Name</label>
+//       <input
+//         type="text"
+//         readOnly
+//         value={
+//           verifyingAccount
+//             ? 'Verifying...'
+//             : formData.bankDetails.accountName || ''
+//         }
+//         placeholder="Auto-filled once your account number is verified"
+//         className={`w-full px-4 py-3 rounded-xl border text-sm placeholder-gray-300 transition-all cursor-not-allowed ${
+//           accountVerified
+//             ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold'
+//             : 'border-gray-200 bg-gray-50 text-gray-500'
+//         }`}
 //       />
+//       {accountVerified && (
+//         <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1">
+//           <ShieldCheck size={12} /> Verified with Paystack
+//         </p>
+//       )}
+//       {!accountVerified && verifyError && (
+//         <p className="text-xs text-red-500 mt-1.5">{verifyError}</p>
+//       )}
 //     </div>
 //   </div>
+
 //   <p className="text-xs text-amber-600 mt-3">
-//     ⚠️ Ensure account details are correct. This will be used for settlements.
+//     ⚠️ This account name is resolved automatically and can't be edited — it must match what Paystack has on file for the account number and bank you select. This is what settlements will be paid into.
 //   </p>
 // </SectionCard>
 
@@ -380,7 +641,7 @@
 //           {!showChainForm ? (
 //             <button
 //               type="button"
-//               onClick={() => setShowChainForm(true)}
+//               onClick={openAddChainForm}
 //               className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-semibold text-gray-400 hover:border-[#8B1E3F] hover:text-[#8B1E3F] hover:bg-rose-50 transition-all flex items-center justify-center gap-2"
 //             >
 //               <Plus size={15} />
@@ -394,7 +655,7 @@
 //                 </p>
 //                 <button
 //                   type="button"
-//                   onClick={() => { setShowChainForm(false); setEditingChainIndex(null); setChainForm({ businessName: '', email: '', phoneNumber: '', address: '', relationship: 'wholesaler' }); }}
+//                   onClick={() => { setShowChainForm(false); setEditingChainIndex(null); setChainForm({ businessName: '', email: '', phoneNumber: '', address: '', relationship: allowedRelationshipOptions[0] || 'retailer' }); }}
 //                   className="text-xs text-gray-400 hover:text-gray-600"
 //                 >
 //                   Cancel
@@ -414,10 +675,13 @@
 //                     onChange={handleChainChange}
 //                     className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all bg-white"
 //                   >
-//                     {RELATIONSHIP_OPTIONS.map(r => (
+//                     {allowedRelationshipOptions.map(r => (
 //                       <option key={r} value={r} className="capitalize">{r.charAt(0).toUpperCase() + r.slice(1)}</option>
 //                     ))}
 //                   </select>
+//                   <p className="text-xs text-gray-400 mt-1.5">
+//                     Only roles at or below your own level in the supply chain are shown.
+//                   </p>
 //                 </div>
 //               </div>
 
@@ -475,29 +739,21 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import appConfig from '../../config/AppConfig';
 import Loading from '../../config/Loading';
 import {lagosMarkets} from "../../categories/locationCategories"
 import { toast } from 'sonner';
 import {
   Users, Save, Edit2, Trash2, Plus, Building2,
-  Mail, Phone, MapPin, ChevronDown, ChevronUp, CheckCircle2, Store, Factory, ShoppingBag, Truck
+  Mail, Phone, MapPin, ChevronDown, ChevronUp, CheckCircle2, Store, Factory, ShoppingBag, Truck,
+  AlertTriangle, Loader2, ShieldCheck, XCircle
 } from 'lucide-react';
 import { productCategories } from '../../categories/productCategories';
+import InspectionPaymentButton from './InspectionButton';
+import ScrollingNoticeBanner from '../../config/scrollingNotice';
+import CautionBanner from '../../config/cautionBanner';
+
 
 // Order matters here — index position defines seniority in the supply chain
 // (0 = most upstream, higher index = further downstream toward the end customer)
@@ -572,8 +828,9 @@ export default function SellerProfileSetup() {
     shopName: '',
     shopDescription: '',
     market: '',
-    bankDetails: {  
+    bankDetails: {
       bankName: '',
+      bankCode: '',
       accountNumber: '',
       accountName: '',
     }
@@ -585,6 +842,22 @@ export default function SellerProfileSetup() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [showChainForm, setShowChainForm] = useState(false);
+
+  // ---- Inspection payment / verification badges ----
+  const [sellerEmail, setSellerEmail] = useState('');
+  const [inspectionPaid, setInspectionPaid] = useState(false);
+  const [addressVerified, setAddressVerified] = useState(false);
+  const [isSuperVerify, setIsSuperVerify] = useState(false);
+
+  // ---- Paystack bank verification state ----
+  const [banks, setBanks] = useState([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [banksError, setBanksError] = useState(false);
+  const [verifyingAccount, setVerifyingAccount] = useState(false);
+  const [accountVerified, setAccountVerified] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
+  const verifyTimeoutRef = useRef(null);
+  const verifyRequestIdRef = useRef(0);
 
   useEffect(() => {
     const fetchSellerProfile = async () => {
@@ -599,24 +872,68 @@ export default function SellerProfileSetup() {
           const isKnownMarket = lagosMarkets.some((m) => m.name === marketVal);
           setShowCustomMarket(marketVal !== '' && !isKnownMarket);
 
+          const savedBankDetails = {
+            bankName: data.sellerProfile.bankDetails?.bankName || '',
+            bankCode: data.sellerProfile.bankDetails?.bankCode || '',
+            accountNumber: data.sellerProfile.bankDetails?.accountNumber || '',
+            accountName: data.sellerProfile.bankDetails?.accountName || '',
+          };
+
           setFormData({
             sellerTypes: data.sellerProfile.sellerTypes || [],
             productCategories: data.sellerProfile.productCategories || [],
             shopName: data.sellerProfile.shopName || '',
             shopDescription: data.sellerProfile.shopDescription || '',
             market: marketVal,
-              bankDetails: {
-      bankName: data.sellerProfile.bankDetails?.bankName || '',
-      accountNumber: data.sellerProfile.bankDetails?.accountNumber || '',
-      accountName: data.sellerProfile.bankDetails?.accountName || '',
-    }
+            bankDetails: savedBankDetails,
           });
           setSellerChain(data.sellerProfile.sellerChain || []);
+
+          // Adjust this to wherever your API actually returns the seller's
+          // email from (top-level user object, data.user.email, etc.)
+          setSellerEmail(data.user?.email || data.email || data.user.alternateContact || '');
+          setInspectionPaid(Boolean(data.sellerProfile.inspectionPayment?.paid));
+          setAddressVerified(Boolean(data.sellerProfile.addressVerified));
+          setIsSuperVerify(Boolean(data.sellerProfile.isSuperVerify));
+
+          // If we're loading a profile that already has a verified-looking
+          // account (all three fields present), treat it as verified so we
+          // don't immediately show the "unverified" warning on page load.
+          if (savedBankDetails.bankCode && savedBankDetails.accountNumber?.length >= 10 && savedBankDetails.accountName) {
+            setAccountVerified(true);
+          }
         }
       } catch (err) { console.error(err); }
       finally { setInitialLoading(false); }
     };
     fetchSellerProfile();
+  }, []);
+
+  // Fetch the list of Nigerian banks (name + Paystack bank code) from our
+  // backend, which proxies Paystack's /bank endpoint since it requires the
+  // secret key.
+  useEffect(() => {
+    const fetchBanks = async () => {
+      setBanksLoading(true);
+      setBanksError(false);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/banks`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setBanks(data.banks || []);
+        } else {
+          setBanksError(true);
+        }
+      } catch (err) {
+        console.error(err);
+        setBanksError(true);
+      } finally {
+        setBanksLoading(false);
+      }
+    };
+    fetchBanks();
   }, []);
 
   const toggleSellerType = (type) => setFormData(prev => ({
@@ -710,8 +1027,101 @@ export default function SellerProfileSetup() {
     finally { setLoading(false); }
   };
 
+  // ---- Bank details handlers ----
+
+  const handleBankSelectChange = (e) => {
+    const code = e.target.value;
+    const selected = banks.find((b) => b.code === code);
+    setAccountVerified(false);
+    setVerifyError('');
+    setFormData(prev => ({
+      ...prev,
+      bankDetails: {
+        ...prev.bankDetails,
+        bankCode: code,
+        bankName: selected ? selected.name : '',
+        accountName: '', // bank changed — any previously resolved name is stale
+      }
+    }));
+  };
+
+  const handleAccountNumberChange = (e) => {
+    // Paystack account numbers are numeric NUBAN, 10 digits
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setAccountVerified(false);
+    setVerifyError('');
+    setFormData(prev => ({
+      ...prev,
+      bankDetails: { ...prev.bankDetails, accountNumber: val, accountName: '' }
+    }));
+  };
+
+  // Debounced auto-verification: fires 600ms after the seller stops typing,
+  // once we have both a 10-digit account number and a selected bank.
+  useEffect(() => {
+    const { bankCode, accountNumber } = formData.bankDetails;
+
+    if (verifyTimeoutRef.current) clearTimeout(verifyTimeoutRef.current);
+
+    if (!bankCode || accountNumber.length !== 10) {
+      setVerifyingAccount(false);
+      return;
+    }
+
+    verifyTimeoutRef.current = setTimeout(() => {
+      verifyAccount(bankCode, accountNumber);
+    }, 600);
+
+    return () => clearTimeout(verifyTimeoutRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.bankDetails.bankCode, formData.bankDetails.accountNumber]);
+
+  const verifyAccount = async (bankCode, accountNumber) => {
+    const requestId = ++verifyRequestIdRef.current;
+    setVerifyingAccount(true);
+    setVerifyError('');
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-account?accountNumber=${accountNumber}&bankCode=${bankCode}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      const data = await res.json();
+
+      // Ignore stale responses if the seller kept typing/changed bank
+      if (requestId !== verifyRequestIdRef.current) return;
+
+      if (data.success && data.accountName) {
+        setFormData(prev => ({
+          ...prev,
+          bankDetails: { ...prev.bankDetails, accountName: data.accountName }
+        }));
+        setAccountVerified(true);
+      } else {
+        setAccountVerified(false);
+        setVerifyError(data.message || "Couldn't verify this account number. Double-check it and the bank.");
+      }
+    } catch (err) {
+      if (requestId !== verifyRequestIdRef.current) return;
+      console.error(err);
+      setAccountVerified(false);
+      setVerifyError("Couldn't reach the verification service. Try again.");
+    } finally {
+      if (requestId === verifyRequestIdRef.current) setVerifyingAccount(false);
+    }
+  };
+
+  const bankDetailsIncomplete = !formData.bankDetails.bankCode
+    || formData.bankDetails.accountNumber.length !== 10
+    || !formData.bankDetails.accountName
+    || !accountVerified;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (bankDetailsIncomplete) {
+      toast.error("Add and verify your bank account before saving, or orders will pay out to the estore's default account.");
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/profile`, {
@@ -730,18 +1140,44 @@ export default function SellerProfileSetup() {
 
   return (
     <div className="w-full px-0 py-2 pb-10">
+  
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 px-1">
-        <div className="w-10 h-10 rounded-xl bg-[#8B1E3F] flex items-center justify-center flex-shrink-0">
-          <Users size={18} className="text-white" />
+      <div className="flex items-start justify-between gap-3 mb-6 px-1 flex-wrap">
+            <CautionBanner />
+        <div className="flex items-center gap-3">
+            
+          <div className="w-10 h-10 rounded-xl bg-[#8B1E3F] flex items-center justify-center flex-shrink-0">
+            <Users size={18} className="text-white" />
+          </div>
+      
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 leading-tight">Seller Profile</h1>
+            <p className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+              <span>Manage your seller identity & distribution network</span>
+              {addressVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold">
+                  <CheckCircle2 size={10} /> Address Verified
+                </span>
+              )}
+              {isSuperVerify && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 border border-violet-200 text-violet-600 text-[10px] font-bold">
+                  <ShieldCheck size={10} /> Super Verified
+                </span>
+              )}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">Seller Profile</h1>
-          <p className="text-xs text-gray-400">Manage your seller identity & distribution network</p>
-        </div>
+         
+
+        <InspectionPaymentButton
+          sellerEmail={sellerEmail}
+          paid={inspectionPaid}
+          onPaid={() => setInspectionPaid(true)}
+        />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
 
         {/* Seller Type */}
         <SectionCard title="I am a..." subtitle="Select all roles that apply to you">
@@ -855,49 +1291,97 @@ export default function SellerProfileSetup() {
         </SectionCard>
 
         {/* ==================== BANK DETAILS ==================== */}
-<SectionCard 
-  title="Bank Information" 
-  subtitle="For receiving payments from sales"
+<SectionCard
+  title="Bank Information"
+  subtitle="For receiving payments from sales — verified via Paystack"
 >
+  {/* Persistent warning if bank details aren't complete + verified */}
+  {bankDetailsIncomplete && (
+    <div className="mb-4 flex items-start gap-2.5 p-3.5 rounded-xl border border-amber-200 bg-amber-50">
+      <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+      <p className="text-xs text-amber-700 leading-relaxed">
+        <span className="font-bold">No verified account on file.</span> Until you add and verify a bank
+        account, payments for goods ordered from your store will be settled into the estore's default
+        account instead of yours.
+      </p>
+    </div>
+  )}
+
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <InputField 
-      label="Bank Name" 
-      type="text" 
-      value={formData.bankDetails.bankName}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        bankDetails: { ...prev.bankDetails, bankName: e.target.value }
-      }))}
-      placeholder="e.g. GTBank, Zenith Bank"
-    />
+    {/* Bank Name — select from Paystack's bank list */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Bank Name</label>
+      <select
+        value={formData.bankDetails.bankCode}
+        onChange={handleBankSelectChange}
+        disabled={banksLoading}
+        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all bg-white disabled:opacity-50"
+      >
+        <option value="">{banksLoading ? 'Loading banks...' : 'Select your bank'}</option>
+        {banks.map((bank) => (
+          <option key={bank.code} value={bank.code}>{bank.name}</option>
+        ))}
+      </select>
+      {banksError && (
+        <p className="text-xs text-red-500 mt-1.5">Couldn't load the bank list. Refresh the page to try again.</p>
+      )}
+    </div>
 
-    <InputField 
-      label="Account Number" 
-      type="text" 
-      // maxLength={10}
-      value={formData.bankDetails.accountNumber}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        bankDetails: { ...prev.bankDetails, accountNumber: e.target.value }
-      }))}
-      placeholder="0123456789"
-    />
+    {/* Account Number */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Account Number</label>
+      <div className="relative">
+        <input
+          type="text"
+          inputMode="numeric"
+          value={formData.bankDetails.accountNumber}
+          onChange={handleAccountNumberChange}
+          disabled={!formData.bankDetails.bankCode}
+          placeholder="0123456789"
+          className="w-full px-4 py-3 pr-10 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#8B1E3F] focus:ring-2 focus:ring-[#8B1E3F]/10 transition-all disabled:opacity-50"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          {verifyingAccount && <Loader2 size={16} className="text-gray-400 animate-spin" />}
+          {!verifyingAccount && accountVerified && <ShieldCheck size={16} className="text-emerald-500" />}
+          {!verifyingAccount && !accountVerified && verifyError && <XCircle size={16} className="text-red-400" />}
+        </div>
+      </div>
+      {!formData.bankDetails.bankCode && (
+        <p className="text-xs text-gray-400 mt-1.5">Select a bank first</p>
+      )}
+    </div>
 
+    {/* Account Name — auto-filled and read-only, resolved by Paystack */}
     <div className="sm:col-span-2">
-      <InputField 
-        label="Account Name" 
-        type="text" 
-        value={formData.bankDetails.accountName}
-        onChange={(e) => setFormData(prev => ({
-          ...prev,
-          bankDetails: { ...prev.bankDetails, accountName: e.target.value }
-        }))}
-        placeholder="Account name as registered on bank"
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Account Name</label>
+      <input
+        type="text"
+        readOnly
+        value={
+          verifyingAccount
+            ? 'Verifying...'
+            : formData.bankDetails.accountName || ''
+        }
+        placeholder="Auto-filled once your account number is verified"
+        className={`w-full px-4 py-3 rounded-xl border text-sm placeholder-gray-300 transition-all cursor-not-allowed ${
+          accountVerified
+            ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold'
+            : 'border-gray-200 bg-gray-50 text-gray-500'
+        }`}
       />
+      {accountVerified && (
+        <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1">
+          <ShieldCheck size={12} /> Verified with Paystack
+        </p>
+      )}
+      {!accountVerified && verifyError && (
+        <p className="text-xs text-red-500 mt-1.5">{verifyError}</p>
+      )}
     </div>
   </div>
+
   <p className="text-xs text-amber-600 mt-3">
-    ⚠️ Ensure account details are correct. This will be used for settlements.
+    ⚠️ This account name is resolved automatically and can't be edited — it must match what Paystack has on file for the account number and bank you select. This is what settlements will be paid into.
   </p>
 </SectionCard>
 

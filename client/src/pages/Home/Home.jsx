@@ -18,6 +18,9 @@ import { FlashSaleSection,
 import Food from "../../components/home/Food";
 import Footer from "../../components/Footer";
 import ProductVideoSection from "../../components/home/ProductVideoSection";
+import SellerAllReviews from "../order/AllReview";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -47,6 +50,19 @@ function TrustBar() {
 }
 
 export default function Home() {
+
+   const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        // slight delay lets the page finish rendering/layout first
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      }
+    }
+  }, [location]);
+
   return (
     <div className="bg-[#f4f4f6]  overflow-x-hidden">
       {/* Nav */}
@@ -73,6 +89,9 @@ export default function Home() {
 
 <Food/>
 <ProductVideoSection />
+<div id="seller-reviews">
+  <SellerAllReviews />
+</div>
 <CarParts/>
         <FlashSaleSection />
     <DiscountDealsSection />

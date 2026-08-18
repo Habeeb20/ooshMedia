@@ -1,4 +1,5 @@
 
+
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -340,6 +341,28 @@ bankDetails: {
     shopName: String,
     shopDescription: String,
     verifiedSeller: { type: Boolean, default: false },
+
+    // ==================== SUPER VERIFY / ADDRESS VERIFICATION ====================
+    // Higher trust tier, separate from the standard `verifiedSeller` badge above.
+    // Toggled manually by an admin — see updateSuperVerify controller.
+    isSuperVerify: { type: Boolean, default: false },
+
+    // Set true once an admin confirms the seller's physical address after
+    // a paid inspection. See inspectionPayment below + updateAddressVerification.
+    addressVerified: { type: Boolean, default: false },
+    addressVerifiedAt: Date,
+    addressVerifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // One-time ₦5,000 payment that unlocks the address-inspection request.
+    // Mirrors the inventoryAccess pattern above. `paid` is checked server-side
+    // to enforce one-time-only — see verifyInspectionPayment controller.
+    inspectionPayment: {
+      paid: { type: Boolean, default: false },
+      amount: Number,           // stored in Naira, e.g. 5000
+      reference: String,        // Paystack transaction reference
+      paystackTransactionId: String,
+      paidAt: Date,
+    },
   },
 
   // ==================== EMPLOYER PROFILE ====================
@@ -493,83 +516,3 @@ userSchema.index({ "businessProfile.businessName": "text" });
 userSchema.index({ "riderProfile.currentLocation": "2dsphere" });
 // userSchema.index({ "riderProfile.licensePlate": 1 });
 export default mongoose.model('User', userSchema);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

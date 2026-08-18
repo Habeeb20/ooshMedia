@@ -2,7 +2,7 @@
 import Product from '../../models/sellers/product.js';
 import mongoose from 'mongoose';
 import User from '../../models/user.js';
-
+import Review from '../../models/order/review.js';
 // Create Product
 
 /**
@@ -901,3 +901,20 @@ function escapeRegex(string) {
 
 
 
+
+
+
+
+
+export const getProductReviews = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const reviews = await Review.find({ product: productId })
+      .sort({ createdAt: -1 })
+      .select('userName rating comment createdAt');
+
+    res.json({ reviews });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

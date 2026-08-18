@@ -1,0 +1,98 @@
+# Checkout changes — pickup codes, transport fee, split settlement
+
+## Files
+- `services/distanceService.js` — new. Calls the Nigeria geo API to turn a seller/buyer
+  state+LGA into a distance, then a transport fee. Never throws — falls back to a local
+  Haversine calc, then to a flat assumed distance, so a geo API outage can never block checkout.
+- `services/paystackSplitService.js` — new. Decides which sellers qualify for direct
+  Paystack-split payout, and builds the dynamic `split` payload for `transaction/initialize`.
+- `models/order/SettlementHistory.js` — new collection. One row per money movement per
+  order (seller share / platform fee / transport fee), with destination, method, and status.
+  This is the "history for everything" you asked for — query it via the new
+  `GET /api/orders/:orderId/settlement-history` route.
+- `models/order/Order.js` — updated: `pickup.code` + `pickup.isCodeVerified` (mirrors the
+  existing delivery fields), `transportFee`, `transportFeeDetails`, `paystackSplitUsed`.
+  Also fixed a bug in the original file: the `pre('save')` hook never called `next()`,
+  which would hang every save.
+- `controllers/order/orderController.js` — updated checkout/verify/webhook/code-verify flow.
+
+## 1. One field to add to your User model
+Paystack **split** payments need a *subaccount* code (`ACCT_xxx`, created via the
+`/subaccount` endpoint), which is different from the `recipientCode` you already store for
+the old Transfer-based payout. Add it next to `recipientCode` inside `sellerProfile.bankDetails`:
+
+```js
+bankDetails: {
+  bankName: { type: String, required: false },
+  accountNumber: { type: String, required: false },
+  accountName: { type: String, required: false },
+  bankCode: String,
+  recipientCode: String,
+  subaccountCode: String,   // ← add this — Paystack subaccount code for split payouts
+  isVerified: { type: Boolean, default: false },
+  verifiedAt: { type: Date },
+},
+```
+
+A seller only gets paid **directly** at checkout if `sellerProfile.isSuperVerify === true`
+**and** `sellerProfile.bankDetails.subaccountCode` is set. Otherwise their share is left in
+your estore's main Paystack account (the one behind `PAYSTACK_SECRET_KEY`) — same account
+that always receives the platform fee and the transport fee.
+
+## 2. New route
+Add alongside your existing order routes:
+
+```js
+router.get('/:orderId/settlement-history', verifyToken, getOrderSettlementHistory);
+```
+
+(`verifyDeliveryCode` route stays exactly where it is — it now handles pickup codes too.)
+
+## 3. Env vars (all optional, sensible defaults shown)
+
+```
+DISTANCE_API_BASE_URL=https://nigeria.jamiuadewaleyusuf.com/api/v1
+TRANSPORT_BASE_FEE=500
+TRANSPORT_RATE_PER_KM=100
+TRANSPORT_MIN_FEE=500
+TRANSPORT_MAX_FEE=15000
+TRANSPORT_FALLBACK_DISTANCE_KM=20
+```
+
+## How it works, end to end
+
+**Checkout**
+1. A 4-digit code is now generated for *both* pickup and delivery orders (`pickup.code` or
+   `delivery.deliveryCode`) — the seller asks the buyer for it to release the order.
+2. If `fulfillmentType === 'delivery'`, the transport fee is computed per seller (a
+   multi-seller cart ships from multiple locations) using `buyer.state/lga` vs
+   `seller.state/lga`, summed, and added on top of the item subtotal into `order.totalAmount`.
+3. For online payment, we try to initialize the Paystack transaction with a dynamic `split`:
+   super-verified sellers with a subaccount code get a flat share equal to their
+   `sellerAmount` (in kobo); everything else (platform fee, transport fee, and any
+   non-eligible seller's share) simply isn't listed, so Paystack leaves it in your main
+   account. If building or sending that split-enabled request fails for any reason, we
+   silently retry a plain (non-split) initialize — checkout always completes either way.
+4. Every seller's share, the platform fee, and the transport fee are logged to
+   `SettlementHistory` as `pending` rows.
+
+**Payment verification (`verifyPayment` / webhook)**
+- Marks the order paid, awards loyalty, creates the `Transaction` record (unchanged), and
+  flips the pending `SettlementHistory` rows to `completed`, storing Paystack's own
+  `data.split` breakdown in `meta` for reconciliation. No manual Transfer call is needed here
+  — Paystack settles split shares automatically at charge time.
+
+**Pickup/delivery code verification**
+- Works for both fulfillment types now. If the order was pay-on-delivery/pay-on-pickup and
+  still unpaid, this is where sellers actually get paid: super-verified sellers with a
+  `recipientCode` get a Paystack Transfer, logged as `completed`/`failed`; everyone else's
+  share (and the transport fee, always) is logged as owed to the estore account.
+
+## Assumptions worth checking
+- Seller/buyer location is taken from `User.state` + `User.lga` (the only structured geo
+  fields on the schema) — `businessProfile.businessAddress` is free text and isn't used for
+  distance math.
+- Transport fee is `base + rate × distanceKm`, clamped to a min/max — tune via env vars.
+- For pay-on-delivery orders the transport fee never actually moves through Paystack (it's
+  cash), so it's recorded in history as `completed`/`cash_pending` for bookkeeping only —
+  you'll still need your own reconciliation process for cash collected in the field.

@@ -3,7 +3,7 @@ import User from "../models/user.js"
 
 
 import express from "express"
-import {adminLogin} from "../controllers/adminController.js"
+import {adminLogin, getInspectionSellers, updateAddressVerification, updateSuperVerify} from "../controllers/adminController.js"
 import { getDashboardData } from '../controllers/dashboardController.js';
 import { getAdminOverview,
   getAllUsersAdmin,
@@ -34,5 +34,8 @@ adminRouter.get('/orders', verifyToken, adminOnly, getAllOrdersAdmin);
 adminRouter.get('/posts', verifyToken, adminOnly, getAllPostsAdmin);
 adminRouter.get('/riders', verifyToken, adminOnly, getAllRidersAdmin);
 adminRouter.get('/sellers', verifyToken, adminOnly, getAllSellersAdmin);
+adminRouter.get('/sellers/inspections', verifyToken, adminOnly, getInspectionSellers);
+adminRouter.put('/sellers/:id/address-verify', verifyToken, adminOnly, updateAddressVerification);
+adminRouter.put('/sellers/:id/super-verify', verifyToken, adminOnly, updateSuperVerify);
 
 export default adminRouter;

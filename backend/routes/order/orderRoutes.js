@@ -4,7 +4,8 @@ import { verifyToken, sellerOnly } from '../../middleware/verifyToken.js';
 import {
   checkout, verifyPayment, paystackWebhook,
   verifyDeliveryCode, getBuyerOrders, getOrderById,
-  getSellerOrders
+  getSellerOrders,
+  estimateCheckout
 } from '../../controllers/order/orderController.js';
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post('/webhook', paystackWebhook);
 
 router.use(verifyToken);
+router.get('/estimate', estimateCheckout);   // ← add this
 router.post('/checkout', checkout);
 router.get('/verify-payment/:reference', verifyPayment);
 router.post('/:orderId/verify-delivery', verifyDeliveryCode);
@@ -20,5 +22,8 @@ router.get('/my', getBuyerOrders);
 router.get('/seller', sellerOnly, getSellerOrders);
 router.post('/:orderId/verify-delivery', verifyDeliveryCode);
 router.get('/:orderId', getOrderById);
+
+
+
 
 export default router;

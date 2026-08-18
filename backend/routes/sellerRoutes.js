@@ -17,23 +17,40 @@ import {
   createPurchaseHistory,
   updatePurchaseHistory,
   deletePurchaseHistory,
-  getPurchaseHistory
+  getPurchaseHistory,
+  sellerBanks,
+  verifyBanks
 
 } from '../controllers/sellerController.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import { initiateInventoryAccessPayment, verifyInventoryAccessPayment } from '../controllers/inventoryaccessController.js';
+import { verifyInspectionPayment } from '../controllers/Inspection.js';
 const router = express.Router();
+
+
+
 
 router.put('/profile', verifyToken, updateSellerProfile);
 router.get('/profile', verifyToken, getSellerProfile);
 
+// GET /api/seller/banks
+router.get('/banks', verifyToken, sellerBanks)
+
+// GET /api/seller/verify-account?accountNumber=...&bankCode=...
+router.get('/verify-account', verifyToken, verifyBanks)
 router.post('/chain', verifyToken, addSellerChain);
+
+  router.post('/inspection/verify', verifyToken, verifyInspectionPayment); // literal — near the top
+
+ 
+
+
 router.put('/chain/:chainId', verifyToken, editSellerChain);
 router.delete('/chain/:chainId', verifyToken, deleteSellerChain);
 
 router.get('/all', getAllSellers);
 
-router.get('/:id', getSellerById);
+
 
 // Seller Stats Routes
 router.post('/:sellerId/like', verifyToken, likeSeller);
@@ -70,5 +87,9 @@ router.get(
 
 router.post('/inventory-access/initiate', verifyToken, initiateInventoryAccessPayment);
 router.get('/inventory-access/verify', verifyToken, verifyInventoryAccessPayment)
+
+router.get('/:id', getSellerById);
+
+
 export default router;
 

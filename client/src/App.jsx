@@ -60,6 +60,8 @@ import HomePage from "./pages/others/food/FoodHomepage";
 import BlacklistedSellers from "./pages/BlacklistedUsers";
 import SellerStorefront from "./pages/others/food/foodSellerStorefront";
 import VideoGridPage from "./components/home/VideoGridPage";
+import ForgotPasswordFlow from "./pages/auth/Forgotpassword";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordpage";
 
 
 const App = () => {
@@ -184,6 +186,7 @@ const App = () => {
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/business/*" element={<FeedPage />} />
             <Route path="/food" element={<HomePage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
             

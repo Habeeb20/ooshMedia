@@ -1,10 +1,162 @@
 
 
-import { useState, useEffect } from 'react';
-import {useCart} from '../../context/cartContext'
-import { useNavigate } from 'react-router-dom';
+// import { useState, useEffect } from 'react';
+// import {useCart} from '../../context/cartContext'
+// import { useNavigate } from 'react-router-dom';
 
-import api from "../../config/api"
+// import api from "../../config/api"
+
+// export default function CheckoutPage() {
+//   const cartHook = useCart();
+//   const navigate = useNavigate();
+
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+
+//   const cart = cartHook?.cart || null;
+//   const cartTotal = cartHook?.cartTotal || 0;
+
+//   // Redirect if cart is empty
+//   useEffect(() => {
+//     if (cartHook && (!cart || cart.items?.length === 0)) {
+//       const timer = setTimeout(() => {
+//         navigate('/cart', { replace: true });
+//       }, 800);
+//       return () => clearTimeout(timer);
+//     }
+//   }, [cartHook, cart, navigate]);
+
+//   const handleCheckout = async () => {
+//     if (!cart || cart.items?.length === 0) return;
+
+//     setError('');
+//     setLoading(true);
+//     try {
+//       const { data } = await api.post('/api/orders/checkout');
+//       const { order, paymentUrl, deliveryCode } = data;
+
+//       if (deliveryCode) {
+//         sessionStorage.setItem('deliveryCode', deliveryCode);
+//         sessionStorage.setItem('orderId', order._id);
+//       }
+
+//       if (paymentUrl) {
+//         window.location.href = paymentUrl;
+//       } else {
+//         navigate(`/order/${order._id}`, { state: { deliveryCode, order } });
+//       }
+//     } catch (err) {
+//       setError(err.response?.data?.message || 'Checkout failed. Please try again.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   if (!cartHook) {
+//     return (
+//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//         <div className="text-center">
+//           <div className="animate-spin w-8 h-8 border-4 border-[#8B1E3F] border-t-transparent rounded-full mx-auto"></div>
+//           <p className="mt-4 text-gray-600">Loading...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (!cart || cart.items?.length === 0) {
+//     return (
+//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//         <div className="text-center">
+//           <p className="text-gray-600">Redirecting to cart...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const fulfillmentLabel = cart.fulfillmentType === 'delivery' ? 'Delivery' : 'Pickup';
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h1>
+
+//       <div className="max-w-lg mx-auto space-y-4">
+//         {/* Items */}
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-3">Items ({cart.items.length})</h2>
+//           {cart.items.map(item => (
+//             <div key={item.product} className="flex justify-between text-sm py-2 border-b last:border-b-0">
+//               <span className="text-gray-700">{item.name} × {item.quantity}</span>
+//               <span className="font-semibold">₦{(item.price * item.quantity).toLocaleString()}</span>
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Fulfillment & Payment sections same as before */}
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-2">Fulfillment</h2>
+//           <p className="text-sm text-gray-600">Method: <span className="font-medium">{fulfillmentLabel}</span></p>
+//           {cart.fulfillmentType === 'delivery' && cart.delivery?.address && (
+//             <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
+//           )}
+//           {cart.fulfillmentType === 'delivery' && (
+//             <div className="mt-3 bg-[#8B1E3F] rounded-xl p-3">
+//               <p className="text-xs text-[#8B1E3F] font-semibold">
+//                 📦 A 4-digit delivery code will be displayed after checkout.
+//               </p>
+//             </div>
+//           )}
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-5 shadow-sm">
+//           <h2 className="font-bold text-gray-700 mb-2">Payment</h2>
+//           <p className="text-sm text-gray-600">
+//             Method: <span className="font-medium capitalize">
+//               {cart.paymentMethod === 'online' ? 'Online (Paystack)' : 'Pay on Delivery'}
+//             </span>
+//           </p>
+//           <div className="mt-3 space-y-1 text-sm">
+//             <div className="flex justify-between text-gray-600">
+//               <span>Subtotal</span>
+//               <span>₦{cartTotal.toLocaleString()}</span>
+//             </div>
+//             <div className="flex justify-between font-bold text-gray-800 text-base border-t pt-2 mt-2">
+//               <span>Total</span>
+//               <span>₦{cartTotal.toLocaleString()}</span>
+//             </div>
+//           </div>
+//         </div>
+
+//         {error && <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>}
+
+//         <button
+//           onClick={handleCheckout}
+//           disabled={loading}
+//           className="w-full bg-[#8B1E3F] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#8B1E3F] disabled:opacity-50"
+//         >
+//           {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
+//         </button>
+
+//         <button onClick={() => navigate('/cart')} className="w-full text-gray-500 text-sm text-center py-2">
+//           ← Back to Cart
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+import { useState, useEffect } from 'react';
+import { useCart } from '../../context/cartContext';
+import { useNavigate } from 'react-router-dom';
+import api from "../../config/api";
 
 export default function CheckoutPage() {
   const cartHook = useCart();
@@ -12,6 +164,8 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [estimate, setEstimate] = useState(null);
+  const [estimateLoading, setEstimateLoading] = useState(true);
 
   const cart = cartHook?.cart || null;
   const cartTotal = cartHook?.cartTotal || 0;
@@ -26,6 +180,33 @@ export default function CheckoutPage() {
     }
   }, [cartHook, cart, navigate]);
 
+  // Fetch the real total (incl. transport fee + payout info) before the user pays
+  useEffect(() => {
+    if (!cart || cart.items?.length === 0) return;
+
+    let cancelled = false;
+    setEstimateLoading(true);
+
+    api.get('/api/orders/estimate')
+      .then(({ data }) => {
+        if (!cancelled) setEstimate(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.response?.data?.message || 'Could not calculate order total.');
+      })
+      .finally(() => {
+        if (!cancelled) setEstimateLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [cart]);
+
+  const transportFee = estimate?.transportFee || 0;
+  const finalTotal = estimate ? estimate.total : cartTotal;
+
+  // Does at least one seller in this order get paid instantly via split?
+  const hasSplitEligibleSeller = estimate?.sellerPayoutInfo?.some(s => s.eligibleForSplit) || false;
+
   const handleCheckout = async () => {
     if (!cart || cart.items?.length === 0) return;
 
@@ -33,17 +214,21 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       const { data } = await api.post('/api/orders/checkout');
-      const { order, paymentUrl, deliveryCode } = data;
+      const { order, paymentUrl, deliveryCode, pickupCode } = data;
 
       if (deliveryCode) {
         sessionStorage.setItem('deliveryCode', deliveryCode);
+        sessionStorage.setItem('orderId', order._id);
+      }
+      if (pickupCode) {
+        sessionStorage.setItem('pickupCode', pickupCode);
         sessionStorage.setItem('orderId', order._id);
       }
 
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        navigate(`/order/${order._id}`, { state: { deliveryCode, order } });
+        navigate(`/order/${order._id}`, { state: { deliveryCode, pickupCode, order } });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Checkout failed. Please try again.');
@@ -91,22 +276,40 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {/* Fulfillment & Payment sections same as before */}
+        {/* Fulfillment */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-2">Fulfillment</h2>
           <p className="text-sm text-gray-600">Method: <span className="font-medium">{fulfillmentLabel}</span></p>
           {cart.fulfillmentType === 'delivery' && cart.delivery?.address && (
             <p className="text-sm text-gray-600">Address: <span className="font-medium">{cart.delivery.address}</span></p>
           )}
+
           {cart.fulfillmentType === 'delivery' && (
-            <div className="mt-3 bg-[#8B1E3F] rounded-xl p-3">
+            <div className="mt-3 bg-[#fdf2f5] rounded-xl p-3 space-y-1">
               <p className="text-xs text-[#8B1E3F] font-semibold">
-                📦 A 4-digit delivery code will be displayed after checkout.
+                📦 A 4-digit delivery code will be shown after checkout.
+              </p>
+              {estimateLoading ? (
+                <p className="text-xs text-gray-500">Calculating delivery fee...</p>
+              ) : estimate?.transportFeeDetails ? (
+                <p className="text-xs text-gray-500">
+                  Delivery fee estimated at ~{estimate.transportFeeDetails.breakdown?.[0]?.distanceKm?.toFixed?.(1) ?? '—'}km
+                  from the seller ({estimate.transportFeeDetails.breakdown?.[0]?.source}).
+                </p>
+              ) : null}
+            </div>
+          )}
+
+          {cart.fulfillmentType === 'pickup' && (
+            <div className="mt-3 bg-[#fdf2f5] rounded-xl p-3">
+              <p className="text-xs text-[#8B1E3F] font-semibold">
+                🏬 A 4-digit pickup code will be shown after checkout.
               </p>
             </div>
           )}
         </div>
 
+        {/* Payment */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-2">Payment</h2>
           <p className="text-sm text-gray-600">
@@ -114,14 +317,35 @@ export default function CheckoutPage() {
               {cart.paymentMethod === 'online' ? 'Online (Paystack)' : 'Pay on Delivery'}
             </span>
           </p>
+
+          {cart.paymentMethod === 'online' && !estimateLoading && (
+            <p className="text-xs text-gray-500 mt-1">
+              {hasSplitEligibleSeller
+                ? '⚡ Verified sellers on this order are paid instantly via secure split payment.'
+                : 'Funds are held securely and settled to the seller after delivery is confirmed.'}
+            </p>
+          )}
+
           <div className="mt-3 space-y-1 text-sm">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal</span>
               <span>₦{cartTotal.toLocaleString()}</span>
             </div>
+
+            {cart.fulfillmentType === 'delivery' && (
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery fee</span>
+                <span>
+                  {estimateLoading ? 'Calculating...' : `₦${transportFee.toLocaleString()}`}
+                </span>
+              </div>
+            )}
+
             <div className="flex justify-between font-bold text-gray-800 text-base border-t pt-2 mt-2">
               <span>Total</span>
-              <span>₦{cartTotal.toLocaleString()}</span>
+              <span>
+                {estimateLoading ? '...' : `₦${finalTotal.toLocaleString()}`}
+              </span>
             </div>
           </div>
         </div>
@@ -130,8 +354,8 @@ export default function CheckoutPage() {
 
         <button
           onClick={handleCheckout}
-          disabled={loading}
-          className="w-full bg-[#8B1E3F] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#8B1E3F] disabled:opacity-50"
+          disabled={loading || estimateLoading}
+          className="w-full bg-[#8B1E3F] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#7a1a37] disabled:opacity-50"
         >
           {loading ? 'Processing...' : cart.paymentMethod === 'online' ? 'Pay Now →' : 'Place Order →'}
         </button>

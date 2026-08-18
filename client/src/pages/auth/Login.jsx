@@ -218,6 +218,7 @@ export default function Login() {
       setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
+    
   }, [resendCooldown]);
 
   const completeLogin = (token, user) => {
@@ -633,6 +634,14 @@ if (redirectTo) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 
 
 
