@@ -47,6 +47,8 @@ import RidersTable from '../../components/admin/RiderTable.jsx';
 import SellersTable from '../../components/admin/SellerTable.jsx';
 import AdminReports from "../../components/admin/AdminReports.jsx";
 import AdminInspectionList from "../../components/admin/AdminInspectionList.jsx";
+import AdminSettlements from "../../components/admin/AdminSettlement.jsx";
+import AdminPlatformFeeTracker from "../../components/AdminPlatformfee.jsx";
 // import RewardRules from './RewardRules';
 // import Reports from './Reports';
 
@@ -81,6 +83,8 @@ const NAV = [
   { key: "posts", label: "Posts", icon: FileText },
   { key: "reports", label: "Reports", icon: FileText },
   { key: "inspection", label: "Inspection Verification", icon: FileText },
+  { key: "settlement", label: "Settlement", icon: FileText },
+  { key: "platformFee", label: "Admin platform fee tracker", icon: FileText },
 ];
 
 export default function AdminDashboard() {
@@ -211,6 +215,8 @@ export default function AdminDashboard() {
           {active === "orders" && <OrdersTable />}
           {active === "posts" && <PostsTable />}
           {active === "inspection" && <AdminInspectionList />}
+          {active === "settlement" && <AdminSettlements />}
+          {active === "platformFee" && <AdminPlatformFeeTracker />}
 
       
           {active === "reports" && <AdminReports/>} 

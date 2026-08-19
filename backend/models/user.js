@@ -16,12 +16,16 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['user', 'entity', 'admin'], default: 'user' },
   profilePicture: String,
   password: { type: String, required: true },
+  isBlocked:{type: String},
 
   eAuthOtp: {
   code: { type: String, select: false },
   expiresAt: { type: Date },
   attempts: { type: Number, default: 0 },
 },
+
+
+
 
     uniqueNumber: { type: String, unique: true, sparse: true },
     referralCode: { type: String, unique: true, sparse: true },
@@ -197,6 +201,15 @@ inventoryAccess: {
   amount: Number,
   reference: String,
   paidAt: Date,
+},
+
+// Add inside userSchema -> sellerProfile object
+platformFee: {
+  balance: { type: Number, default: 0 }, // Amount currently owed in NGN
+  lastPaymentAt: { type: Date },
+  dueDate: { type: Date },               // Date when current accumulated fee is due
+  isOverdue: { type: Boolean, default: false },
+  overdueMonths: { type: Number, default: 0 },
 },
 
 controlRoom: {

@@ -359,6 +359,18 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
+      if (user.isBlacklisted) {
+  return res.status(403).json({
+    message: 'Your account has been blacklisted, contact us at info@joblink.com',
+  });
+}
+
+  if (user.isBlocked) {
+  return res.status(403).json({
+    message: 'Your account has been blocked, contact us at info@joblink.com to make your outstanding platform fee',
+  });
+}
+
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
@@ -420,6 +432,18 @@ export const requestEAuthOtp = async (req, res) => {
       // Don't reveal whether the email exists
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
+
+         if (user.isBlacklisted) {
+  return res.status(403).json({
+    message: 'Your account has been blacklisted, contact us at info@joblink.com',
+  });
+}
+
+  if (user.isBlocked) {
+  return res.status(403).json({
+    message: 'Your account has been blocked, contact us at info@joblink.com to make your outstanding platform fee',
+  });
+}
 
     const code = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min

@@ -17,6 +17,7 @@ import { getAdminOverview,
   deleteUserAdmin,
  } from '../controllers/adminController.js';
 import { verifyToken, adminOnly } from '../middleware/verifyToken.js';
+import { getAllSettlements, getSettlementSummary, payoutSettlement, retryPayout } from "../controllers/order/adminSettlementController.js";
 
 
 const adminRouter = express.Router();
@@ -38,4 +39,8 @@ adminRouter.get('/sellers/inspections', verifyToken, adminOnly, getInspectionSel
 adminRouter.put('/sellers/:id/address-verify', verifyToken, adminOnly, updateAddressVerification);
 adminRouter.put('/sellers/:id/super-verify', verifyToken, adminOnly, updateSuperVerify);
 
+adminRouter.get('/settlements', verifyToken, adminOnly, getAllSettlements);
+adminRouter.get('/settlements/summary', verifyToken, adminOnly,  getSettlementSummary);
+adminRouter.post('/settlements/:id/pay', verifyToken, adminOnly,  payoutSettlement);
+adminRouter.post('/settlements/:id/retry', verifyToken, adminOnly, retryPayout);
 export default adminRouter;

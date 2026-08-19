@@ -1,3 +1,5 @@
+
+
 // import axios from 'axios';
 // import crypto from 'crypto';
 // import Cart from '../../models/order/Cart.js';
@@ -6,16 +8,18 @@
 // import Product from "../../models/sellers/product.js"
 // import Transaction from '../../models/order/Transaction.js';
 // import Loyalty from '../../models/order/Loyalty.js';
+// import  SettlementHistory from '../../models/order/settlementHistory.js';
+
 // import User from "../../models/user.js"
-
-
+// import { computeTransportFee } from '../../utills/Distance.js';
+// import { buildSellerSettlementPlan } from '../../utills/paystacksplitService.js';
+// import { buildDynamicSplit } from '../../utills/paystacksplitService.js';
 // const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
 // const PLATFORM_FEE_RATE = 0.01; // 1%
 
-// const generateDeliveryCode = () => String(Math.floor(1000 + Math.random() * 9000));
+// const generateVerificationCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
-
-
+// // ── CHECKOUT ────────────────────────────────────────────────
 // export const checkout = async (req, res) => {
 //   try {
 //     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
@@ -23,8 +27,11 @@
 //       return res.status(400).json({ message: 'Cart is empty' });
 //     }
 
+//     const buyer = await User.findById(req.user._id);
+//     if (!buyer) return res.status(400).json({ message: 'Buyer not found' });
+
 //     // Validate stock & payment method, capture seller info as we go
-//     const sellerCache = new Map(); // avoid refetching the same seller repeatedly
+//     const sellerCache = new Map(); // sellerId -> full seller User doc
 //     let orderSellerId; // top-level order.seller (assumes single-seller cart)
 
 //     for (const item of cart.items) {
@@ -53,15 +60,27 @@
 //       orderSellerId = seller?._id;
 //     }
 
-//     // Build order items with fee calculations
+//     // Build order items with fee calculations, and group by seller (needed
+//     // for both settlement planning and per-seller transport-fee distance).
 //     let totalAmount = 0;
 //     let totalPlatformFee = 0;
+//     const sellerGroups = {};
+
 //     const orderItems = cart.items.map(item => {
 //       const subtotal = item.price * item.quantity;
 //       const platformFee = +(subtotal * PLATFORM_FEE_RATE).toFixed(2);
 //       const sellerAmount = +(subtotal - platformFee).toFixed(2);
 //       totalAmount += subtotal;
 //       totalPlatformFee += platformFee;
+
+//       const sid = item.seller.toString();
+//       if (!sellerGroups[sid]) {
+//         sellerGroups[sid] = { seller: item.seller, amount: 0, fee: 0, sellerAmt: 0 };
+//       }
+//       sellerGroups[sid].amount += subtotal;
+//       sellerGroups[sid].fee += platformFee;
+//       sellerGroups[sid].sellerAmt += sellerAmount;
+
 //       return {
 //         product: item.product._id,
 //         seller: item.seller,
@@ -75,7 +94,33 @@
 //       };
 //     });
 
-//     const deliveryCode = cart.fulfillmentType === 'delivery' ? generateDeliveryCode() : undefined;
+//     // ── TRANSPORT FEE (delivery orders only) ───────────────────
+//     let transportFee = 0;
+//     let transportFeeDetails = null;
+
+//     if (cart.fulfillmentType === 'delivery') {
+//       const breakdown = [];
+//       for (const sid of Object.keys(sellerGroups)) {
+//         const sellerDoc = sellerCache.get(sid);
+//         const { fee, distanceKm, source } = await computeTransportFee({
+//           buyerState: buyer.state,
+//           buyerLga: buyer.lga,
+//           sellerState: sellerDoc?.state,
+//           sellerLga: sellerDoc?.lga,
+//         });
+//         transportFee += fee;
+//         breakdown.push({ seller: sid, distanceKm, fee, source });
+//       }
+//       transportFeeDetails = {
+//         ratePerKm: Number(process.env.TRANSPORT_RATE_PER_KM || 100),
+//         baseFee: Number(process.env.TRANSPORT_BASE_FEE || 500),
+//         source: breakdown[0]?.source,
+//         breakdown,
+//       };
+//     }
+
+//     // ── VERIFICATION CODE (pickup AND delivery, per seller request) ──
+//     const verificationCode = generateVerificationCode();
 
 //     // Create order
 //     const order = new Order({
@@ -83,41 +128,92 @@
 //       seller: orderSellerId,
 //       items: orderItems,
 //       fulfillmentType: cart.fulfillmentType,
-//       pickup: cart.pickup,
-//       delivery: {
-//         address: cart.delivery?.address,
-//         deliveryCode,
+//       pickup: {
+//         ...cart.pickup,
+//         code: cart.fulfillmentType === 'pickup' ? verificationCode : undefined,
 //         isCodeVerified: false,
 //       },
+//       delivery: {
+//         address: cart.delivery?.address,
+//         deliveryCode: cart.fulfillmentType === 'delivery' ? verificationCode : undefined,
+//         isCodeVerified: false,
+//       },
+//       transportFee,
+//       transportFeeDetails,
 //       paymentMethod: cart.paymentMethod,
 //       paymentStatus: 'pending',
 //       status: 'pending',
-//       totalAmount: +totalAmount.toFixed(2),
+//       totalAmount: +(totalAmount + transportFee).toFixed(2),
 //       totalPlatformFee: +totalPlatformFee.toFixed(2),
 //       totalSellerAmount: +(totalAmount - totalPlatformFee).toFixed(2),
 //     });
 
 //     await order.save();
 
-//     // If paying online, initialize Paystack
-//     if (cart.paymentMethod === 'online') {
-//       const buyer = await User.findById(req.user._id);
+//     // Settlement plan: who's eligible for direct-to-seller payout
+//     const settlementPlan = buildSellerSettlementPlan(sellerGroups, sellerCache);
 
-//       const paystackRes = await axios.post(
-//         'https://api.paystack.co/transaction/initialize',
-//         {
-//           email: buyer.email || buyer.alternateContact,
-//           amount: Math.round(totalAmount * 100), // kobo
-//           reference: `ORD-${order._id}-${Date.now()}`,
-//           metadata: { orderId: order._id.toString() },
-//           callback_url: `${process.env.FRONTEND_URL}/payment/verify`,
-//         },
-//         { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
-//       );
+//     // If paying online, initialize Paystack (with split when possible)
+//     if (cart.paymentMethod === 'online') {
+//       const chargeAmountKobo = Math.round(order.totalAmount * 100);
+//       const basePayload = {
+//         email: buyer.email || buyer.alternateContact,
+//         amount: chargeAmountKobo,
+//         reference: `ORD-${order._id}-${Date.now()}`,
+//         metadata: { orderId: order._id.toString() },
+//         callback_url: `${process.env.FRONTEND_URL}/payment/verify`,
+//       };
+
+//       let paystackRes;
+//       let usedSplit = false;
+//       let splitBuildError = null;
+
+//       // Attempt a split-enabled charge first (direct-to-seller for eligible
+//       // sellers); fall back to a plain charge into the estore account if
+//       // anything about the split goes wrong, so checkout is never blocked.
+//       const splitPayload = buildDynamicSplit(settlementPlan);
+//       if (splitPayload) {
+//         try {
+//           paystackRes = await axios.post(
+//             'https://api.paystack.co/transaction/initialize',
+//             { ...basePayload, split: splitPayload },
+//             { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
+//           );
+//           usedSplit = true;
+//         } catch (err) {
+//           splitBuildError = err?.response?.data?.message || err.message;
+//           paystackRes = null;
+//         }
+//       }
+
+//       if (!paystackRes) {
+//         try {
+//           paystackRes = await axios.post(
+//             'https://api.paystack.co/transaction/initialize',
+//             basePayload,
+//             { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
+//           );
+//           usedSplit = false;
+//         } catch (err) {
+//           // Total Paystack outage — nothing we can do to get a payment link,
+//           // let the outer catch handle the 500.
+//           throw err;
+//         }
+//       }
 
 //       order.paystackReference = paystackRes.data.data.reference;
 //       order.paystackAccessCode = paystackRes.data.data.access_code;
+//       order.paystackSplitUsed = usedSplit;
 //       await order.save();
+
+//       await recordCheckoutSettlementHistory({
+//         order,
+//         settlementPlan,
+//         transportFee,
+//         usedSplit,
+//         splitBuildError,
+//         paymentMethod: 'online',
+//       });
 
 //       // Reduce stock optimistically
 //       await decreaseStock(cart.items);
@@ -126,11 +222,13 @@
 //         order,
 //         paymentUrl: paystackRes.data.data.authorization_url,
 //         reference: paystackRes.data.data.reference,
-//         deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
+//         transportFee,
+//         deliveryCode: order.fulfillmentType === 'delivery' ? verificationCode : null,
+//         pickupCode: order.fulfillmentType === 'pickup' ? verificationCode : null,
 //       });
 //     }
 
-//     // Pay on delivery — just confirm order
+//     // Pay on delivery / pickup — just confirm order, money settles on code verification
 //     await decreaseStock(cart.items);
 //     order.status = 'confirmed';
 //     await order.save();
@@ -138,11 +236,23 @@
 //     // Create transaction record
 //     await createTransaction(order, 'pending');
 
+//     await recordCheckoutSettlementHistory({
+//       order,
+//       settlementPlan,
+//       transportFee,
+//       usedSplit: false,
+//       splitBuildError: null,
+//       paymentMethod: 'on_delivery',
+//       cashPending: true,
+//     });
+
 //     await Cart.findOneAndDelete({ buyer: req.user._id });
 
 //     res.json({
 //       order,
-//       deliveryCode: order.fulfillmentType === 'delivery' ? deliveryCode : null,
+//       transportFee,
+//       deliveryCode: order.fulfillmentType === 'delivery' ? verificationCode : null,
+//       pickupCode: order.fulfillmentType === 'pickup' ? verificationCode : null,
 //     });
 //   } catch (err) {
 //     console.error('Checkout error:', err);
@@ -160,8 +270,8 @@
 //  *     summary: Verify a Paystack payment and finalize the order
 //  *     description: >
 //  *       Confirms the transaction with Paystack, marks the order paid/confirmed, awards
-//  *       loyalty points (1 point per ₦100), creates the seller transaction, kicks off
-//  *       seller transfers, and clears the buyer's cart.
+//  *       loyalty points (1 point per ₦100), creates the seller transaction, reconciles
+//  *       split settlement history, and clears the buyer's cart.
 //  *     tags: [Orders]
 //  *     security:
 //  *       - bearerAuth: []
@@ -175,27 +285,10 @@
 //  *     responses:
 //  *       200:
 //  *         description: Payment verified and order finalized
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 message:
-//  *                   type: string
-//  *                 order:
-//  *                   $ref: '#/components/schemas/Order'
 //  *       400:
 //  *         description: Payment was not successful
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
 //  *       404:
 //  *         description: No order found for this reference
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
 //  */
 
 // export const verifyPayment = async (req, res) => {
@@ -214,22 +307,7 @@
 //     const order = await Order.findOne({ paystackReference: reference });
 //     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-//     order.paymentStatus = 'paid';
-//     order.status = 'confirmed';
-//     await order.save();
-
-//     // Award loyalty points (1 point per ₦100)
-//     const points = Math.floor(order.totalAmount / 100);
-//     await awardLoyalty(order.buyer, points, order._id);
-//     order.loyaltyPointsAwarded = points;
-//     await order.save();
-
-//     // Create transaction + initiate seller transfers
-//     await createTransaction(order, 'completed');
-//     await initiateSellerTransfers(order);
-
-//     // Clear cart
-//     await Cart.findOneAndDelete({ buyer: order.buyer });
+//     await finalizeOnlinePayment(order, data);
 
 //     res.json({ message: 'Payment verified', order });
 //   } catch (err) {
@@ -239,7 +317,6 @@
 
 // // ── PAYSTACK WEBHOOK ───────────────────────────────────────
 // // POST /orders/webhook
-
 
 // /**
 //  * @swagger
@@ -252,26 +329,12 @@
 //  *       Mounted **before** `router.use(verifyToken)` in orderRoutes.js.
 //  *     tags: [Orders]
 //  *     security: []
-//  *     parameters:
-//  *       - in: header
-//  *         name: x-paystack-signature
-//  *         required: true
-//  *         schema:
-//  *           type: string
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             description: Raw Paystack event payload
 //  *     responses:
 //  *       200:
 //  *         description: Event received and processed (or ignored if not charge.success)
 //  *       401:
 //  *         description: Signature mismatch
 //  */
-
 
 // export const paystackWebhook = async (req, res) => {
 //   const hash = crypto
@@ -288,37 +351,61 @@
 //     const reference = event.data.reference;
 //     const order = await Order.findOne({ paystackReference: reference });
 //     if (order && order.paymentStatus !== 'paid') {
-//       order.paymentStatus = 'paid';
-//       order.status = 'confirmed';
-//       await order.save();
-//       await awardLoyalty(order.buyer, Math.floor(order.totalAmount / 100), order._id);
-//       await createTransaction(order, 'completed');
-//       await initiateSellerTransfers(order);
-//       await Cart.findOneAndDelete({ buyer: order.buyer });
+//       await finalizeOnlinePayment(order, event.data);
 //     }
 //   }
 //   res.sendStatus(200);
 // };
 
-// // ── DELIVERY CODE VERIFY ───────────────────────────────────
+// // Shared by verifyPayment + the webhook so both paths behave identically.
+// async function finalizeOnlinePayment(order, paystackData) {
+//   order.paymentStatus = 'paid';
+//   order.status = 'confirmed';
+
+//   const points = Math.floor(order.totalAmount / 100);
+//   await awardLoyalty(order.buyer, points, order._id);
+//   order.loyaltyPointsAwarded = points;
+//   await order.save();
+
+//   await createTransaction(order, 'completed');
+
+//   // Reconcile settlement history against what Paystack actually did. If a
+//   // split was used, `paystackData.split` tells us the real per-account
+//   // breakdown; store it for the record either way.
+//   await SettlementHistory.updateMany(
+//     { order: order._id, status: 'pending' },
+//     {
+//       $set: {
+//         status: 'completed',
+//         meta: paystackData.split || null,
+//       },
+//     }
+//   );
+
+//   // Note: sellers paid via Paystack split are settled automatically by
+//   // Paystack — no manual Transfer call needed for them. Sellers who weren't
+//   // eligible for direct payout intentionally keep their share in the
+//   // estore account, so no transfer is owed there either.
+
+//   await Cart.findOneAndDelete({ buyer: order.buyer });
+// }
+
+// // ── DELIVERY / PICKUP CODE VERIFY ──────────────────────────
 // // POST /orders/:orderId/verify-delivery
 // /**
 //  * @swagger
 //  * /api/orders/{orderId}/verify-delivery:
 //  *   post:
-//  *     summary: Verify the delivery code to mark an order as delivered
+//  *     summary: Verify the delivery or pickup code to complete an order
 //  *     description: >
-//  *       If the order was pay-on-delivery and unpaid, this also marks it paid, awards
-//  *       loyalty points, creates the transaction, and kicks off seller transfers.
+//  *       Works for both fulfillment types — checks delivery.deliveryCode for delivery
+//  *       orders and pickup.code for pickup orders. If the order was pay-on-delivery/
+//  *       pay-on-pickup and unpaid, this also marks it paid, awards loyalty points,
+//  *       creates the transaction, and (for super-verified sellers with a payout
+//  *       account) initiates their transfer — logging everything to settlement history.
 //  *     tags: [Orders]
 //  *     security:
 //  *       - bearerAuth: []
-//  *     parameters:
-//  *       - in: path
-//  *         name: orderId
-//  *         required: true
-//  *         schema:
-//  *           type: string
 //  *     requestBody:
 //  *       required: true
 //  *       content:
@@ -332,28 +419,11 @@
 //  *                 example: "4821"
 //  *     responses:
 //  *       200:
-//  *         description: Delivery confirmed
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 message:
-//  *                   type: string
-//  *                 order:
-//  *                   $ref: '#/components/schemas/Order'
+//  *         description: Order completed
 //  *       400:
-//  *         description: Not a delivery order, or the code is invalid
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
+//  *         description: The code is invalid
 //  *       404:
 //  *         description: Order not found
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
 //  */
 
 // export const verifyDeliveryCode = async (req, res) => {
@@ -361,33 +431,38 @@
 //     const { code } = req.body;
 //     const order = await Order.findById(req.params.orderId);
 //     if (!order) return res.status(404).json({ message: 'Order not found' });
-//     if (order.fulfillmentType !== 'delivery') {
-//       return res.status(400).json({ message: 'This order is not a delivery order' });
+
+//     const isDelivery = order.fulfillmentType === 'delivery';
+//     const expectedCode = isDelivery ? order.delivery.deliveryCode : order.pickup.code;
+
+//     if (!expectedCode || expectedCode !== code) {
+//       return res.status(400).json({ message: 'Invalid code' });
 //     }
-//     if (order.delivery.deliveryCode !== code) {
-//       return res.status(400).json({ message: 'Invalid delivery code' });
+
+//     if (isDelivery) {
+//       order.delivery.isCodeVerified = true;
+//     } else {
+//       order.pickup.isCodeVerified = true;
 //     }
-//     order.delivery.isCodeVerified = true;
 //     order.status = 'delivered';
 
-//     // Award loyalty if pay-on-delivery
+//     // Award loyalty + settle sellers if this was pay-on-delivery/pickup
 //     if (order.paymentMethod === 'on_delivery' && order.paymentStatus !== 'paid') {
 //       order.paymentStatus = 'paid';
 //       const points = Math.floor(order.totalAmount / 100);
 //       await awardLoyalty(order.buyer, points, order._id);
 //       order.loyaltyPointsAwarded = points;
 //       await createTransaction(order, 'completed');
-//       await initiateSellerTransfers(order);
+//       await settleCashOrderPayouts(order);
 //     }
 
 //     await order.save();
-//     res.json({ message: 'Delivery confirmed', order });
+//     await syncOrderRiderSettlement(order);
+//     res.json({ message: 'Order completed', order });
 //   } catch (err) {
 //     res.status(500).json({ message: err.message });
 //   }
 // };
-
-
 
 // /**
 //  * @swagger
@@ -407,22 +482,10 @@
 //  *     responses:
 //  *       200:
 //  *         description: Order found
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Order'
 //  *       403:
 //  *         description: Not the buyer or a seller on this order
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
 //  *       404:
 //  *         description: Order not found
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
 //  */
 
 // // ── GET SINGLE ORDER ───────────────────────────────────────
@@ -443,8 +506,6 @@
 //   }
 // };
 
-
-
 // /**
 //  * @swagger
 //  * /api/orders/my:
@@ -456,12 +517,6 @@
 //  *     responses:
 //  *       200:
 //  *         description: List of the buyer's orders, newest first
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 $ref: '#/components/schemas/Order'
 //  */
 // export const getBuyerOrders = async (req, res) => {
 //   try {
@@ -474,8 +529,6 @@
 //     res.status(500).json({ message: err.message });
 //   }
 // };
-// // ── SELLER ORDER MANAGEMENT ───────────────────────────────
-
 
 // // ── SELLER ORDER MANAGEMENT ───────────────────────────────
 
@@ -514,20 +567,14 @@
 //  *     responses:
 //  *       200:
 //  *         description: Orders containing this seller's items, filtered to just their items
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 $ref: '#/components/schemas/Order'
 //  */
 
 // export const getSellerOrders = async (req, res) => {
 //   try {
 //     const { status, paymentMethod, from, to } = req.query;
 
-//     const match = { 
-//       'items.seller': req.user._id 
+//     const match = {
+//       'items.seller': req.user._id
 //     };
 
 //     if (status) match.status = status;
@@ -541,7 +588,7 @@
 //     const orders = await Order.find(match)
 //       .populate('buyer', 'firstName lastName email phoneNumber')
 //       .populate({
-//         path: 'items.seller',                    // ← This is the key
+//         path: 'items.seller',
 //         select: 'firstName lastName email phoneNumber businessName state lga businessAddress phoneNumber'
 //       })
 //       .populate('items.product', 'name images price')
@@ -552,9 +599,9 @@
 //     const filteredOrders = orders.map(order => {
 //       const orderObj = order.toObject({ getters: true });
 
-//       const sellerItems = orderObj.items.filter(item => 
-//         item.seller && 
-//         (typeof item.seller === 'string' 
+//       const sellerItems = orderObj.items.filter(item =>
+//         item.seller &&
+//         (typeof item.seller === 'string'
 //           ? item.seller === req.user._id.toString()
 //           : item.seller._id.toString() === req.user._id.toString())
 //       );
@@ -563,18 +610,66 @@
 //         ...orderObj,
 //         items: sellerItems.map(item => ({
 //           ...item,
-//           seller: item.seller   // Now this should be the full populated object
+//           seller: item.seller
 //         })),
-//         // Optional: Attach seller info at order level
 //         sellerInfo: sellerItems[0]?.seller || null
 //       };
 //     });
 
-//     // console.log("Populated Orders:", JSON.stringify(filteredOrders, null, 2)); // For debugging
 //     res.json(filteredOrders);
 
 //   } catch (err) {
 //     console.error("Error fetching seller orders:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// /**
+//  * @swagger
+//  * /api/orders/{orderId}/settlement-history:
+//  *   get:
+//  *     summary: Get the full settlement/payout audit trail for an order
+//  *     description: >
+//  *       Every movement of money for this order — seller shares, platform fee,
+//  *       transport fee — with its destination (seller_subaccount vs estore),
+//  *       method (split/transfer/fallback/cash_pending) and status.
+//  *     tags: [Orders]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     parameters:
+//  *       - in: path
+//  *         name: orderId
+//  *         required: true
+//  *         schema:
+//  *           type: string
+//  *     responses:
+//  *       200:
+//  *         description: Settlement history rows for the order
+//  *       403:
+//  *         description: Not the buyer or a seller on this order
+//  *       404:
+//  *         description: Order not found
+//  */
+// export const getOrderSettlementHistory = async (req, res) => {
+//   try {
+//     const order = await Order.findById(req.params.orderId);
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+
+//     const isBuyer = order.buyer.toString() === req.user._id.toString();
+//     const isSeller = order.items.some(i => i.seller.toString() === req.user._id.toString());
+//     const isAdmin = req.user.role === 'admin';
+//     if (!isBuyer && !isSeller && !isAdmin) return res.status(403).json({ message: 'Forbidden' });
+
+//     // Keep the transport_fee row's rider/riderAmount current — a rider is
+//     // often assigned or the agreed fee is set after checkout already happened.
+//     await syncOrderRiderSettlement(order);
+
+//     const history = await SettlementHistory.find({ order: order._id })
+//       .sort({ createdAt: 1 })
+//       .populate('seller', 'firstName lastName shopName')
+//       .populate('rider', 'firstName lastName phoneNumber riderProfile.vehicleType');
+//     res.json(history);
+//   } catch (err) {
 //     res.status(500).json({ message: err.message });
 //   }
 // };
@@ -631,8 +726,91 @@
 //   }
 // }
 
-// async function initiateSellerTransfers(order) {
-//   // Group items by seller
+// // Keeps the transport_fee SettlementHistory row's rider/riderAmount aligned
+// // with the order — a rider is frequently assigned (or the agreed delivery
+// // fee finalized) after checkout already ran. Safe to call anytime; no-ops
+// // if there's nothing to update.
+// async function syncOrderRiderSettlement(order) {
+//   if (!order.transportFee || order.transportFee <= 0) return;
+
+//   const rider = order.delivery?.assignedRider || null;
+//   const riderAmount = order.delivery?.agreedDeliveryFee ?? order.transportFee;
+
+//   await SettlementHistory.updateMany(
+//     { order: order._id, type: 'transport_fee' },
+//     { $set: { rider, riderAmount } }
+//   );
+// }
+
+// // Writes the initial (pending) settlement-history rows at checkout time —
+// // one per seller's sale share, one for the platform fee, one for the
+// // transport fee. This is the audit trail the split/transfer logic later
+// // updates to 'completed' or 'failed'.
+// async function recordCheckoutSettlementHistory({
+//   order,
+//   settlementPlan,
+//   transportFee,
+//   usedSplit,
+//   splitBuildError,
+//   paymentMethod,
+//   cashPending = false,
+// }) {
+//   const rows = [];
+
+//   for (const entry of settlementPlan) {
+//     const paidDirect = usedSplit && entry.eligibleForDirectPayout;
+//     rows.push({
+//       order: order._id,
+//       seller: entry.seller,
+//       type: 'sale_share',
+//       amount: entry.sellerAmount,
+//       destination: paidDirect ? 'seller_subaccount' : 'estore',
+//       method: cashPending ? 'cash_pending' : (paidDirect ? 'split' : 'fallback_main_account'),
+//       status: 'pending',
+//       paymentMethod,
+//       paystackReference: order.paystackReference,
+//       error: !usedSplit ? splitBuildError : undefined,
+//     });
+//   }
+
+//   rows.push({
+//     order: order._id,
+//     seller: null,
+//     type: 'platform_fee',
+//     amount: order.totalPlatformFee,
+//     destination: 'estore',
+//     method: cashPending ? 'cash_pending' : 'fallback_main_account',
+//     status: 'pending',
+//     paymentMethod,
+//     paystackReference: order.paystackReference,
+//   });
+
+//   if (transportFee > 0) {
+//     rows.push({
+//       order: order._id,
+//       seller: null,
+//       // A rider usually isn't assigned yet at checkout — this gets synced
+//       // in later via syncOrderRiderSettlement once one is.
+//       rider: order.delivery?.assignedRider || null,
+//       riderAmount: order.delivery?.agreedDeliveryFee ?? transportFee,
+//       type: 'transport_fee',
+//       amount: transportFee,
+//       destination: 'estore', // the fee is collected into the estore account...
+//       method: cashPending ? 'cash_pending' : 'fallback_main_account',
+//       status: 'pending',
+//       paymentMethod,
+//       paystackReference: order.paystackReference,
+//     });
+//   }
+
+//   if (rows.length) await SettlementHistory.insertMany(rows);
+// }
+
+// // Legacy Transfer-API payout path — used only for pay-on-delivery/pickup
+// // orders (money never passed through a Paystack transaction, so there's no
+// // split to rely on). Only fires for super-verified sellers with a payout
+// // recipient on file; everyone else's share is recorded as owed to estore.
+// async function settleCashOrderPayouts(order) {
 //   const sellerMap = {};
 //   for (const item of order.items) {
 //     const sid = item.seller.toString();
@@ -641,22 +819,36 @@
 //   }
 
 //   for (const { seller, sellerAmt } of Object.values(sellerMap)) {
-//     try {
-//       const sellerDoc = await User.findById(seller);
-//       if (!sellerDoc?.bankDetails?.recipientCode) continue;
+//     const sellerDoc = await User.findById(seller);
+//     const isSuperVerify = !!sellerDoc?.sellerProfile?.isSuperVerify;
+//     const recipientCode = sellerDoc?.sellerProfile?.bankDetails?.recipientCode;
 
+//     if (!isSuperVerify || !recipientCode) {
+//       await SettlementHistory.create({
+//         order: order._id,
+//         seller,
+//         type: 'sale_share',
+//         amount: sellerAmt,
+//         destination: 'estore',
+//         method: 'cash_pending',
+//         status: 'completed',
+//         paymentMethod: 'on_delivery',
+//       });
+//       continue;
+//     }
+
+//     try {
 //       const transferRes = await axios.post(
 //         'https://api.paystack.co/transfer',
 //         {
 //           source: 'balance',
 //           amount: Math.round(sellerAmt * 100),
-//           recipient: sellerDoc.bankDetails.recipientCode,
+//           recipient: recipientCode,
 //           reason: `Payment for order ${order.orderNumber}`,
 //         },
 //         { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
 //       );
 
-//       // Update item transfer status
 //       await Order.updateOne(
 //         { _id: order._id, 'items.seller': seller },
 //         {
@@ -667,9 +859,49 @@
 //         },
 //         { arrayFilters: [{ 'elem.seller': seller }] }
 //       );
+
+//       await SettlementHistory.create({
+//         order: order._id,
+//         seller,
+//         type: 'sale_share',
+//         amount: sellerAmt,
+//         destination: 'seller_subaccount',
+//         method: 'transfer',
+//         status: 'completed',
+//         paymentMethod: 'on_delivery',
+//         paystackTransferCode: transferRes.data.data.transfer_code,
+//       });
 //     } catch (err) {
 //       console.error(`Transfer failed for seller ${seller}:`, err.message);
+//       await SettlementHistory.create({
+//         order: order._id,
+//         seller,
+//         type: 'sale_share',
+//         amount: sellerAmt,
+//         destination: 'estore',
+//         method: 'cash_pending',
+//         status: 'failed',
+//         paymentMethod: 'on_delivery',
+//         error: err?.response?.data?.message || err.message,
+//       });
 //     }
+//   }
+
+//   // Transport fee on a cash order stays with whoever physically collected
+//   // it — recorded here purely for the audit trail.
+//   if (order.transportFee > 0) {
+//     await SettlementHistory.create({
+//       order: order._id,
+//       seller: null,
+//       rider: order.delivery?.assignedRider || null,
+//       riderAmount: order.delivery?.agreedDeliveryFee ?? order.transportFee,
+//       type: 'transport_fee',
+//       amount: order.transportFee,
+//       destination: 'estore',
+//       method: 'cash_pending',
+//       status: 'completed',
+//       paymentMethod: 'on_delivery',
+//     });
 //   }
 // }
 
@@ -680,27 +912,71 @@
 
 
 
+// // ── ESTIMATE (delivery fee preview, no order created) ──────
+// export const estimateCheckout = async (req, res) => {
+//   try {
+//     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
+//     if (!cart || cart.items.length === 0) {
+//       return res.status(400).json({ message: 'Cart is empty' });
+//     }
 
+//     const buyer = await User.findById(req.user._id);
+//     if (!buyer) return res.status(400).json({ message: 'Buyer not found' });
 
+//     const subtotal = cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
+//     // Group sellers so we can check super-verify + compute transport fee
+//     const sellerIds = [...new Set(cart.items.map(i => i.seller.toString()))];
+//     const sellers = await User.find({ _id: { $in: sellerIds } });
+//     const sellerMap = new Map(sellers.map(s => [s._id.toString(), s]));
 
+//     let transportFee = 0;
+//     let transportFeeDetails = null;
 
+//     if (cart.fulfillmentType === 'delivery') {
+//       const breakdown = [];
+//       for (const sid of sellerIds) {
+//         const sellerDoc = sellerMap.get(sid);
+//         const { fee, distanceKm, source } = await computeTransportFee({
+//           buyerState: buyer.state,
+//           buyerLga: buyer.lga,
+//           sellerState: sellerDoc?.state,
+//           sellerLga: sellerDoc?.lga,
+//         });
+//         transportFee += fee;
+//         breakdown.push({ seller: sid, distanceKm, fee, source });
+//       }
+//       transportFeeDetails = {
+//         ratePerKm: Number(process.env.TRANSPORT_RATE_PER_KM || 100),
+//         baseFee: Number(process.env.TRANSPORT_BASE_FEE || 500),
+//         breakdown,
+//       };
+//     }
 
+//     // Buyer-facing signal: will sellers be paid instantly via split?
+//     const sellerPayoutInfo = sellerIds.map(sid => {
+//       const s = sellerMap.get(sid);
+//       return {
+//         seller: sid,
+//         superVerified: !!s?.sellerProfile?.isSuperVerify,
+//         eligibleForSplit: !!s?.sellerProfile?.isSuperVerify && !!s?.sellerProfile?.bankDetails?.recipientCode,
+//       };
+//     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//     res.json({
+//       subtotal,
+//       transportFee,
+//       transportFeeDetails,
+//       total: +(subtotal + transportFee).toFixed(2),
+//       fulfillmentType: cart.fulfillmentType,
+//       paymentMethod: cart.paymentMethod,
+//       sellerPayoutInfo,
+//     });
+//   } catch (err) {
+//     console.error('Estimate error:', err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 
 
@@ -729,7 +1005,7 @@ import Order from '../../models/order/Order.js';
 import Product from "../../models/sellers/product.js"
 import Transaction from '../../models/order/Transaction.js';
 import Loyalty from '../../models/order/Loyalty.js';
-import  SettlementHistory from '../../models/order/settlementHistory.js';
+import SettlementHistory, { computeInitialPayoutStatus } from '../../models/order/settlementHistory.js';
 
 import User from "../../models/user.js"
 import { computeTransportFee } from '../../utills/Distance.js';
@@ -1104,9 +1380,11 @@ async function finalizeOnlinePayment(order, paystackData) {
   );
 
   // Note: sellers paid via Paystack split are settled automatically by
-  // Paystack — no manual Transfer call needed for them. Sellers who weren't
-  // eligible for direct payout intentionally keep their share in the
-  // estore account, so no transfer is owed there either.
+  // Paystack — no manual Transfer call needed for them (their rows were
+  // written with payoutStatus 'not_applicable' at checkout time). Sellers
+  // who weren't eligible for direct payout keep payoutStatus 'owed' from
+  // checkout, and now show up on the admin settlements dashboard for a
+  // manual payout.
 
   await Cart.findOneAndDelete({ buyer: order.buyer });
 }
@@ -1450,23 +1728,38 @@ async function createTransaction(order, paymentStatus) {
 // Keeps the transport_fee SettlementHistory row's rider/riderAmount aligned
 // with the order — a rider is frequently assigned (or the agreed delivery
 // fee finalized) after checkout already ran. Safe to call anytime; no-ops
-// if there's nothing to update.
+// if there's nothing to update. Also re-derives payoutStatus, since a rider
+// getting assigned can flip a row from 'not_applicable' to 'owed'.
 async function syncOrderRiderSettlement(order) {
   if (!order.transportFee || order.transportFee <= 0) return;
 
   const rider = order.delivery?.assignedRider || null;
   const riderAmount = order.delivery?.agreedDeliveryFee ?? order.transportFee;
 
-  await SettlementHistory.updateMany(
-    { order: order._id, type: 'transport_fee' },
-    { $set: { rider, riderAmount } }
-  );
+  const rows = await SettlementHistory.find({ order: order._id, type: 'transport_fee' });
+  for (const row of rows) {
+    // Don't clobber a row that's already been paid out or attempted.
+    if (['paid', 'payout_failed'].includes(row.payoutStatus)) {
+      row.rider = rider;
+      row.riderAmount = riderAmount;
+      await row.save();
+      continue;
+    }
+    row.rider = rider;
+    row.riderAmount = riderAmount;
+    row.payoutStatus = computeInitialPayoutStatus({ type: 'transport_fee', riderAmount });
+    await row.save();
+  }
 }
 
 // Writes the initial (pending) settlement-history rows at checkout time —
 // one per seller's sale share, one for the platform fee, one for the
 // transport fee. This is the audit trail the split/transfer logic later
 // updates to 'completed' or 'failed'.
+//
+// IMPORTANT: uses insertMany(), which does NOT run the model's pre('save')
+// hook — so payoutStatus is computed explicitly per-row here via
+// computeInitialPayoutStatus(), rather than relying on the hook.
 async function recordCheckoutSettlementHistory({
   order,
   settlementPlan,
@@ -1480,14 +1773,18 @@ async function recordCheckoutSettlementHistory({
 
   for (const entry of settlementPlan) {
     const paidDirect = usedSplit && entry.eligibleForDirectPayout;
+    const destination = paidDirect ? 'seller_subaccount' : 'estore';
+    const method = cashPending ? 'cash_pending' : (paidDirect ? 'split' : 'fallback_main_account');
+
     rows.push({
       order: order._id,
       seller: entry.seller,
       type: 'sale_share',
       amount: entry.sellerAmount,
-      destination: paidDirect ? 'seller_subaccount' : 'estore',
-      method: cashPending ? 'cash_pending' : (paidDirect ? 'split' : 'fallback_main_account'),
+      destination,
+      method,
       status: 'pending',
+      payoutStatus: computeInitialPayoutStatus({ type: 'sale_share', destination, method }),
       paymentMethod,
       paystackReference: order.paystackReference,
       error: !usedSplit ? splitBuildError : undefined,
@@ -1502,23 +1799,26 @@ async function recordCheckoutSettlementHistory({
     destination: 'estore',
     method: cashPending ? 'cash_pending' : 'fallback_main_account',
     status: 'pending',
+    payoutStatus: 'not_applicable', // platform fee is the estore's own revenue — never owed out
     paymentMethod,
     paystackReference: order.paystackReference,
   });
 
   if (transportFee > 0) {
+    const riderAmount = order.delivery?.agreedDeliveryFee ?? transportFee;
     rows.push({
       order: order._id,
       seller: null,
       // A rider usually isn't assigned yet at checkout — this gets synced
       // in later via syncOrderRiderSettlement once one is.
       rider: order.delivery?.assignedRider || null,
-      riderAmount: order.delivery?.agreedDeliveryFee ?? transportFee,
+      riderAmount,
       type: 'transport_fee',
       amount: transportFee,
       destination: 'estore', // the fee is collected into the estore account...
       method: cashPending ? 'cash_pending' : 'fallback_main_account',
       status: 'pending',
+      payoutStatus: computeInitialPayoutStatus({ type: 'transport_fee', riderAmount }),
       paymentMethod,
       paystackReference: order.paystackReference,
     });
@@ -1531,6 +1831,11 @@ async function recordCheckoutSettlementHistory({
 // orders (money never passed through a Paystack transaction, so there's no
 // split to rely on). Only fires for super-verified sellers with a payout
 // recipient on file; everyone else's share is recorded as owed to estore.
+//
+// Uses .create() throughout, so the model's pre('save') hook already
+// computes payoutStatus correctly here — no explicit override needed,
+// though 'paid'-via-transfer rows are explicitly marked not_applicable
+// since the transfer already happened in the same call.
 async function settleCashOrderPayouts(order) {
   const sellerMap = {};
   for (const item of order.items) {
@@ -1553,6 +1858,7 @@ async function settleCashOrderPayouts(order) {
         destination: 'estore',
         method: 'cash_pending',
         status: 'completed',
+        payoutStatus: 'owed', // sitting in estore, still owed to this seller
         paymentMethod: 'on_delivery',
       });
       continue;
@@ -1589,6 +1895,10 @@ async function settleCashOrderPayouts(order) {
         destination: 'seller_subaccount',
         method: 'transfer',
         status: 'completed',
+        payoutStatus: 'paid', // already sent — nothing left for an admin to do
+        payoutReference: transferRes.data.data.transfer_code,
+        payoutAmount: sellerAmt,
+        paidAt: new Date(),
         paymentMethod: 'on_delivery',
         paystackTransferCode: transferRes.data.data.transfer_code,
       });
@@ -1602,6 +1912,8 @@ async function settleCashOrderPayouts(order) {
         destination: 'estore',
         method: 'cash_pending',
         status: 'failed',
+        payoutStatus: 'payout_failed', // shows up with a "Retry payout" button in admin
+        payoutError: err?.response?.data?.message || err.message,
         paymentMethod: 'on_delivery',
         error: err?.response?.data?.message || err.message,
       });
@@ -1611,27 +1923,22 @@ async function settleCashOrderPayouts(order) {
   // Transport fee on a cash order stays with whoever physically collected
   // it — recorded here purely for the audit trail.
   if (order.transportFee > 0) {
+    const riderAmount = order.delivery?.agreedDeliveryFee ?? order.transportFee;
     await SettlementHistory.create({
       order: order._id,
       seller: null,
       rider: order.delivery?.assignedRider || null,
-      riderAmount: order.delivery?.agreedDeliveryFee ?? order.transportFee,
+      riderAmount,
       type: 'transport_fee',
       amount: order.transportFee,
       destination: 'estore',
       method: 'cash_pending',
       status: 'completed',
+      payoutStatus: computeInitialPayoutStatus({ type: 'transport_fee', riderAmount }),
       paymentMethod: 'on_delivery',
     });
   }
 }
-
-
-
-
-
-
-
 
 // ── ESTIMATE (delivery fee preview, no order created) ──────
 export const estimateCheckout = async (req, res) => {

@@ -30,6 +30,7 @@ import reportRoutes from "./routes/reportRoutes.js"
 import ticketRoutes from './routes/ticketRoutes.js';
 import fakeProductvideoRoutes from "./routes/sellers/fakeProductVideoRoute.js"
 import reviewRoutes from "./routes/order/reviewRoute.js"
+import platformFeeRoutes from "./routes/platformfeeRoute.js"
 dotenv.config();
 connectDb();
 
@@ -95,6 +96,9 @@ app.use("/api/product-videos", fakeProductvideoRoutes)
 app.use('/api', reportRoutes)
 app.use('/api/reviews', reviewRoutes),
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/analytics/seller', platformFeeRoutes)
+app.use('/api/admin/sellers', platformFeeRoutes)
+
 // Start server
 const port = process.env.PORT || 2021;
 
@@ -102,8 +106,6 @@ app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
 
 })
-
-
 
 
 

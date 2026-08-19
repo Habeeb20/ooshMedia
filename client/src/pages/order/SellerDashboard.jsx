@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import api from '../../config/api';
 import { TrendingUp, ShoppingBag, Users, DollarSign, AlertTriangle } from 'lucide-react';
+import PayPlatformFeeModal from '../vendor/PlatformFeeModal';
 
 const PERIODS = [
   { label: '12h', value: '12h' },
@@ -38,6 +39,7 @@ export default function SellerDashboard() {
   const [customers, setCustomers] = useState([]);
   const [tab, setTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -111,6 +113,32 @@ export default function SellerDashboard() {
               color="amber"
             />
           </div>
+
+          <div className="relative">
+  <StatCard
+    icon={AlertTriangle}
+    label="Platform Fee Owed"
+    value={`₦${(analytics?.summary?.totalPlatformFee || 0).toLocaleString()}`}
+    sub="To be remitted"
+    color="amber"
+  />
+  <button
+    onClick={() => setIsPayModalOpen(true)}
+    className="mt-2 w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 rounded-lg transition-all"
+  >
+    Pay Platform Fee
+  </button>
+</div>
+
+<PayPlatformFeeModal
+  isOpen={isPayModalOpen}
+  onClose={() => setIsPayModalOpen(false)}
+  currentBalance={analytics?.summary?.totalPlatformFee || 0}
+  onPaymentSuccess={() => {
+    // Refresh dashboard stats
+    setPeriod(period);
+  }}
+/>
 
           {/* Revenue Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
@@ -240,3 +268,37 @@ export default function SellerDashboard() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
