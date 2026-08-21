@@ -1,5 +1,12 @@
+
+
+
 // import { useState, useEffect, useRef, useCallback } from "react";
+// import { createPortal } from "react-dom";
 // import { Link } from "react-router-dom";
+// import im from "../../assets/AC/part2.jpeg"
+// import im2 from "../../assets/AC/parts1.jpeg"
+// import im3 from "../../assets/AC/parts3.jpeg"
 
 // // ─── Category Data ────────────────────────────────────────────────────────────
 // const partCategories = [
@@ -241,19 +248,40 @@
 //   const [openMenu, setOpenMenu] = useState(null);
 //   const [mobileOpen, setMobileOpen] = useState(false);
 //   const [scrolled, setScrolled] = useState(false);
+//   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 //   const menuRef = useRef(null);
+//   const btnRefs = useRef({});
+//   const dropdownRef = useRef(null);
 
 //   useEffect(() => {
-//     const onScroll = () => setScrolled(window.scrollY > 40);
+//     const onScroll = () => {
+//       setScrolled(window.scrollY > 40);
+//       // Close any open dropdown on scroll instead of leaving it stranded
+//       // at a stale position (it's positioned "fixed" relative to viewport).
+//       setOpenMenu(null);
+//     };
 //     window.addEventListener("scroll", onScroll);
 //     return () => window.removeEventListener("scroll", onScroll);
 //   }, []);
 
 //   useEffect(() => {
-//     const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenu(null); };
+//     const handler = (e) => {
+//       const clickedTrigger = menuRef.current && menuRef.current.contains(e.target);
+//       const clickedDropdown = dropdownRef.current && dropdownRef.current.contains(e.target);
+//       if (!clickedTrigger && !clickedDropdown) setOpenMenu(null);
+//     };
 //     document.addEventListener("mousedown", handler);
 //     return () => document.removeEventListener("mousedown", handler);
 //   }, []);
+
+//   const openDropdownFor = (catId) => {
+//     const el = btnRefs.current[catId];
+//     if (el) {
+//       const rect = el.getBoundingClientRect();
+//       setDropdownPos({ top: rect.bottom + 6, left: rect.left });
+//     }
+//     setOpenMenu(catId);
+//   };
 
 //   return (
 //     <header
@@ -346,11 +374,16 @@
 //             {partCategories.map(cat => (
 //               <div key={cat.id} className="relative">
 //                 <button
+//                   ref={(el) => { btnRefs.current[cat.id] = el; }}
 //                   onClick={() => {
 //                     onCategoryClick(cat.id);
-//                     setOpenMenu(openMenu === cat.id ? null : cat.id);
+//                     if (openMenu === cat.id) {
+//                       setOpenMenu(null);
+//                     } else {
+//                       openDropdownFor(cat.id);
+//                     }
 //                   }}
-//                   onMouseEnter={() => setOpenMenu(cat.id)}
+//                   onMouseEnter={() => openDropdownFor(cat.id)}
 //                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
 //                     activeCategory === cat.id
 //                       ? "bg-rose-500 text-white"
@@ -367,12 +400,19 @@
 //                   </svg>
 //                 </button>
 
-//                 {/* Dropdown */}
-//                 {openMenu === cat.id && (
+//                 {/* Dropdown — rendered through a portal into document.body so it
+//                     escapes the nav's overflow-x-auto clipping and always sits
+//                     above the Hero section, regardless of stacking context. */}
+//                 {openMenu === cat.id && createPortal(
 //                   <div
-//                     className="absolute top-full left-0 mt-1 bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 min-w-[220px] z-50 grid grid-cols-2 gap-1"
+//                     ref={dropdownRef}
+//                     className="fixed bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 min-w-[220px] z-[9999] grid grid-cols-2 gap-1"
+//                     style={{
+//                       top: dropdownPos.top,
+//                       left: dropdownPos.left,
+//                       animation: "dropIn 0.15s ease-out",
+//                     }}
 //                     onMouseLeave={() => setOpenMenu(null)}
-//                     style={{ animation: "dropIn 0.15s ease-out" }}
 //                   >
 //                     <style>{`@keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }`}</style>
 //                     {cat.subcategories.map(sub => (
@@ -384,7 +424,8 @@
 //                         {sub}
 //                       </button>
 //                     ))}
-//                   </div>
+//                   </div>,
+//                   document.body
 //                 )}
 //               </div>
 //             ))}
@@ -743,7 +784,21 @@
 //       </footer>
 //     </div>
 //   );
+
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -751,6 +806,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import im from "../../assets/AC/part2.jpeg"
+import im2 from "../../assets/AC/parts1.jpeg"
+import im3 from "../../assets/AC/parts3.jpeg"
 
 // ─── Category Data ────────────────────────────────────────────────────────────
 const partCategories = [
@@ -806,7 +864,7 @@ function StarRating({ rating = 0 }) {
 // ─── Product Card ─────────────────────────────────────────────────────────────
 function ProductCard({ product }) {
   const [imgError, setImgError] = useState(false);
-    const slug = product?.name?.toLowerCase()?.replace(/[^\w ]+/g, "")?.replace(/ +/g, "-");
+  const slug = product?.name?.toLowerCase()?.replace(/[^\w ]+/g, "")?.replace(/ +/g, "-");
   const [hovered, setHovered] = useState(false);
   const img = getPrimary(product.images);
   const isOnSale = product.salePrice && product.salePrice < product.price;
@@ -824,63 +882,62 @@ function ProductCard({ product }) {
     >
       {/* Image */}
       <Link to={`/product/${slug}`}>
-          <div className="relative overflow-hidden bg-rose-50" style={{ paddingBottom: "75%" }}>
-        <div className="absolute inset-0">
-          {img && !imgError ? (
-            <img
-              src={img} alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-slate-100 to-slate-200">
-              {partCategories.find(c => c.id === product.category)?.icon || "📦"}
-            </div>
-          )}
-        </div>
+        <div className="relative overflow-hidden bg-rose-50" style={{ paddingBottom: "75%" }}>
+          <div className="absolute inset-0">
+            {img && !imgError ? (
+              <img
+                src={img} alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-slate-100 to-slate-200">
+                {partCategories.find(c => c.id === product.category)?.icon || "📦"}
+              </div>
+            )}
+          </div>
 
-        {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-          {isOnSale && (
-            <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide uppercase">
-              -{discount}%
-            </span>
-          )}
-          {isLowStock && !isOutOfStock && (
-            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-              Low Stock
-            </span>
-          )}
-          {isOutOfStock && (
-            <span className="bg-rose-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-              Sold Out
-            </span>
-          )}
-        </div>
+          {/* Badges */}
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+            {isOnSale && (
+              <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide uppercase">
+                -{discount}%
+              </span>
+            )}
+            {isLowStock && !isOutOfStock && (
+              <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                Low Stock
+              </span>
+            )}
+            {isOutOfStock && (
+              <span className="bg-rose-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                Sold Out
+              </span>
+            )}
+          </div>
 
-        {/* Quick add */}
-        <div
-          className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-3 pt-8 transition-all duration-300"
-          style={{
-            opacity: hovered ? 1 : 0,
-            transform: hovered ? "translateY(0)" : "translateY(8px)",
-            background: "linear-gradient(to top, rgba(255,255,255,0.95) 60%, transparent)"
-          }}
-        >
-          <button
-            disabled={isOutOfStock}
-            className="flex items-center gap-1.5 bg-rose-900 text-white text-xs font-bold px-5 py-2 rounded-full hover:bg-rose-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          {/* Quick add */}
+          <div
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-3 pt-8 transition-all duration-300"
+            style={{
+              opacity: hovered ? 1 : 0,
+              transform: hovered ? "translateY(0)" : "translateY(8px)",
+              background: "linear-gradient(to top, rgba(255,255,255,0.95) 60%, transparent)"
+            }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-          </button>
+            <button
+              disabled={isOutOfStock}
+              className="flex items-center gap-1.5 bg-rose-900 text-white text-xs font-bold px-5 py-2 rounded-full hover:bg-rose-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            </button>
+          </div>
         </div>
-      </div>
       </Link>
-  
 
       {/* Info */}
       <div className="p-3.5 flex flex-col gap-2 flex-1">
@@ -1203,8 +1260,32 @@ function Navbar({ activeCategory, onCategoryClick, cartCount }) {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero({ onExplore }) {
+  // Background photos — same import names as before, now used as a photo
+  // backdrop instead of being unused. Overlaid with the original
+  // rose/indigo/red gradient (darkened) so the palette is unchanged, it's
+  // just sitting on top of the images now instead of standing alone.
+  const heroImages = [im, im2, im3];
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-rose-900 via-indigo-950 to-red-900 py-20 lg:py-28">
+      {/* Background images */}
+      <div className="absolute inset-0 grid grid-cols-3">
+        {heroImages.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ))}
+      </div>
+
+      {/* Dark color overlay — keeps the original gradient palette, tinted
+          darker on top of the photos, plus a flat black layer for contrast
+          so the white text stays legible over busy photo content. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-900/90 via-indigo-950/90 to-red-900/90" />
+      <div className="absolute inset-0 bg-black/5" />
+
       {/* Decorative grid */}
       <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
@@ -1240,11 +1321,10 @@ function Hero({ onExplore }) {
               </svg>
             </button>
             <Link to='/categories'>
-               <button className="flex items-center gap-2 bg-white/5 border border-white/10 text-white font-semibold px-6 py-3 rounded-2xl hover:bg-white/10 transition-all text-sm">
-              Browse Categories
-            </button>
+              <button className="flex items-center gap-2 bg-white/5 border border-white/10 text-white font-semibold px-6 py-3 rounded-2xl hover:bg-white/10 transition-all text-sm">
+                Browse Categories
+              </button>
             </Link>
-         
           </div>
 
           <div className="flex flex-wrap gap-6 mt-12 pt-8 border-t border-white/10">

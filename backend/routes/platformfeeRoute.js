@@ -23,7 +23,7 @@ router.post('/pay-fee/verify', verifyToken, verifyFeePayment);
 router.get('/platform-fees', verifyToken, getSellersFeeStatus);
 
 // Block or Unblock a seller
-router.patch('/:sellerId/toggle-block', verifyToken, isAdmin, toggleBlockSeller);
+router.put('/:sellerId/toggle-block', verifyToken, isAdmin, toggleBlockSeller);
 
 // View payment history logs for a specific seller
 router.get('/:sellerId/payment-history', verifyToken, isAdmin, getSellerPaymentHistory);

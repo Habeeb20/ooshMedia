@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   profilePicture: String,
   password: { type: String, required: true },
   isBlocked:{type: String},
-
+  loyaltyUsageAllowed: { type: Boolean, default: true }, // admin can disable per-user
   eAuthOtp: {
   code: { type: String, select: false },
   expiresAt: { type: Date },
@@ -192,7 +192,7 @@ employerProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'EmployerProfile' 
   sellerProfile: {
     sellerTypes: [{
       type: String,
-      enum: ['manufacturer', 'wholesaler', 'retailer', 'distributor', "agent"]
+      enum: ['manufacturer', 'wholesaler', 'retailer', 'distributor', "agent", "farmer"]
     }],
   market: { type: String },
   // Add inside sellerProfile: { ... } in models/User.js

@@ -62,8 +62,9 @@ import SellerStorefront from "./pages/others/food/foodSellerStorefront";
 import VideoGridPage from "./components/home/VideoGridPage";
 import ForgotPasswordFlow from "./pages/auth/Forgotpassword";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordpage";
-
-
+import PriceChecker from "./pages/others/PriceChecker/Checker";
+import RawMaterials from "./components/home/RawMaterials";
+import ExploreProducers from "./components/home/ExploreProducers";
 const App = () => {
   useScrollToTop();
    const location = useLocation();
@@ -174,6 +175,8 @@ const App = () => {
             {/* Rider: their delivery dashboard */}
             <Route path="/rider/dashboard" element={<RiderDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+<Route path="/b2b-sourcing/raw-materials" element={<RawMaterials />} />
+<Route path="/b2b-sourcing/producers" element={<ExploreProducers />} />
 
             <Route path="/marketplace" element={<MarketPlace />} />
             <Route path="/products" element={<ProductsPage/>} />
@@ -209,6 +212,7 @@ const App = () => {
             <Route path="/carparts" element={<AutoParts/>} />
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />
+            <Route path="/priceChecker" element={<PriceChecker />} />
           </Routes>
         </div>
       </CartProvider>
@@ -217,6 +221,18 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

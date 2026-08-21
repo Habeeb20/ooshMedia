@@ -1,5 +1,21 @@
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import axios from 'axios';
 // import crypto from 'crypto';
 // import Cart from '../../models/order/Cart.js';
@@ -8,7 +24,7 @@
 // import Product from "../../models/sellers/product.js"
 // import Transaction from '../../models/order/Transaction.js';
 // import Loyalty from '../../models/order/Loyalty.js';
-// import  SettlementHistory from '../../models/order/settlementHistory.js';
+// import SettlementHistory, { computeInitialPayoutStatus } from '../../models/order/settlementHistory.js';
 
 // import User from "../../models/user.js"
 // import { computeTransportFee } from '../../utills/Distance.js';
@@ -362,7 +378,7 @@
 //   order.paymentStatus = 'paid';
 //   order.status = 'confirmed';
 
-//   const points = Math.floor(order.totalAmount / 100);
+//   const points = Math.floor(order.totalAmount / 1000);
 //   await awardLoyalty(order.buyer, points, order._id);
 //   order.loyaltyPointsAwarded = points;
 //   await order.save();
@@ -383,9 +399,11 @@
 //   );
 
 //   // Note: sellers paid via Paystack split are settled automatically by
-//   // Paystack — no manual Transfer call needed for them. Sellers who weren't
-//   // eligible for direct payout intentionally keep their share in the
-//   // estore account, so no transfer is owed there either.
+//   // Paystack — no manual Transfer call needed for them (their rows were
+//   // written with payoutStatus 'not_applicable' at checkout time). Sellers
+//   // who weren't eligible for direct payout keep payoutStatus 'owed' from
+//   // checkout, and now show up on the admin settlements dashboard for a
+//   // manual payout.
 
 //   await Cart.findOneAndDelete({ buyer: order.buyer });
 // }
@@ -449,7 +467,7 @@
 //     // Award loyalty + settle sellers if this was pay-on-delivery/pickup
 //     if (order.paymentMethod === 'on_delivery' && order.paymentStatus !== 'paid') {
 //       order.paymentStatus = 'paid';
-//       const points = Math.floor(order.totalAmount / 100);
+//       const points = Math.floor(order.totalAmount / 1000);
 //       await awardLoyalty(order.buyer, points, order._id);
 //       order.loyaltyPointsAwarded = points;
 //       await createTransaction(order, 'completed');
@@ -729,23 +747,38 @@
 // // Keeps the transport_fee SettlementHistory row's rider/riderAmount aligned
 // // with the order — a rider is frequently assigned (or the agreed delivery
 // // fee finalized) after checkout already ran. Safe to call anytime; no-ops
-// // if there's nothing to update.
+// // if there's nothing to update. Also re-derives payoutStatus, since a rider
+// // getting assigned can flip a row from 'not_applicable' to 'owed'.
 // async function syncOrderRiderSettlement(order) {
 //   if (!order.transportFee || order.transportFee <= 0) return;
 
 //   const rider = order.delivery?.assignedRider || null;
 //   const riderAmount = order.delivery?.agreedDeliveryFee ?? order.transportFee;
 
-//   await SettlementHistory.updateMany(
-//     { order: order._id, type: 'transport_fee' },
-//     { $set: { rider, riderAmount } }
-//   );
+//   const rows = await SettlementHistory.find({ order: order._id, type: 'transport_fee' });
+//   for (const row of rows) {
+//     // Don't clobber a row that's already been paid out or attempted.
+//     if (['paid', 'payout_failed'].includes(row.payoutStatus)) {
+//       row.rider = rider;
+//       row.riderAmount = riderAmount;
+//       await row.save();
+//       continue;
+//     }
+//     row.rider = rider;
+//     row.riderAmount = riderAmount;
+//     row.payoutStatus = computeInitialPayoutStatus({ type: 'transport_fee', riderAmount });
+//     await row.save();
+//   }
 // }
 
 // // Writes the initial (pending) settlement-history rows at checkout time —
 // // one per seller's sale share, one for the platform fee, one for the
 // // transport fee. This is the audit trail the split/transfer logic later
 // // updates to 'completed' or 'failed'.
+// //
+// // IMPORTANT: uses insertMany(), which does NOT run the model's pre('save')
+// // hook — so payoutStatus is computed explicitly per-row here via
+// // computeInitialPayoutStatus(), rather than relying on the hook.
 // async function recordCheckoutSettlementHistory({
 //   order,
 //   settlementPlan,
@@ -759,14 +792,18 @@
 
 //   for (const entry of settlementPlan) {
 //     const paidDirect = usedSplit && entry.eligibleForDirectPayout;
+//     const destination = paidDirect ? 'seller_subaccount' : 'estore';
+//     const method = cashPending ? 'cash_pending' : (paidDirect ? 'split' : 'fallback_main_account');
+
 //     rows.push({
 //       order: order._id,
 //       seller: entry.seller,
 //       type: 'sale_share',
 //       amount: entry.sellerAmount,
-//       destination: paidDirect ? 'seller_subaccount' : 'estore',
-//       method: cashPending ? 'cash_pending' : (paidDirect ? 'split' : 'fallback_main_account'),
+//       destination,
+//       method,
 //       status: 'pending',
+//       payoutStatus: computeInitialPayoutStatus({ type: 'sale_share', destination, method }),
 //       paymentMethod,
 //       paystackReference: order.paystackReference,
 //       error: !usedSplit ? splitBuildError : undefined,
@@ -781,23 +818,26 @@
 //     destination: 'estore',
 //     method: cashPending ? 'cash_pending' : 'fallback_main_account',
 //     status: 'pending',
+//     payoutStatus: 'not_applicable', // platform fee is the estore's own revenue — never owed out
 //     paymentMethod,
 //     paystackReference: order.paystackReference,
 //   });
 
 //   if (transportFee > 0) {
+//     const riderAmount = order.delivery?.agreedDeliveryFee ?? transportFee;
 //     rows.push({
 //       order: order._id,
 //       seller: null,
 //       // A rider usually isn't assigned yet at checkout — this gets synced
 //       // in later via syncOrderRiderSettlement once one is.
 //       rider: order.delivery?.assignedRider || null,
-//       riderAmount: order.delivery?.agreedDeliveryFee ?? transportFee,
+//       riderAmount,
 //       type: 'transport_fee',
 //       amount: transportFee,
 //       destination: 'estore', // the fee is collected into the estore account...
 //       method: cashPending ? 'cash_pending' : 'fallback_main_account',
 //       status: 'pending',
+//       payoutStatus: computeInitialPayoutStatus({ type: 'transport_fee', riderAmount }),
 //       paymentMethod,
 //       paystackReference: order.paystackReference,
 //     });
@@ -810,6 +850,11 @@
 // // orders (money never passed through a Paystack transaction, so there's no
 // // split to rely on). Only fires for super-verified sellers with a payout
 // // recipient on file; everyone else's share is recorded as owed to estore.
+// //
+// // Uses .create() throughout, so the model's pre('save') hook already
+// // computes payoutStatus correctly here — no explicit override needed,
+// // though 'paid'-via-transfer rows are explicitly marked not_applicable
+// // since the transfer already happened in the same call.
 // async function settleCashOrderPayouts(order) {
 //   const sellerMap = {};
 //   for (const item of order.items) {
@@ -832,6 +877,7 @@
 //         destination: 'estore',
 //         method: 'cash_pending',
 //         status: 'completed',
+//         payoutStatus: 'owed', // sitting in estore, still owed to this seller
 //         paymentMethod: 'on_delivery',
 //       });
 //       continue;
@@ -868,6 +914,10 @@
 //         destination: 'seller_subaccount',
 //         method: 'transfer',
 //         status: 'completed',
+//         payoutStatus: 'paid', // already sent — nothing left for an admin to do
+//         payoutReference: transferRes.data.data.transfer_code,
+//         payoutAmount: sellerAmt,
+//         paidAt: new Date(),
 //         paymentMethod: 'on_delivery',
 //         paystackTransferCode: transferRes.data.data.transfer_code,
 //       });
@@ -881,6 +931,8 @@
 //         destination: 'estore',
 //         method: 'cash_pending',
 //         status: 'failed',
+//         payoutStatus: 'payout_failed', // shows up with a "Retry payout" button in admin
+//         payoutError: err?.response?.data?.message || err.message,
 //         paymentMethod: 'on_delivery',
 //         error: err?.response?.data?.message || err.message,
 //       });
@@ -890,27 +942,22 @@
 //   // Transport fee on a cash order stays with whoever physically collected
 //   // it — recorded here purely for the audit trail.
 //   if (order.transportFee > 0) {
+//     const riderAmount = order.delivery?.agreedDeliveryFee ?? order.transportFee;
 //     await SettlementHistory.create({
 //       order: order._id,
 //       seller: null,
 //       rider: order.delivery?.assignedRider || null,
-//       riderAmount: order.delivery?.agreedDeliveryFee ?? order.transportFee,
+//       riderAmount,
 //       type: 'transport_fee',
 //       amount: order.transportFee,
 //       destination: 'estore',
 //       method: 'cash_pending',
 //       status: 'completed',
+//       payoutStatus: computeInitialPayoutStatus({ type: 'transport_fee', riderAmount }),
 //       paymentMethod: 'on_delivery',
 //     });
 //   }
 // }
-
-
-
-
-
-
-
 
 // // ── ESTIMATE (delivery fee preview, no order created) ──────
 // export const estimateCheckout = async (req, res) => {
@@ -985,18 +1032,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 import axios from 'axios';
 import crypto from 'crypto';
 import Cart from '../../models/order/Cart.js';
@@ -1011,12 +1046,18 @@ import User from "../../models/user.js"
 import { computeTransportFee } from '../../utills/Distance.js';
 import { buildSellerSettlementPlan } from '../../utills/paystacksplitService.js';
 import { buildDynamicSplit } from '../../utills/paystacksplitService.js';
+import Settings from '../../models/setting.js';
+import { validateRedemption, allocateLoyaltyAcrossCart,
+  groupAllocationsBySeller, } from '../../utills/coreLoyaltyAllocation.js';
+
+
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
 const PLATFORM_FEE_RATE = 0.01; // 1%
 
 const generateVerificationCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
 // ── CHECKOUT ────────────────────────────────────────────────
+// Body may include: { pointsToRedeem: 1500 }  (optional)
 export const checkout = async (req, res) => {
   try {
     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
@@ -1091,6 +1132,50 @@ export const checkout = async (req, res) => {
       };
     });
 
+    // ── LOYALTY REDEMPTION ──────────────────────────────────────
+    // Re-validate server-side even though estimate() previewed this —
+    // never trust a client-supplied discount amount.
+    let loyaltyDiscount = 0;
+    let loyaltyPointsUsed = 0;
+    let loyaltyAllocations = [];
+    let loyaltyDoc = null;
+
+    const pointsToRedeem = Number(req.body.pointsToRedeem || 0);
+    if (pointsToRedeem > 0) {
+      const settings = await Settings.findOne({ key: 'global' });
+      const globalEnabled = !!settings?.allowLoyaltyUsage;
+      const userEnabled = buyer.loyaltyUsageAllowed !== false;
+
+      loyaltyDoc = await Loyalty.findOne({ user: buyer._id });
+      const availablePoints = loyaltyDoc ? loyaltyDoc.totalPoints - loyaltyDoc.usedPoints : 0;
+
+      const validation = validateRedemption({
+        pointsRequested: pointsToRedeem,
+        availablePoints,
+        cartSubtotal: totalAmount,
+        globalEnabled,
+        userEnabled,
+      });
+
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+      }
+
+      const { allocations, totalAllocated } = allocateLoyaltyAcrossCart(cart.items, validation.valueNGN);
+      loyaltyDiscount = totalAllocated;
+      loyaltyPointsUsed = Math.round(totalAllocated / 1000);
+      loyaltyAllocations = allocations;
+
+      // Deduct points now — reserved for this order.
+      loyaltyDoc.usedPoints += loyaltyPointsUsed;
+      loyaltyDoc.history.push({
+        type: 'spent',
+        points: loyaltyPointsUsed,
+        description: `Redeemed at checkout`,
+      });
+      await loyaltyDoc.save();
+    }
+
     // ── TRANSPORT FEE (delivery orders only) ───────────────────
     let transportFee = 0;
     let transportFeeDetails = null;
@@ -1140,9 +1225,13 @@ export const checkout = async (req, res) => {
       paymentMethod: cart.paymentMethod,
       paymentStatus: 'pending',
       status: 'pending',
-      totalAmount: +(totalAmount + transportFee).toFixed(2),
+      // Loyalty reduces what the BUYER pays, but never reduces what sellers
+      // are ultimately owed — that gap is tracked via loyalty_redemption rows.
+      totalAmount: +(totalAmount + transportFee - loyaltyDiscount).toFixed(2),
       totalPlatformFee: +totalPlatformFee.toFixed(2),
       totalSellerAmount: +(totalAmount - totalPlatformFee).toFixed(2),
+      loyaltyPointsUsed,
+      loyaltyDiscount,
     });
 
     await order.save();
@@ -1212,6 +1301,14 @@ export const checkout = async (req, res) => {
         paymentMethod: 'online',
       });
 
+      if (loyaltyAllocations.length) {
+        await recordLoyaltySettlementHistory({
+          order,
+          buyer: buyer._id,
+          allocations: loyaltyAllocations,
+        });
+      }
+
       // Reduce stock optimistically
       await decreaseStock(cart.items);
 
@@ -1220,6 +1317,8 @@ export const checkout = async (req, res) => {
         paymentUrl: paystackRes.data.data.authorization_url,
         reference: paystackRes.data.data.reference,
         transportFee,
+        loyaltyDiscount,
+        loyaltyPointsUsed,
         deliveryCode: order.fulfillmentType === 'delivery' ? verificationCode : null,
         pickupCode: order.fulfillmentType === 'pickup' ? verificationCode : null,
       });
@@ -1243,11 +1342,21 @@ export const checkout = async (req, res) => {
       cashPending: true,
     });
 
+    if (loyaltyAllocations.length) {
+      await recordLoyaltySettlementHistory({
+        order,
+        buyer: buyer._id,
+        allocations: loyaltyAllocations,
+      });
+    }
+
     await Cart.findOneAndDelete({ buyer: req.user._id });
 
     res.json({
       order,
       transportFee,
+      loyaltyDiscount,
+      loyaltyPointsUsed,
       deliveryCode: order.fulfillmentType === 'delivery' ? verificationCode : null,
       pickupCode: order.fulfillmentType === 'pickup' ? verificationCode : null,
     });
@@ -1267,7 +1376,7 @@ export const checkout = async (req, res) => {
  *     summary: Verify a Paystack payment and finalize the order
  *     description: >
  *       Confirms the transaction with Paystack, marks the order paid/confirmed, awards
- *       loyalty points (1 point per ₦100), creates the seller transaction, reconciles
+ *       loyalty points (1 point per ₦1000), creates the seller transaction, reconciles
  *       split settlement history, and clears the buyer's cart.
  *     tags: [Orders]
  *     security:
@@ -1359,7 +1468,7 @@ async function finalizeOnlinePayment(order, paystackData) {
   order.paymentStatus = 'paid';
   order.status = 'confirmed';
 
-  const points = Math.floor(order.totalAmount / 100);
+  const points = Math.floor(order.totalAmount / 1000);
   await awardLoyalty(order.buyer, points, order._id);
   order.loyaltyPointsAwarded = points;
   await order.save();
@@ -1448,7 +1557,7 @@ export const verifyDeliveryCode = async (req, res) => {
     // Award loyalty + settle sellers if this was pay-on-delivery/pickup
     if (order.paymentMethod === 'on_delivery' && order.paymentStatus !== 'paid') {
       order.paymentStatus = 'paid';
-      const points = Math.floor(order.totalAmount / 100);
+      const points = Math.floor(order.totalAmount / 1000);
       await awardLoyalty(order.buyer, points, order._id);
       order.loyaltyPointsAwarded = points;
       await createTransaction(order, 'completed');
@@ -1630,8 +1739,8 @@ export const getSellerOrders = async (req, res) => {
  *     summary: Get the full settlement/payout audit trail for an order
  *     description: >
  *       Every movement of money for this order — seller shares, platform fee,
- *       transport fee — with its destination (seller_subaccount vs estore),
- *       method (split/transfer/fallback/cash_pending) and status.
+ *       transport fee, loyalty redemption — with its destination (seller_subaccount vs
+ *       estore), method (split/transfer/fallback/cash_pending/loyalty_points) and status.
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -1827,6 +1936,29 @@ async function recordCheckoutSettlementHistory({
   if (rows.length) await SettlementHistory.insertMany(rows);
 }
 
+// Writes one settlement-history row PER SELLER whose goods were (partly)
+// paid for via loyalty points, so admin knows exactly who to reconcile cash
+// to and how much. `payoutStatus: 'owed'` means admin still owes this
+// seller real money for the points-covered portion of their sale.
+async function recordLoyaltySettlementHistory({ order, buyer, allocations }) {
+  const bySeller = groupAllocationsBySeller(allocations);
+  const rows = bySeller.map(group => ({
+    order: order._id,
+    buyer,
+    seller: group.seller,
+    type: 'loyalty_redemption',
+    amount: group.totalCovered,
+    loyaltyValueNGN: group.totalCovered,
+    loyaltyPointsUsed: Math.round(group.totalCovered / 1000),
+    destination: 'estore', // points redemption is absorbed by the platform, not paystack
+    method: 'loyalty_points',
+    status: 'completed', // the redemption itself is done; payoutStatus tracks the CASH owed
+    payoutStatus: 'owed',
+    paymentMethod: order.paymentMethod,
+  }));
+  if (rows.length) await SettlementHistory.insertMany(rows);
+}
+
 // Legacy Transfer-API payout path — used only for pay-on-delivery/pickup
 // orders (money never passed through a Paystack transaction, so there's no
 // split to rely on). Only fires for super-verified sellers with a payout
@@ -1940,7 +2072,8 @@ async function settleCashOrderPayouts(order) {
   }
 }
 
-// ── ESTIMATE (delivery fee preview, no order created) ──────
+// ── ESTIMATE (delivery fee preview + optional loyalty redemption preview) ──
+// GET /api/orders/estimate?pointsToRedeem=1500   (pointsToRedeem optional)
 export const estimateCheckout = async (req, res) => {
   try {
     const cart = await Cart.findOne({ buyer: req.user._id }).populate('items.product');
@@ -1991,14 +2124,60 @@ export const estimateCheckout = async (req, res) => {
       };
     });
 
+    // ── LOYALTY PREVIEW ────────────────────────────────────────
+    const settings = await Settings.findOne({ key: 'global' });
+    const globalEnabled = !!settings?.allowLoyaltyUsage;
+    const userEnabled = buyer.loyaltyUsageAllowed !== false;
+
+    const loyaltyDoc = await Loyalty.findOne({ user: buyer._id });
+    const availablePoints = loyaltyDoc ? loyaltyDoc.totalPoints - loyaltyDoc.usedPoints : 0;
+
+    const loyaltyInfo = {
+      availablePoints,
+      globalEnabled,
+      userEnabled,
+      minRedemptionPoints: 1000,
+      eligible: globalEnabled && userEnabled && availablePoints >= 1000,
+    };
+
+    let loyaltyDiscount = 0;
+    let loyaltyPointsUsed = 0;
+    let loyaltyAllocationPreview = null;
+
+    const pointsToRedeem = Number(req.query.pointsToRedeem || 0);
+    if (pointsToRedeem > 0) {
+      const validation = validateRedemption({
+        pointsRequested: pointsToRedeem,
+        availablePoints,
+        cartSubtotal: subtotal,
+        globalEnabled,
+        userEnabled,
+      });
+
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+      }
+
+      const { allocations, totalAllocated } = allocateLoyaltyAcrossCart(cart.items, validation.valueNGN);
+      loyaltyDiscount = totalAllocated;
+      loyaltyPointsUsed = Math.round(totalAllocated / 1000);
+      loyaltyAllocationPreview = groupAllocationsBySeller(allocations);
+    }
+
+    const total = +(subtotal + transportFee - loyaltyDiscount).toFixed(2);
+
     res.json({
       subtotal,
       transportFee,
       transportFeeDetails,
-      total: +(subtotal + transportFee).toFixed(2),
+      loyaltyDiscount,
+      loyaltyPointsUsed,
+      loyaltyAllocationPreview,
+      total,
       fulfillmentType: cart.fulfillmentType,
       paymentMethod: cart.paymentMethod,
       sellerPayoutInfo,
+      loyaltyInfo,
     });
   } catch (err) {
     console.error('Estimate error:', err);

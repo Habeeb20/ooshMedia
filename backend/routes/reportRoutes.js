@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/reports', verifyToken, createReport);
 router.get('/admin/reports', verifyToken, isAdmin, getReports);
 router.get('/admin/reports/:id',verifyToken, isAdmin, getReportById);
-router.patch('/admin/reports/:id', verifyToken, isAdmin, updateReportStatus);
+router.put('/admin/reports/:id', verifyToken, isAdmin, updateReportStatus);
 
 // Blacklist (admin)
 router.get('/admin/users', verifyToken, isAdmin, getUsersForAdmin);

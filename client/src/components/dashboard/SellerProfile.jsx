@@ -757,10 +757,11 @@ import CautionBanner from '../../config/cautionBanner';
 
 // Order matters here — index position defines seniority in the supply chain
 // (0 = most upstream, higher index = further downstream toward the end customer)
-const HIERARCHY = ['manufacturer', 'distributor', 'wholesaler', 'retailer'];
+const HIERARCHY = ['manufacturer', 'distributor', 'farmer', 'wholesaler', 'retailer'];
 
 const SELLER_TYPES = [
   { id: 'manufacturer', label: 'Manufacturer/Importer', icon: Factory, desc: 'I produce or import goods', color: 'blue' },
+  { id: 'farmer', label: 'Farmer/Exporter', icon: Factory, desc: 'I produce farm products/export farm products', color: 'purple' },
   { id: 'distributor', label: 'Distributor', icon: Truck, desc: 'I distribute goods', color: 'indigo' },
   { id: 'wholesaler', label: 'Wholesaler', icon: Store, desc: 'I sell in bulk', color: 'violet' },
   { id: 'retailer', label: 'Retailer', icon: ShoppingBag, desc: 'I sell to end users', color: 'emerald' },
@@ -768,12 +769,13 @@ const SELLER_TYPES = [
 
 const COLOR_MAP = {
   blue: { active: 'border-blue-400 bg-blue-50', icon: 'bg-blue-100 text-blue-600', text: 'text-blue-700', check: 'text-blue-500' },
+  purple: { active: 'border-purple-400 bg-blue-50', icon: 'bg-purple-100 text-purple-600', text: 'text-purple-700', check: 'text-purple-500' },
   indigo: { active: 'border-indigo-400 bg-indigo-50', icon: 'bg-indigo-100 text-indigo-600', text: 'text-indigo-700', check: 'text-indigo-500' },
   violet: { active: 'border-violet-400 bg-violet-50', icon: 'bg-violet-100 text-violet-600', text: 'text-violet-700', check: 'text-violet-500' },
   emerald: { active: 'border-emerald-400 bg-emerald-50', icon: 'bg-emerald-100 text-emerald-600', text: 'text-emerald-700', check: 'text-emerald-500' },
 };
 
-const ALL_RELATIONSHIP_OPTIONS = ['manufacturer', 'distributor', 'wholesaler', 'retailer'];
+const ALL_RELATIONSHIP_OPTIONS = ['manufacturer', 'farmer', 'distributor', 'wholesaler', 'retailer'];
 
 // Returns the relationship options a seller is allowed to add to their distribution
 // network, based on the most senior (most upstream) role they've selected for

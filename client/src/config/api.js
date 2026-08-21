@@ -2,12 +2,17 @@ import axios from 'axios';
 
 const API = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL });
 
+// API.interceptors.request.use(config => {
+//   const token = localStorage.getItem('token' || 'adminToken');
+//   if (token) config.headers.Authorization = `Bearer ${token}`;
+//   return config;
+// });
+
 API.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
 export const feedAPI = {
   getFeed: (params) => API.get('/api/posts/feed', { params }),
   getPost: (id) => API.get(`/api/posts/${id}`),
@@ -73,7 +78,7 @@ const api = axios.create({
 
 // Attach token automatically
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

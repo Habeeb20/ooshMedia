@@ -19,6 +19,7 @@ const productSchema = new mongoose.Schema({
   stockQuantity: { type: Number, required: true, default: 0 },
   lowStockThreshold: { type: Number, default: 10 },
   part:{type: Boolean, default: false},
+  rawMaterial:{type:Boolean, default: false},
 
   whatPart:{type: String},
   subCategoryPart:{type: String},

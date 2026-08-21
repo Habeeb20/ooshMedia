@@ -338,7 +338,7 @@ export default function AdminPlatformFeeTracker() {
     if (reason === null) return;
 
     try {
-      await api.patch(
+      await api.put(
         `/api/admin/sellers/${sellerId}/toggle-block`,
         { blockReason: reason },
         getAuthHeader()

@@ -120,7 +120,8 @@ export const getSellerReviews = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .populate('product', 'name images')
-      .select('userName rating comment image createdAt product');
+      .populate('user', 'firstName lastName rating comment image createdAt product profilePicture')
+      .select('userName firstName lastName rating comment image createdAt product profilePicture');
 
     res.json({ reviews, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
   } catch (err) {

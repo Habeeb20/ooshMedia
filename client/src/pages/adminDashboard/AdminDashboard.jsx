@@ -49,6 +49,7 @@ import AdminReports from "../../components/admin/AdminReports.jsx";
 import AdminInspectionList from "../../components/admin/AdminInspectionList.jsx";
 import AdminSettlements from "../../components/admin/AdminSettlement.jsx";
 import AdminPlatformFeeTracker from "../../components/AdminPlatformfee.jsx";
+import AdminLoyaltyDashboard from "../../components/admin/AdminLoyaltydashboard.jsx";
 // import RewardRules from './RewardRules';
 // import Reports from './Reports';
 
@@ -85,6 +86,7 @@ const NAV = [
   { key: "inspection", label: "Inspection Verification", icon: FileText },
   { key: "settlement", label: "Settlement", icon: FileText },
   { key: "platformFee", label: "Admin platform fee tracker", icon: FileText },
+  { key: "loyalty", label: "Loyalty settings", icon: FileText },
 ];
 
 export default function AdminDashboard() {
@@ -217,6 +219,7 @@ export default function AdminDashboard() {
           {active === "inspection" && <AdminInspectionList />}
           {active === "settlement" && <AdminSettlements />}
           {active === "platformFee" && <AdminPlatformFeeTracker />}
+          {active === "loyalty" && <AdminLoyaltyDashboard />}
 
       
           {active === "reports" && <AdminReports/>} 

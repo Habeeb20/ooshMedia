@@ -53,6 +53,7 @@ const STATUS_STYLES = {
 
 export default function ProductDetails() {
   const { slug } = useParams();
+
   const navigate = useNavigate();
   const [showVarietyModal, setShowVarietyModal] = useState(false);
 const [addingVariety, setAddingVariety] = useState(null);
@@ -180,35 +181,80 @@ const openPurchaseHistory = (partner) => {
   };
 
   // ── Fetch product ────────────────────────────────────────────────────────
+// const fetchProduct = async () => {
+//   try {
+//     // Extract the mongo ID suffix appended by the marketplace (last 6 chars after final "-")
+//     const parts = slug.split("-");
+//     const idSuffix = parts[parts.length - 1];
+
+//     // Try fetching by ID suffix first (fast, exact)
+//     if (idSuffix?.length === 6) {
+//       const res = await axios.get(
+//         `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
+//       );
+//       const products = res.data?.products || res.data || [];
+//       const found = products.find((p) => p._id.endsWith(idSuffix));
+//       if (found) {
+//         setProduct(found);
+//         setMainImage(found.images?.[0]?.url || "");
+//         setRelatedProducts(
+//           products.filter((p) => p.category === found.category && p._id !== found._id)
+//         );
+//         return;
+//       }
+//     }
+
+//     // Fallback: match by slugified name (handles links from related products section)
+//     const res = await axios.get(
+//       `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
+//     );
+//     const products = res.data?.products || res.data || [];
+//     const found = products.find((p) => slugify(p.name) === slug || slug.startsWith(slugify(p.name)));
+//     setProduct(found || null);
+//     if (found?.images?.length) setMainImage(found.images[0].url);
+//     setRelatedProducts(
+//       products.filter((p) => p.category === found?.category && p._id !== found?._id)
+//     );
+//   } catch (err) {
+//     console.error("PRODUCT ERROR:", err);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+
+// Matches a raw Mongo ObjectId, e.g. /product/64f1a2b3c4d5e6f7a8b9c0d1
+const isValidObjectId = (value) => /^[a-f0-9]{24}$/i.test(value);
+
 const fetchProduct = async () => {
   try {
-    // Extract the mongo ID suffix appended by the marketplace (last 6 chars after final "-")
-    const parts = slug.split("-");
-    const idSuffix = parts[parts.length - 1];
-
-    // Try fetching by ID suffix first (fast, exact)
-    if (idSuffix?.length === 6) {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
-      );
-      const products = res.data?.products || res.data || [];
-      const found = products.find((p) => p._id.endsWith(idSuffix));
-      if (found) {
-        setProduct(found);
-        setMainImage(found.images?.[0]?.url || "");
-        setRelatedProducts(
-          products.filter((p) => p.category === found.category && p._id !== found._id)
-        );
-        return;
-      }
-    }
-
-    // Fallback: match by slugified name (handles links from related products section)
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_URL}/api/inventory/all`
     );
     const products = res.data?.products || res.data || [];
-    const found = products.find((p) => slugify(p.name) === slug || slug.startsWith(slugify(p.name)));
+
+    let found;
+
+    if (isValidObjectId(slug)) {
+      // Param is a raw Mongo ID — match exactly
+      found = products.find((p) => p._id === slug);
+    } else {
+      // Param is a slug — try "name-suffix" pattern first
+      const parts = slug.split("-");
+      const idSuffix = parts[parts.length - 1];
+
+      if (idSuffix?.length === 6) {
+        found = products.find((p) => p._id.endsWith(idSuffix));
+      }
+
+      // Fallback: match by slugified name
+      if (!found) {
+        found = products.find(
+          (p) => slugify(p.name) === slug || slug.startsWith(slugify(p.name))
+        );
+      }
+    }
+
     setProduct(found || null);
     if (found?.images?.length) setMainImage(found.images[0].url);
     setRelatedProducts(

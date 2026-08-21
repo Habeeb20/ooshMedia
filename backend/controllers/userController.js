@@ -361,13 +361,13 @@ export const login = async (req, res) => {
 
       if (user.isBlacklisted) {
   return res.status(403).json({
-    message: 'Your account has been blacklisted, contact us at info@joblink.com',
+    message: 'Your account has been blacklisted, contact us at support@estores.com',
   });
 }
 
   if (user.isBlocked) {
   return res.status(403).json({
-    message: 'Your account has been blocked, contact us at info@joblink.com to make your outstanding platform fee',
+    message: 'Your account has been blocked, contact us at support@estores.com to make your outstanding platform fee',
   });
 }
 

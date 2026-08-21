@@ -31,6 +31,8 @@ import ticketRoutes from './routes/ticketRoutes.js';
 import fakeProductvideoRoutes from "./routes/sellers/fakeProductVideoRoute.js"
 import reviewRoutes from "./routes/order/reviewRoute.js"
 import platformFeeRoutes from "./routes/platformfeeRoute.js"
+// in your main app/router file:
+import loyaltyRoutes from './routes/loyaltyRoutes.js'
 dotenv.config();
 connectDb();
 
@@ -60,6 +62,10 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
  */
 app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }));
 app.use(morgan("dev"));
+      
+
+
+
 
 /**
  * Health check
@@ -99,6 +105,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/analytics/seller', platformFeeRoutes)
 app.use('/api/admin/sellers', platformFeeRoutes)
 
+app.use('/api/loyalty', loyaltyRoutes);
 // Start server
 const port = process.env.PORT || 2021;
 
@@ -106,6 +113,16 @@ app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
 
 })
+
+
+
+
+
+
+
+
+
+
 
 
 

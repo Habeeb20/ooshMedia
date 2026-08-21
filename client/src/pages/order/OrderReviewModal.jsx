@@ -70,7 +70,7 @@ export default function ReviewModal({ sellerId, orderId, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
-      <div className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[50vh] overflow-y-auto">
         <div className="sticky top-0 bg-white flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="font-bold text-gray-900 text-lg">Write a Review</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">

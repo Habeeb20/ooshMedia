@@ -48,7 +48,7 @@ export default function AdminReports() {
   };
 
   const updateStatus = async (status) => {
-    await axios.patch(
+    await axios.put(
       `${import.meta.env.VITE_BACKEND_URL}/api/admin/reports/${selected}`,
       { status },
       authHeader
