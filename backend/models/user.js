@@ -65,6 +65,7 @@ walletAccount: {
   businessProfile: {
     businessName: { type: String },
     businessAddress: { type: String },
+     storeSlug: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
     
     // Can accept single or multiple categories
     entityCategory: [{

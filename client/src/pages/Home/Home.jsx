@@ -8,13 +8,14 @@ import FashionDeals from "../../components/home/FashionDeals";
 import FeatureGrid from "./FeaturedGrid";
 import ProductsGrid from "../product/ProductGrid";
 import appConfig from "../../config/appConfig";
-import CarParts from "../../components/home/CarParts";
+import CarParts from "../others/carpart/CarParts";
 import { Truck, ShieldCheck, RefreshCw, Headphones } from "lucide-react";
-import { FlashSaleSection,
-   DiscountDealsSection, TrendingNowSection,
+import {
+  FlashSaleSection,
+  DiscountDealsSection, TrendingNowSection,
   TopSellersSection, TopProductsSection, AnniversaryDealsSection,
   CompanyAdDisplay
- } from "../ads/EcommerceAdsBanner";
+} from "../ads/EcommerceAdsBanner";
 import Food from "../../components/home/Food";
 import Footer from "../../components/Footer";
 import ProductVideoSection from "../../components/home/ProductVideoSection";
@@ -52,7 +53,7 @@ function TrustBar() {
 
 export default function Home() {
 
-   const location = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     if (location.hash) {
@@ -77,32 +78,32 @@ export default function Home() {
       <TrustBar />
 
       {/* Feature grid */}
-   
+
 
       {/* Promo banner */}
       <PromoBanner />
 
       {/* Products */}
       <ProductsGrid />
-   <FeatureGrid />
+      <FeatureGrid />
       {/* Fashion deals */}
       <FashionDeals />
 
-<Food/>
-<ProductVideoSection />
+      <Food />
+      <ProductVideoSection />
 
-<RawMaterialsBanner/>
+      <RawMaterialsBanner />
 
-<CarParts/>
-        <FlashSaleSection />
-    <DiscountDealsSection />
-    <TrendingNowSection />
-    <TopSellersSection />
-    <TopProductsSection />
-    <AnniversaryDealsSection />
+      <CarParts />
+      <FlashSaleSection />
+      <DiscountDealsSection />
+      <TrendingNowSection />
+      <TopSellersSection />
+      <TopProductsSection />
+      <AnniversaryDealsSection />
 
       {/* Footer strip */}
-   <Footer />
+      <Footer />
     </div>
   );
 }

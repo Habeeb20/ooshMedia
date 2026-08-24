@@ -655,6 +655,7 @@ import {
   AlertTriangle, Heart, MapPin, BadgeCheck, ShieldCheck, Truck,
   Headphones, ArrowRight, CircleDot, SlidersHorizontal,
 } from "lucide-react";
+import CarPartsCategoryGrid from "./CarpartCategory";
 
 /* ----------------------------------------------------------------
    CONFIG
@@ -859,11 +860,10 @@ function PillRow({ label, options, value, onChange }) {
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
         <button
           onClick={() => onChange("")}
-          className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-            value === ""
+          className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${value === ""
               ? "bg-gradient-to-r from-rose-600 to-red-500 text-white border-transparent shadow-sm"
               : "bg-white text-gray-600 border-gray-200 hover:border-rose-300 hover:text-rose-600"
-          }`}
+            }`}
         >
           All
         </button>
@@ -871,11 +871,10 @@ function PillRow({ label, options, value, onChange }) {
           <button
             key={opt}
             onClick={() => onChange(value === opt ? "" : opt)}
-            className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-              value === opt
+            className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${value === opt
                 ? "bg-gradient-to-r from-rose-600 to-red-500 text-white border-transparent shadow-sm"
                 : "bg-white text-gray-600 border-gray-200 hover:border-rose-300 hover:text-rose-600"
-            }`}
+              }`}
           >
             {opt}
           </button>
@@ -1201,7 +1200,7 @@ function WhyUs() {
    PROMO BANNER
    ---------------------------------------------------------------- */
 function PromoBanner() {
-  return ( 
+  return (
     <section className="bg-gray-100 px-5 sm:px-8 py-16 sm:py-20">
       <div className="max-w-7xl mx-auto">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 via-red-500 to-orange-400 px-6 sm:px-12 py-10 sm:py-14 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -1477,9 +1476,11 @@ export default function CarPartsListing() {
           </div>
         )}
       </section>
+      <CarPartsCategoryGrid />
 
       <PromoBanner />
       <WhyUs />
+
     </div>
   );
 }

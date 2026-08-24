@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Navbar from "./components/Navbar";
 import { useEffect } from "react";
 import {
@@ -51,7 +52,7 @@ import HerbalMarketplace from "./pages/others/Eherbal";
 import InventoryAccessCallback from "./pages/vendor/Inventoryaccesscallback";
 import VerifyCallback from "./pages/VerifyCallback";
 
-import AutoParts from "./pages/others/Autoparts";
+import AutoParts from "./pages/others/carpart/Autoparts";
 import Topbar from "./components/home/Topbar";
 import ProductsPage from "./pages/product/ProductsPage";
 import { trackPageView } from "./pages/analytics";
@@ -65,11 +66,13 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordpage";
 import PriceChecker from "./pages/others/PriceChecker/Checker";
 import RawMaterials from "./components/home/RawMaterials";
 import ExploreProducers from "./components/home/ExploreProducers";
+import getStoreSlug from "./config/getslug";
+import CarPartsListing from "./pages/others/carpart/CarpartListing";
 const App = () => {
   useScrollToTop();
-   const location = useLocation();
+  const location = useLocation();
 
-    useEffect(() => {
+  useEffect(() => {
     trackPageView(location.pathname + location.search);
   }, [location]);
 
@@ -79,17 +82,19 @@ const App = () => {
     );
   }, []);
 
+  const slug = getStoreSlug()
+  const RootElement = slug ? <SellerStorefront /> : <Home />;
   return (
     <>
       <CartProvider>
         <Toaster richColors position="top-right" />
-     
+
         <Navbar />
         {/* Your other content with pt-20 */}
         <div className="pt-20">
           <Routes>
-            <Route path="/" element={<Home />} />
-
+            {/* <Route path="/" element={<Home />} /> */}
+            <Route path="/" element={RootElement} />
             <Route path="/product/:slug" element={<ProductDetails />} />
 
             <Route
@@ -101,7 +106,10 @@ const App = () => {
               }
             />
 
-            <Route  path="/blacklisted-sellers" element={<BlacklistedSellers />}/>
+            <Route path="/blacklisted-sellers" element={<BlacklistedSellers />} />
+            <Route path="/category/automotive/part/:partSlug" element={<CarPartsListing />} />
+            <Route path="/category/automotive/brand/:partSlug" element={<CarPartsListing />} />
+
 
             <Route
               path="/checkout"
@@ -175,11 +183,11 @@ const App = () => {
             {/* Rider: their delivery dashboard */}
             <Route path="/rider/dashboard" element={<RiderDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-<Route path="/b2b-sourcing/raw-materials" element={<RawMaterials />} />
-<Route path="/b2b-sourcing/producers" element={<ExploreProducers />} />
+            <Route path="/b2b-sourcing/raw-materials" element={<RawMaterials />} />
+            <Route path="/b2b-sourcing/producers" element={<ExploreProducers />} />
 
             <Route path="/marketplace" element={<MarketPlace />} />
-            <Route path="/products" element={<ProductsPage/>} />
+            <Route path="/products" element={<ProductsPage />} />
             <Route path="/signup" element={<Signup />} />
             {/* <Route path="/price-checker" element={<PriceChecker />} /> */}
             <Route path="/price-checker" element={<PriceCheckers />} />
@@ -192,12 +200,12 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
-            
-<Route path="/seller/:sellerId" element={<SellerStorefront />} />
-<Route path="/videos" element={<VideoGridPage />} />
 
-           
-<Route path="/category/:categorySlug/:subCategorySlug" element={<ProductsGrid />} />
+            <Route path="/seller/:sellerId" element={<SellerStorefront />} />
+            <Route path="/videos" element={<VideoGridPage />} />
+
+
+            <Route path="/category/:categorySlug/:subCategorySlug" element={<ProductsGrid />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -207,9 +215,9 @@ const App = () => {
               path="/dashboard/inventory-access/callback"
               element={<InventoryAccessCallback />}
             />
-<Route path="/verify/callback" element={<VerifyCallback />} />
+            <Route path="/verify/callback" element={<VerifyCallback />} />
             <Route path="/eparts" element={<Eparts />} />
-            <Route path="/carparts" element={<AutoParts/>} />
+            <Route path="/carparts" element={<AutoParts />} />
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />
             <Route path="/priceChecker" element={<PriceChecker />} />
@@ -221,6 +229,25 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

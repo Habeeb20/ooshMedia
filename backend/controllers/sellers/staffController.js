@@ -177,12 +177,12 @@ export const reissueCreatorCode = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    if (!user?.sellerProfile?.controlRoom?.activatedAt) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Control Room has not been activated yet.' 
-      });
-    }
+    // if (!user?.sellerProfile?.controlRoom?.activatedAt) {
+    //   return res.status(400).json({ 
+    //     success: false, 
+    //     message: 'Control Room has not been activated yet.' 
+    //   });
+    // }
 
     const code = generate4DigitCode();
     const hashedCode = await bcrypt.hash(code, 10);
@@ -265,6 +265,7 @@ export const controlRoomLogin = async (req, res) => {
     if (!code) return res.status(400).json({ success: false, message: 'Enter your 4-digit code.' });
 
     const user = await User.findById(req.user._id);
+    console.log(user)
     const roomAuth = user?.sellerProfile?.controlRoom;
     if (!roomAuth?.codeHash) {
       return res.status(400).json({ success: false, message: 'Control Room has not been activated yet.' });

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable no-unused-vars */
 // import React, { useState, useEffect } from 'react';
 // import { useParams, useNavigate } from 'react-router-dom';
 // import axios from 'axios';
@@ -338,6 +340,7 @@ import appConfig from '../../config/AppConfig';
 import JobLocationMap from '../../location/JobLocationMap';
 import { useJobDistance } from '../../location/UseJobDistance';
 import { useUserLocation, getDistanceKm } from '../../location/UserLocation';
+import getStoreSlug from '../../config/getslug';
 
 
 
@@ -346,7 +349,7 @@ const SellerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-const [distributors, setDistributors] = useState([]);
+  const [distributors, setDistributors] = useState([]);
   const [seller, setSeller] = useState(null);
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -354,11 +357,37 @@ const [distributors, setDistributors] = useState([]);
   const [liked, setLiked] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
-const { location: userLocation } = useUserLocation();
-const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocation, seller?.lga, seller?.state);
+  const { location: userLocation } = useUserLocation();
+  const { distanceKm, driveMinutes, distanceLoading } = useJobDistance(userLocation, seller?.lga, seller?.state);
   const token = localStorage.getItem("token");
 
-  const cleanArray = (value) => {
+
+
+
+const { id: sellerIdParam } = useParams();
+const [resolvedSellerId, setResolvedSellerId] = useState(sellerIdParam);
+
+
+useEffect(() => {
+  const init = async () => {
+    if (sellerIdParam) {
+      setResolvedSellerId(sellerIdParam);
+      return;
+    }
+    const slug = getStoreSlug();
+    if (!slug) return; // not on a subdomain, handle as normal home route
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/storefront/${slug}`);
+      setResolvedSellerId(data.seller._id);
+    } catch (err) {
+      navigate('/store-not-found');
+    }
+  };
+  init();
+}, [sellerIdParam]);
+
+
+const cleanArray = (value) => {
   try {
     if (!value) return [];
 

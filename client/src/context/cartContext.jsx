@@ -1,7 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../config/api';
 import { toast } from 'sonner';
+import { useAuth } from './AuthContext';
+import { getCart as getLocalCart, clearCart as clearLocalCart } from '../config/cartUtils';
+
 
 const defaultValue = {
   cart: null,
@@ -34,6 +38,7 @@ const normalizeCart = (rawCart) => {
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
+    const { isAuthenticated } = useAuth();
 
   const fetchCart = useCallback(async () => {
     try {
@@ -44,7 +49,36 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => { fetchCart(); }, [fetchCart]);
+
+  const mergeGuestCart = useCallback(async () => {
+    const guestItems = getLocalCart();
+    if (!guestItems.length) return;
+
+    try {
+      const { data } = await api.post('/api/cart/sync', {
+        items: guestItems.map(i => ({
+          productId: i.productId,
+          varietyName: i.varietyName || null,
+          quantity: i.qty,
+        })),
+      });
+      setCart(normalizeCart(data.cart));
+      clearLocalCart();
+    } catch (err) {
+      console.error('Guest cart merge failed:', err);
+      // don't clear localStorage — retry next mount
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      mergeGuestCart().then(fetchCart);
+    } else {
+      fetchCart();
+    }
+  }, [isAuthenticated, mergeGuestCart, fetchCart]);
+
+  // useEffect(() => { fetchCart(); }, [fetchCart]);
 
   const addToCart = async (productId, quantity = 1, varietyName) => {
     setLoading(true);
@@ -136,3 +170,23 @@ export const CartProvider = ({ children }) => {
 
 // Safe hook — works even if CartProvider is not yet mounted
 export const useCart = () => useContext(CartContext);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

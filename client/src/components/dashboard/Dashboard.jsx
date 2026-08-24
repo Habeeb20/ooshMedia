@@ -31,6 +31,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { Copy,Check } from "lucide-react";
 // ---------------------------------------------------------------------------
 // Palette — white background, dark text, amber/teal/coral accents
 // ---------------------------------------------------------------------------
@@ -417,6 +418,55 @@ export default function Dashboard() {
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
+function StoreUrlButton({ profile }) {
+  const [copied, setCopied] = useState(false);
+
+  const rootDomain = import.meta.env.VITE_ROOT_DOMAIN || "estores.ng";
+  const slug =
+    profile?.businessProfile?.storeSlug ||
+    profile?.username ||
+    "";
+
+  if (!slug) return null;
+
+  const storeUrl = `https://${slug}.${rootDomain}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(storeUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full transition-colors hover:brightness-95"
+      style={{ background: COLORS.panel }}
+      title="Copy your store link"
+    >
+      <span className="font-medium text-gray-700 max-w-[160px] truncate">
+        {slug}.{rootDomain}
+      </span>
+      {copied ? (
+        <Check size={13} style={{ color: COLORS.teal }} />
+      ) : (
+        <Copy size={13} style={{ color: COLORS.textDim }} />
+      )}
+      {copied && (
+        <span className="text-[10px] font-medium" style={{ color: COLORS.teal }}>
+          Copied
+        </span>
+      )}
+    </button>
+  );
+}
+
+
+
 function Header({ profile, flags, currentTime }) {
   const getGreeting = () => {
     const h = currentTime.getHours();
@@ -450,9 +500,13 @@ function Header({ profile, flags, currentTime }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full" style={{ background: COLORS.panel }}>
-        <Award size={14} style={{ color: COLORS.amber }} />
-        {profile?.referralPoints || 0} referral pts · {profile?.referralCount || 0} referrals
+      <div className="flex items-center gap-2 flex-wrap">
+        {flags.isSeller && <StoreUrlButton profile={profile} />}
+
+        <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full" style={{ background: COLORS.panel }}>
+          <Award size={14} style={{ color: COLORS.amber }} />
+          {profile?.referralPoints || 0} referral pts · {profile?.referralCount || 0} referrals
+        </div>
       </div>
 
       <div className="text-right">
@@ -466,7 +520,6 @@ function Header({ profile, flags, currentTime }) {
     </header>
   );
 }
-
 function SectionHeading({ icon, title }) {
   return (
     <div className="flex items-center gap-2 mt-10 mb-1">
@@ -612,3 +665,32 @@ function ErrorState({ message }) {
 function objToChartData(obj = {}) {
   return Object.entries(obj).map(([name, value]) => ({ name, value }));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

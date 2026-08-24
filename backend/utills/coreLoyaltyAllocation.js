@@ -3,7 +3,7 @@
 
 // utills/loyaltyAllocation.js
 
-export const POINT_TO_NGN_RATE = 1000; // 1 point = ₦1000 (matches earn rate: ₦1000 spent = 1 point)
+export const POINT_TO_NGN_RATE = 10000; // 1 point = ₦1000 (matches earn rate: ₦1000 spent = 1 point)
 export const MIN_REDEMPTION_POINTS = 1000; // must have + redeem in blocks of at least this many points
 
 export function pointsToNaira(points) {

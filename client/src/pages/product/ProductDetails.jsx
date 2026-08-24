@@ -897,7 +897,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                 <div className="mt-6">
   <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
     <h2
-      className="text-4xl md:text-5xl font-black"
+      className="text-2xl md:text-3xl font-black"
       style={{ color: appConfig.colors.primary }}
     >
       {format(effectivePrice)}
@@ -939,7 +939,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                 </div>
 
                 {/* Description */}
-                <div className="mt-8">
+                <div className="mt-3">
                   <h3 className="font-bold text-xl">Description</h3>
                   <p className="text-gray-600 leading-relaxed mt-3">{product?.description}</p>
                 </div>
@@ -960,7 +960,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
 
                 {/* ── Quantity picker ────────────────────────────────────────── */}
                 {product?.stockQuantity > 0 && (
-                  <div className="mt-8">
+                  <div className="mt-3">
                     <p className="font-semibold text-gray-700 mb-3">Quantity</p>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center border border-gray-200 rounded-2xl overflow-hidden">
