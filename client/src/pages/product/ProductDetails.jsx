@@ -870,14 +870,28 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                 )}
 
                 {/* Ratings */}
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="flex text-amber-400">
+                {/* <div className="flex items-center gap-2 mt-4">
+                  <div className="flex text-gray-400">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} fill="currentColor" size={20} />
                     ))}
                   </div>
                   <span className="text-gray-500">({product?.ratings || 0} Ratings)</span>
-                </div>
+                </div> */}
+                {/* Ratings */}
+<div className="flex items-center gap-2 mt-4">
+  <div className="flex">
+    {[...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        fill="currentColor"
+        size={20}
+        className={i < Math.round(product?.ratings || 0) ? 'text-amber-400' : 'text-gray-400'}
+      />
+    ))}
+  </div>
+  <span className="text-gray-500">({product?.ratings || 0} Ratings)</span>
+</div>
 
                 {/* Price */}
                 {/* <div className="mt-6">

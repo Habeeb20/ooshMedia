@@ -1088,11 +1088,11 @@ export const checkout = async (req, res) => {
         sellerCache.set(sellerId, seller);
       }
 
-      if (cart.paymentMethod === 'on_delivery' && !seller?.acceptsPaymentOnDelivery) {
-        return res.status(400).json({
-          message: `Seller of "${item.name}" does not accept payment on delivery`,
-        });
-      }
+      // if (cart.paymentMethod === 'on_delivery' && !seller?.acceptsPaymentOnDelivery) {
+      //   return res.status(400).json({
+      //     message: `Seller of "${item.name}" does not accept payment on delivery`,
+      //   });
+      // }
 
       // capture the seller for the order (last one wins if cart somehow has more than one)
       orderSellerId = seller?._id;
@@ -1468,7 +1468,7 @@ async function finalizeOnlinePayment(order, paystackData) {
   order.paymentStatus = 'paid';
   order.status = 'confirmed';
 
-  const points = Math.floor(order.totalAmount / 1000);
+  const points = Math.floor(order.totalAmount / 10000);
   await awardLoyalty(order.buyer, points, order._id);
   order.loyaltyPointsAwarded = points;
   await order.save();
@@ -1601,13 +1601,15 @@ export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.orderId)
       .populate('buyer', 'firstName lastName email phoneNumber')
+      .populate('seller', 'firstName lastName email phoneNumber businessName businessAddress address')
       .populate('items.product', 'name images price')
-      .populate('items.seller', 'firstName lastName shopName');
+      .populate('items.seller', 'firstName lastName shopName phoneNumber email businessName');
     if (!order) return res.status(404).json({ message: 'Order not found' });
     // Only buyer or seller can view
     const isBuyer = order.buyer._id.toString() === req.user._id.toString();
     const isSeller = order.items.some(i => i.seller._id.toString() === req.user._id.toString());
     if (!isBuyer && !isSeller) return res.status(403).json({ message: 'Forbidden' });
+    console.log(order)
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -1629,7 +1631,8 @@ export const getOrderById = async (req, res) => {
 export const getBuyerOrders = async (req, res) => {
   try {
     const orders = await Order.find({ buyer: req.user._id })
-       .populate('items.product', 'name images')
+      .populate('items.product', 'name images')
+      .populate('seller', 'firstName lastName email phoneNumber businessName businessAddress address state lga alternateContact')
       .populate('delivery.assignedRider', 'firstName lastName phoneNumber')
       .sort({ createdAt: -1 });
     res.json(orders);

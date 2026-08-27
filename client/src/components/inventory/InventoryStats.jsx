@@ -8,7 +8,7 @@ export default function InventoryStats({ stats }) {
       <div className="bg-white p-6 rounded-3xl shadow-sm">
         <div className="flex justify-between">
           <div>
-            <p className="text-gray-500 text-sm">Total Products </p>
+            <p className="text-gray-500 text-sm">Total Stocks</p>
             <p className="text-2xl font-bold mt-2">{stats.totalUnits}</p>
           </div>
           <Package className="w-10 h-10 text-[#8B1E3F]" />
@@ -17,7 +17,7 @@ export default function InventoryStats({ stats }) {
       <div className="bg-white p-6 rounded-3xl shadow-sm">
         <div className="flex justify-between">
           <div>
-            <p className="text-gray-500 text-sm">Total Products by name</p>
+            <p className="text-gray-500 text-sm">Total Products </p>
             <p className="text-2xl font-bold mt-2">{stats.totalProducts}</p>
           </div>
           <Package className="w-10 h-10 text-[#8B1E3F]" />

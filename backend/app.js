@@ -5,7 +5,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { connectDb } from "./db.js";
-
+import http from "http"
+import { initSocket } from "./socket.js";
 // routes
 import authRoutes from "./routes/userRoute.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
@@ -109,12 +110,19 @@ app.use('/api/loyalty', loyaltyRoutes);
 // Start server
 const port = process.env.PORT || 2021;
 
-app.listen(port, async () => {
+// app.listen(port, async () => {
+//   console.log(`Server is running on port ${port}`);
+
+// })
+
+
+
+const server = http.createServer(app);   // wrap app in a real http.Server
+initSocket(server);                       // attach socket.io to that server
+
+server.listen(port, () => {               // listen on server, not app
   console.log(`Server is running on port ${port}`);
-
-})
-
-
+});
 
 
 

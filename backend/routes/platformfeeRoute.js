@@ -3,7 +3,7 @@ import {   getSellersFeeStatus,
   toggleBlockSeller,
   getSellerPaymentHistory,
   initializeFeePayment,
-  verifyFeePayment, } from '../controllers/platformFeeController.js';
+  verifyFeePayment, } from '../controllers/platformfeeController.js';
 import { verifyToken, isAdmin } from '../middleware/verifyToken.js';
 
 const router = express.Router();

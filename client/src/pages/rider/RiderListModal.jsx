@@ -83,7 +83,7 @@ const token = localStorage.getItem('token')
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[70vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
           <div>
@@ -170,6 +170,7 @@ const token = localStorage.getItem('token')
                       </div>
                     ) : distance ? (
                       <>
+                      <p className='text-rose-900 text-sm'>please note that the rider fee has been paid for by the buyer</p>
                         <div className="grid grid-cols-3 gap-2">
                           <div className="bg-gray-50 rounded-xl p-3 text-center">
                             <p className="text-xs text-gray-500 mb-1">Distance</p>
@@ -184,7 +185,7 @@ const token = localStorage.getItem('token')
                             <p className="font-bold text-rose-900 text-sm">₦{distance.suggestedFee?.toLocaleString()}</p>
                           </div>
                         </div>
-
+{/* 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Your Offer (₦)
@@ -196,7 +197,7 @@ const token = localStorage.getItem('token')
                             placeholder="Enter delivery fee offer"
                             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-900/30 focus:border-rose-900"
                           />
-                        </div>
+                        </div> */}
 
                         <div className="bg-gray-50 rounded-xl p-3 space-y-1 text-sm">
                           <div className="flex justify-between text-gray-500">

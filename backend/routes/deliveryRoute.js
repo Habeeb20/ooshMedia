@@ -7,8 +7,7 @@ import { sendEmail } from '../utills/sendEmail.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import dotenv from "dotenv"
 import { getIO } from '../socket.js';
-
-
+import { feeFromDistance } from '../utills/Distance.js';
 
 dotenv.config()
 const router = express.Router();
@@ -105,10 +104,57 @@ router.get('/riders', verifyToken, async (req, res) => {
  */
 
 
+// router.post('/calculate-distance', verifyToken, async (req, res) => {
+//   try {
+//     const { origin, destination } = req.body;
+//     console.log('calculate-distance body:', req.body);
+
+//     if (!origin || !destination) {
+//       return res.status(400).json({ success: false, message: 'origin and destination required' });
+//     }
+
+//     const url = `https://maps.googleapis.com/maps/api/distancematrix/json`;
+//     const { data } = await axios.get(url, {
+//       params: {
+//         origins: origin,
+//         destinations: destination,
+//         key: process.env.GOOGLE_MAPS_API_KEY,
+//         units: 'metric',
+//       },
+//     });
+
+//     console.log('Google Maps response:', JSON.stringify(data, null, 2));
+
+//     const element = data.rows?.[0]?.elements?.[0];
+
+//     if (!element || element.status !== 'OK') {
+//       console.log('Bad element:', element);
+//       return res.status(400).json({ success: false, message: 'Could not calculate distance' });
+//     }
+
+//     const distanceKm = element.distance.value / 1000;
+//     const durationMinutes = Math.ceil(element.duration.value / 60);
+//     const suggestedFee = Math.round(distanceKm * 150);
+
+//     res.json({
+//       success: true,
+//       distanceKm,
+//       durationMinutes,
+//       suggestedFee,
+//       distanceText: element.distance.text,
+//       durationText: element.duration.text,
+//     });
+//   } catch (err) {
+//     console.error('calculate-distance error:', err.message);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
+
+
+
 router.post('/calculate-distance', verifyToken, async (req, res) => {
   try {
     const { origin, destination } = req.body;
-    console.log('calculate-distance body:', req.body);
 
     if (!origin || !destination) {
       return res.status(400).json({ success: false, message: 'origin and destination required' });
@@ -124,18 +170,15 @@ router.post('/calculate-distance', verifyToken, async (req, res) => {
       },
     });
 
-    console.log('Google Maps response:', JSON.stringify(data, null, 2));
-
     const element = data.rows?.[0]?.elements?.[0];
 
     if (!element || element.status !== 'OK') {
-      console.log('Bad element:', element);
       return res.status(400).json({ success: false, message: 'Could not calculate distance' });
     }
 
     const distanceKm = element.distance.value / 1000;
     const durationMinutes = Math.ceil(element.duration.value / 60);
-    const suggestedFee = Math.round(distanceKm * 150);
+    const suggestedFee = feeFromDistance(distanceKm); // <-- use the shared formula
 
     res.json({
       success: true,
@@ -150,8 +193,6 @@ router.post('/calculate-distance', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-
 /**
  * @swagger
  * /api/delivery/request:
@@ -249,8 +290,8 @@ console.log(req.body)
       durationMinutes,
       sellerName: `${seller.firstName} ${seller.lastName}`,
     });
-
-    // Email rider
+try {
+   // Email rider
   await sendEmail({
   to: rider.email,
   subject: '🚴 New Delivery Request',
@@ -288,6 +329,10 @@ console.log(req.body)
     </div>
   `,
 });
+} catch (error) {
+  console.log(error)
+}
+   
 
     res.status(201).json({ success: true, deliveryRequest: deliveryReq });
   } catch (err) {
@@ -362,7 +407,7 @@ router.get('/my-requests', verifyToken, async (req, res) => {
 router.get('/order/:orderId', verifyToken, async (req, res) => {
   try {
     const requests = await DeliveryRequest.find({ order: req.params.orderId, seller: req.user._id })
-      .populate('rider', 'firstName lastName phone profileImage riderDetails averageRating')
+      .populate('rider', 'firstName lastName phoneNumber email alternateContact profilePicture profileImage riderDetails averageRating')
       .sort({ createdAt: -1 });
     res.json({ success: true, requests });
   } catch (err) {
@@ -700,8 +745,8 @@ router.put('/:requestId/tracking', verifyToken, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid status' });
 
     const request = await DeliveryRequest.findById(req.params.requestId)
-      .populate('seller', 'firstName lastName email')
-      .populate('buyer', 'firstName lastName email');
+      .populate('seller', 'firstName lastName email alternateContact')
+      .populate('buyer', 'firstName lastName email alternateContact');
 
     if (!request) return res.status(404).json({ success: false, message: 'Not found' });
     if (String(request.rider) !== String(req.user._id))
@@ -717,20 +762,26 @@ router.put('/:requestId/tracking', verifyToken, async (req, res) => {
 
     // Notify both seller and buyer
     const label = statusLabels[trackingStatus];
-    if (label) {
-      try {
-          [request.seller, request.buyer].forEach(async (person) => {
+  if (label) {
+  try {
+    await Promise.all(
+      [request.seller, request.buyer].map(async (person) => {
+        const to = person.email || person.alternateContact;
+        if (!to) {
+          console.warn(`No email/alternateContact for ${person._id} — skipping notification`);
+          return;
+        }
         await sendEmail({
-          to: person.email || person.alternateContact,
+          to,
           subject: `📍 Delivery Update: ${label}`,
           html: `<p>Hi ${person.firstName}, your rider is now <strong>${label}</strong>.</p>`,
         });
-      });
-      } catch (error) {
-        console.log(error)
-      }
-    
-    }
+      })
+    );
+  } catch (error) {
+    console.log(error); // now this actually catches failures
+  }
+}
 
     getIO().to(`user_${request.seller._id}`).emit('delivery:tracking_update', { requestId: request._id, trackingStatus });
     getIO().to(`user_${request.buyer._id}`).emit('delivery:tracking_update', { requestId: request._id, trackingStatus });
@@ -1006,6 +1057,21 @@ function buyerAssignedEmailHtml(request, amount) {
 }
 
 export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

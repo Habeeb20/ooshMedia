@@ -378,6 +378,7 @@ export default function SellerDeliveryPanel() {
     try {
       const { data } = await api.get(`/api/delivery/order/${orderId}`);
       setRequestsMap(prev => ({ ...prev, [orderId]: data.requests || [] }));
+      console.log(data.requests)
     } catch (err) {
       console.error(err);
     }
@@ -459,6 +460,7 @@ export default function SellerDeliveryPanel() {
           deliveryOrders.map((order) => {
             const requests = requestsMap[order._id] || [];
             const acceptedReq = requests.find(r => r.status === 'accepted');
+            console.log(acceptedReq)
             console.log(order)
             const sellerAddress =`${order.sellerInfo?.state}, ${order.sellerInfo?.lga}` || order.seller?.businessProfile?.businessAddress;
 console.log(sellerAddress)
@@ -519,14 +521,15 @@ console.log(sellerAddress)
                       <p className="text-green-700 font-semibold mb-2">Active Rider</p>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                          {acceptedReq.rider?.firstName?.[0]}
+                          <img src=  {acceptedReq.rider?.profilePicture || acceptedReq.rider?.firstName?.[0]}/>
+                         
                         </div>
                         <div>
                           <p>{acceptedReq.rider?.firstName} {acceptedReq.rider?.lastName}</p>
-                          <p className="text-sm text-gray-500">{acceptedReq.rider?.phone}</p>
+                          <p className="text-sm text-gray-500">{acceptedReq.rider?.phoneNumber || acceptedReq.rider?.alternateContact}</p>
+                          <p className="text-sm text-gray-500">{acceptedReq.rider?.email}</p>
                         </div>
                         <div className="ml-auto text-right">
-                          <p className="font-bold">₦{acceptedReq.agreedAmount}</p>
                         </div>
                       </div>
                     </div>

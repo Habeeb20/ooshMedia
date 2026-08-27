@@ -149,7 +149,7 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
           </div>
 
           {/* Negotiation History */}
-          {request.negotiations?.length > 0 && (
+          {/* {request.negotiations?.length > 0 && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Offer History</p>
               <div className="space-y-2">
@@ -175,7 +175,7 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Action Buttons: pending / negotiating */}
           {(request.status === 'pending' || request.status === 'negotiating') && (
@@ -196,12 +196,12 @@ export default function RiderRequestCard({ request: initialReq, onUpdate }) {
                   <XCircle size={16} /> Decline
                 </button>
               </div>
-              <button
+              {/* <button
                 onClick={() => setShowNegotiate((s) => !s)}
                 className="w-full flex items-center justify-center gap-1.5 border border-rose-900 text-rose-900 font-semibold py-3 rounded-xl hover:bg-rose-50 transition-colors text-sm"
               >
                 <MessageSquare size={16} /> Negotiate
-              </button>
+              </button> */}
 
               {showNegotiate && (
                 <div className="bg-gray-50 rounded-xl p-3 space-y-3">

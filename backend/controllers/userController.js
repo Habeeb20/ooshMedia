@@ -1110,12 +1110,14 @@ export const getWalletStatus = async (req, res) => {
 
 
 
-export const storeFront = async(req, res) => {
-   try {
+
+export const storeFront = async (req, res) => {
+  try {
+    console.log("slug param:", req.params.slug); // confirm this isn't undefined
     const seller = await User.findOne({
       $or: [
-        { 'businessProfile.storeSlug': req.params.slug.toLowerCase() },
-        { username: req.params.slug.toLowerCase() },
+        { 'businessProfile.storeSlug': req.params.slug?.toLowerCase() },
+        { username: req.params.slug?.toLowerCase() },
       ],
       isSeller: true,
     }).select('-password -identityVerification -walletAccount -sellerProfile.bankDetails');
@@ -1123,11 +1125,10 @@ export const storeFront = async(req, res) => {
     if (!seller) return res.status(404).json({ message: 'Store not found' });
     res.json({ seller });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("STOREFRONT ERROR:", err); // full stack in your server logs
+    res.status(500).json({ message: err.message }); // TEMPORARY - shows real error in Network tab
   }
-}
-
-
+};
 
 
 

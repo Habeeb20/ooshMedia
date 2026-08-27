@@ -83,7 +83,7 @@ const App = () => {
   }, []);
 
   const slug = getStoreSlug()
-  const RootElement = slug ? <SellerStorefront /> : <Home />;
+  const RootElement = slug ? <SellerDetail /> : <Home />;
   return (
     <>
       <CartProvider>
@@ -154,6 +154,14 @@ const App = () => {
             />
             <Route
               path="/product/:slug/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/product/:id"
               element={
                 <ProtectedRoute>
                   <ProductDetails />

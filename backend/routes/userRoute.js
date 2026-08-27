@@ -11,6 +11,7 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.get('/storefront/:slug', storeFront)
 router.get("/", verifyToken, getDashboard);
 router.get("/dashboard", verifyToken, getDashboard);
 router.put(
@@ -24,5 +25,5 @@ router.get('/status', verifyToken, getWalletStatus);
 
 router.post('/e-auth/request', requestEAuthOtp);
 router.post('/e-auth/verify', verifyEAuthOtp);
-router.get('/storefront/:slug', storeFront)
+
 export default router;

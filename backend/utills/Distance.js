@@ -96,7 +96,7 @@ async function getDistanceKm(origin, destination) {
   }
 }
 
-function feeFromDistance(distanceKm) {
+export function feeFromDistance(distanceKm) {
   const raw = TRANSPORT_BASE_FEE + distanceKm * TRANSPORT_RATE_PER_KM;
   return Math.min(TRANSPORT_MAX_FEE, Math.max(TRANSPORT_MIN_FEE, Math.round(raw)));
 }

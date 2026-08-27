@@ -10,7 +10,7 @@ export default function PaymentVerifyPage() {
   const [status, setStatus] = useState('verifying'); // 'verifying' | 'success' | 'failed'
   const [order, setOrder] = useState(null);
   const [deliveryCode, setDeliveryCode] = useState(null);
-
+const [pickupCode, setPickupCode] = useState(null)
   useEffect(() => {
     const reference = searchParams.get('reference') || searchParams.get('trxref');
     if (!reference) {
@@ -22,6 +22,7 @@ export default function PaymentVerifyPage() {
         setOrder(data.order);
         if (data.order.fulfillmentType === 'delivery') {
           setDeliveryCode(data.order.delivery?.deliveryCode);
+          setPickupCode(data.order?.delivery?.pickupCode || data.order?.pickup?.pickupCode)
         }
         setStatus('success');
       })
@@ -60,6 +61,13 @@ export default function PaymentVerifyPage() {
           <p className="text-sm mb-2 opacity-80">Your Delivery Code</p>
           <p className="text-6xl font-black tracking-widest">{deliveryCode}</p>
           <p className="text-xs mt-3 opacity-70">Give this to the rider when they arrive</p>
+        </div>
+      )}
+      {pickupCode && (
+        <div className="bg-indigo-600 text-white rounded-2xl p-6 text-center shadow-xl">
+          <p className="text-sm mb-2 opacity-80">Your Pick up Code</p>
+          <p className="text-6xl font-black tracking-widest">{pickupCode}</p>
+          <p className="text-xs mt-3 opacity-70">Give this to the seller when when you get to store</p>
         </div>
       )}
 

@@ -561,7 +561,7 @@ import im from "../../assets/AC/beauty.jpeg";
    ──────────────────────────────────────────────────────────────────────── */
 const PROVIDERS_API = "https://backend-efixit.ereligion.ng/api/provider/providers";
 const PRODUCTS_API = "https://api.estores.ng/api/products/all";
-const PROVIDER_PROFILE_BASE = "http://localhost:5174";
+const PROVIDER_PROFILE_BASE = "https://efixit.ng";
 const PRODUCT_BASE = "https://estores.estores.ng/product";
 
 /* ────────────────────────────────────────────────────────────────────────
