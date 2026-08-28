@@ -14,7 +14,7 @@ import axios from "axios";
 import {
   Heart, ShoppingCart, Star, Truck, ShieldCheck,
   Loader2, CheckCircle, XCircle, Package, Minus,
-  Plus, ShoppingBag, ChevronRight, Clock,
+  Plus, ShoppingBag, ChevronRight, Clock, Share2
 } from "lucide-react";
 import JobLocationMap from "../../location/JobLocationMap";
 import appConfig from "../../config/appConfig";
@@ -266,6 +266,20 @@ const fetchProduct = async () => {
     setLoading(false);
   }
 };
+
+// ── Track view (fires once per product load) ────────────────────────────
+useEffect(() => {
+  if (!product?._id) return;
+
+  axios
+    .post(`${import.meta.env.VITE_BACKEND_URL}/api/products/${product._id}/view`)
+    .then(({ data }) => {
+      // keep local product state in sync so the displayed count is fresh
+      setProduct((prev) => (prev ? { ...prev, views: data.views } : prev));
+    })
+    .catch((err) => console.error("View tracking failed:", err));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [product?._id]);
   // ── Fetch buyer order history ────────────────────────────────────────────
   const fetchOrders = async () => {
     setOrdersLoading(true);
@@ -338,6 +352,61 @@ const handleSelectVariety = async (variety) => {
     showToast(result.message || "Failed to add to cart", "error");
   }
   setAddingVariety(null);
+};
+
+// ── Like handler ──────────────────────────────────────────────────────────
+const handleLikeProduct = async () => {
+  if (!requireAuth()) return;
+  if (liked || !product?._id) return; // one like per session — no unlike endpoint exists
+
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/${product._id}/like`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setProduct((prev) => (prev ? { ...prev, likes: data.likes } : prev));
+    setLiked(true);
+    showToast("Added to your likes!", "success");
+  } catch (err) {
+    showToast(err.response?.data?.message || "Could not like this product", "error");
+  }
+};
+
+
+// ── Share handler ────────────────────────────────────────────────────────
+const handleShareProduct = async () => {
+  if (!product?._id) return;
+
+  const slug = slugify(product.name) + "-" + product._id.slice(-6);
+  const shareUrl = `${window.location.origin}/product/${slug}`;
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: product.name,
+        text: `Check out ${product.name} on ${appConfig?.name || "our store"}`,
+        url: shareUrl,
+      });
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast("Product link copied to clipboard!", "success");
+    }
+
+    // Count the share regardless of which path was used above —
+    // if the user cancels the native share sheet, this still fires,
+    // which is an acceptable tradeoff since there's no cancel event to hook.
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/${product._id}/share`
+    );
+    setProduct((prev) => (prev ? { ...prev, shares: data.shares } : prev));
+  } catch (err) {
+    // AbortError fires when the user dismisses the native share sheet — not a real error
+    if (err.name !== "AbortError") {
+      console.error("Share failed:", err);
+    }
+  }
 };
 
   // ── Quantity handlers (login required) ───────────────────────────────────
@@ -1055,8 +1124,34 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                     </button>
                   )}
 
+                  {/* Like */}
+<button
+  onClick={handleLikeProduct}
+  disabled={liked}
+  title={liked ? "You liked this" : "Like this product"}
+  className={`w-full sm:w-16 h-16 rounded-2xl border-2 flex flex-col items-center justify-center gap-0.5 transition ${
+    liked ? "bg-red-50 border-red-300" : "border-gray-200 hover:bg-gray-50"
+  }`}
+>
+  <Heart
+    size={20}
+    className={liked ? "fill-red-500 text-red-500" : "text-gray-500"}
+  />
+  <span className="text-[10px] font-semibold text-gray-500">{product?.likes || 0}</span>
+</button>
+
+{/* Share */}
+<button
+  onClick={handleShareProduct}
+  title="Share this product"
+  className="w-full sm:w-16 h-16 rounded-2xl border-2 border-gray-200 hover:bg-gray-50 flex flex-col items-center justify-center gap-0.5 transition"
+>
+  <Share2 size={20} className="text-gray-500" />
+  <span className="text-[10px] font-semibold text-gray-500">{product?.shares || 0}</span>
+</button>
+
                   {/* Wishlist */}
-                  <button
+                  {/* <button
                     onClick={() => setLiked(l => !l)}
                     className={`w-full sm:w-16 h-16 rounded-2xl border-2 flex items-center justify-center transition ${
                       liked ? "bg-red-50 border-red-300" : "border-gray-200 hover:bg-gray-50"
@@ -1066,7 +1161,7 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                       size={22}
                       className={liked ? "fill-red-500 text-red-500" : "text-gray-500"}
                     />
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Checkout button */}

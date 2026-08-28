@@ -23,6 +23,7 @@ import SellerAllReviews from "../order/AllReview";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import RawMaterialsBanner from "../../components/home/RawmaterialsBanner";
+import PriceCheckerBanner from "../../components/home/PricecheckerBanner";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -93,6 +94,7 @@ export default function Home() {
       <ProductVideoSection />
 
       <RawMaterialsBanner />
+      <PriceCheckerBanner/>
 
       <CarParts />
       <FlashSaleSection />

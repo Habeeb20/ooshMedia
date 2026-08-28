@@ -32,7 +32,8 @@ import ticketRoutes from './routes/ticketRoutes.js';
 import fakeProductvideoRoutes from "./routes/sellers/fakeProductVideoRoute.js"
 import reviewRoutes from "./routes/order/reviewRoute.js"
 import platformFeeRoutes from "./routes/platformfeeRoute.js"
-// in your main app/router file:
+
+  import voucherRoutes from './routes/voucherRoutes.js';
 import loyaltyRoutes from './routes/loyaltyRoutes.js'
 dotenv.config();
 connectDb();
@@ -107,6 +108,9 @@ app.use('/api/analytics/seller', platformFeeRoutes)
 app.use('/api/admin/sellers', platformFeeRoutes)
 
 app.use('/api/loyalty', loyaltyRoutes);
+
+
+  app.use('/api/vouchers', voucherRoutes);
 // Start server
 const port = process.env.PORT || 2021;
 

@@ -87,6 +87,21 @@ const orderSchema = new mongoose.Schema({
   loyaltyPointsUsed: { type: Number, default: 0 },
 
   notes: String,
+
+
+  voucherUsed: {
+    code: String,
+    category: String,               // wallet-side voucher category, e.g. "food"
+    redemptionReference: String,    // wallet's redemption_reference, for reconciliation
+    discountAmountKobo: Number,     // what the voucher covered, in kobo
+    matchedItems: [{
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      name: String,
+      quantity: Number,
+      subtotalKobo: Number,
+    }],
+  },
 }, { timestamps: true });
 
 // Auto-generate order number

@@ -13,7 +13,7 @@ import painting5 from "../assets/Painting/p5.jpeg";
 import painting6 from "../assets/Painting/p6.jpeg";
 export const productCategories = [
   {
-    id: "electronics",
+    id: "electronics", 
     name: "Electronics & gadgets",
     icon: "📱",
     subcategories: [
