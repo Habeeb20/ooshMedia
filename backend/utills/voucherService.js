@@ -15,18 +15,24 @@
 //   PAYSTACK_SECRET_KEY=sk_xxx          (server-side only — verifies the reduced-amount charge)
 
 import axios from 'axios';
+import dotenv from "dotenv"
 
+dotenv.config()
 const WALLET_BASE_URL = process.env.WALLET_BASE_URL || 'https://api-ewallet.eroot.ng/api';
+
+const WALLET_API_TOKEN= "esk_dk7ilx2g5kzhSrryB2jPOWok5VBeT6NFbV01oPkn"
 
 // Reuses the same header/token pattern already established for the wallet
 // integration elsewhere in the codebase (walletHeaders()).
 function walletHeaders() {
   return {
-    Authorization: `Bearer ${process.env.WALLET_API_TOKEN}`,
+    Authorization: `Bearer ${WALLET_API_TOKEN}`,
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
 }
+
+
 
 const wallet = axios.create({
   baseURL: WALLET_BASE_URL,
@@ -39,7 +45,7 @@ const wallet = axios.create({
  * decide which cart items it can apply to.
  */
 export async function lookupVoucher(code) {
-  const { data } = await wallet.get(`/vouchers/${encodeURIComponent(code)}`, {
+  const { data } = await wallet.get(`/merchant/vouchers/${encodeURIComponent(code)}`, {
     headers: walletHeaders(),
   });
   return data?.data;
@@ -49,13 +55,15 @@ export async function lookupVoucher(code) {
  * Reserve a checkout-mode redemption against a computed cart_kobo.
  * Does NOT move money — see docs. Caller must confirm or release.
  */
-export async function reserveVoucherCheckout({ code, cartKobo, orderReference }) {
+export async function reserveVoucherCheckout({ code, cartKobo, orderReference, category }) {
+  console.log(cartKobo, orderReference, category)
   const { data } = await wallet.post(
     '/vouchers/redeem',
     {
-      code,
+      
       mode: 'checkout',
       cart_kobo: cartKobo,
+      category:category,
       order_reference: orderReference,
     },
   

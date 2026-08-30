@@ -61,7 +61,7 @@ export default function VoucherModal({ isOpen, onClose, cart, deliveryFeeKobo, o
       const { data } = await api.post('/api/vouchers/redeem', {
         code: code.trim(),
         mode:"ccheckout",
-        category:'food',
+      
         cartItems,
         deliveryFeeKobo,
       });

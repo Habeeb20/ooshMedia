@@ -36,29 +36,29 @@ function getCartItemProductId(item) {
  */
 export async function lookupVoucherHandler(req, res) {
   try {
-    const voucher = await lookupVoucher(req.params.code);
-    if (!voucher) {
-      return res.status(404).json({ message: 'Voucher not found.' });
+    const cartKobo = req.query.cartKobo ? Number(req.query.cartKobo) : undefined;
+    const voucher = await lookupVoucher(req.params.code, cartKobo);
+    if (!voucher) return res.status(404).json({ message: 'Voucher not found.' });
+    if (voucher.valid !== true) {
+      return res.status(422).json({ message: voucher.reason || 'This voucher is not usable right now.' });
     }
-    if (voucher.status !== 'active') {
-      return res.status(422).json({ message: 'This voucher is not active.' });
-    }
-    // Only return what the frontend needs — never leak merchant_email etc.
     return res.json({
       code: voucher.code,
       type: voucher.type,
       category: voucher.category,
-      status: voucher.status,
+      amount_kobo: voucher.amount_kobo,
+      percentage: voucher.percentage,
+      preview_value_kobo: voucher.preview_value_kobo,
+      uses_remaining: voucher.uses_remaining,
       expires_at: voucher.expires_at,
     });
   } catch (err) {
     const status = err.response?.status;
     if (status === 404) return res.status(404).json({ message: 'Voucher not found.' });
-    console.error('lookupVoucherHandler error:', err.response?.data || err.message);
+    console.error('lookupVoucherHandler error:', status, err.response?.data || err.message);
     return res.status(500).json({ message: 'Could not look up voucher right now.' });
   }
 }
-
 /**
  * POST /api/vouchers/apply
  * Body: { code, cartItems: [{ productId, quantity }], deliveryFeeKobo }
@@ -69,26 +69,31 @@ export async function lookupVoucherHandler(req, res) {
  * whatever price the client sends.
  */
 export async function applyVoucherHandler(req, res) {
-    console.log("It got here")
   const buyerId = req.user._id;
-  const { code, cartItems, mode, category, deliveryFeeKobo = 0 } = req.body;
-  console.log(cartItems)
-
+  const { code, cartItems, deliveryFeeKobo = 0 } = req.body;
 
   if (!code || !Array.isArray(cartItems) || cartItems.length === 0) {
     return res.status(400).json({ message: 'Voucher code and cart items are required.' });
   }
 
   try {
-    const voucher = code;
-
-
-    // Pull real product docs — never trust client-sent price/category.
     const productIds = cartItems.map((i) => i.productId ?? i.product ?? i._id);
     const products = await Product.find({ _id: { $in: productIds } }).populate('seller', '_id');
-       
     const productById = new Map(products.map((p) => [String(p._id), p]));
-console.log(productById)
+
+    // Rough matched subtotal first, just to send a useful cart_kobo preview to lookup.
+    let roughCartKobo = 0;
+    for (const item of cartItems) {
+      const pid = item.productId?._id ?? item.product ?? item._id;
+      const product = productById.get(String(pid));
+      if (product) roughCartKobo += Math.round(product.price * item.quantity * NGN_TO_KOBO);
+    }
+
+    const voucher = await lookupVoucher(code, roughCartKobo);
+    if (!voucher || voucher.valid !== true) {
+      return res.status(422).json({ message: voucher?.reason || 'This voucher is invalid or has expired.' });
+    }
+
     const matchedItems = [];
     let matchedSubtotalKobo = 0;
     let unmatchedSubtotalKobo = 0;
@@ -96,13 +101,11 @@ console.log(productById)
     for (const item of cartItems) {
       const pid = item.productId?._id ?? item.product ?? item._id;
       const product = productById.get(String(pid));
-    console.log(product)
-      if (!product) continue; // stale cart item — skip silently, checkout flow already guards this elsewhere
-
+      if (!product) continue;
 
       const lineSubtotalKobo = Math.round(product.price * item.quantity * NGN_TO_KOBO);
 
-      if (productMatchesVoucherCategory(product, category)) {
+      if (productMatchesVoucherCategory(product, voucher.category)) {
         matchedItems.push({
           product: product._id,
           seller: product.seller?._id || product.seller,
@@ -110,28 +113,28 @@ console.log(productById)
           quantity: item.quantity,
           subtotalKobo: lineSubtotalKobo,
         });
-       
         matchedSubtotalKobo += lineSubtotalKobo;
       } else {
         unmatchedSubtotalKobo += lineSubtotalKobo;
       }
     }
-  
 
     if (matchedItems.length === 0) {
-        console.log(`This voucher only applies to "${category}" items, and none are in your cart.`)
       return res.status(422).json({
-        message: `This voucher only applies to "${category}" items, and none are in your cart.`,
+        message: `This voucher only applies to "${voucher.category}" items, and none are in your cart.`,
       });
     }
 
     const orderReference = genOrderReference();
+   
     const reservation = await reserveVoucherCheckout({
-      code,
+      code: voucher.code,
       cartKobo: matchedSubtotalKobo,
       orderReference,
+      category: voucher.category,
     });
-console.log(reservation)
+    
+
     const grandTotalToChargeKobo =
       unmatchedSubtotalKobo + reservation.amount_to_charge_kobo + Math.round(deliveryFeeKobo);
 
@@ -167,12 +170,13 @@ console.log(reservation)
     });
   } catch (err) {
     const walletMessage = err.response?.data?.error;
-    console.error('applyVoucherHandler error:', walletMessage || err.message);
+    console.error('applyVoucherHandler error:', err.response?.status, walletMessage || err.message);
     return res.status(err.response?.status || 500).json({
-      message: walletMessage || 'Could not apply this voucher right now.',
+      message: walletMessage || 'hey!!!!, Could not apply this voucher right now.',
     });
   }
 }
+
 /**
  * POST /api/vouchers/release
  * Body: { redemptionReference }
@@ -317,6 +321,15 @@ export async function adminListVoucherOrdersHandler(req, res) {
 
   return res.json({ status: true, data: orders });
 }
+
+
+
+
+
+
+
+
+
 
 
 
