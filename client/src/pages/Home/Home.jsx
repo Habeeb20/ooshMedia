@@ -24,6 +24,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import RawMaterialsBanner from "../../components/home/RawmaterialsBanner";
 import PriceCheckerBanner from "../../components/home/PricecheckerBanner";
+import OtherPage from "../../components/home/OthersPage";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -83,9 +84,10 @@ export default function Home() {
 
       {/* Promo banner */}
       <PromoBanner />
-
+<OtherPage/>
       {/* Products */}
       <ProductsGrid />
+
       <FeatureGrid />
       {/* Fashion deals */}
       <FashionDeals />

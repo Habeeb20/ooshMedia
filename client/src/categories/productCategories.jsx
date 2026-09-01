@@ -163,7 +163,7 @@ export const productCategories = [
     name: "herbal",
     icon: "📚",
     subcategories: [
-      "leaf", "Powder", "root", "mixture", "sweet", "bitter", "herbal beverages", "fast food", "drops"
+      "leaf", "Powder", "root", "mixture", "sweet", "bitter", "herbal beverages", "arthritis", "body", "diabetes", "man power", "fast food", "drops"
     ]
   },
   {
@@ -284,6 +284,15 @@ export const productCategories = [
       { value: "sofa-repair", label: "Sofa & Couch Repair" },
       { value: "wood-polishing", label: "Wood Polishing & Finishing" },
       { value: "bed-repair", label: "Bed Frame & Mattress Support Repair" }
+    ],
+    subcategories: [
+      { value: "carpentry", label: "Carpentry / Woodwork" },
+      { value: "upholstery", label: "Upholstery & Reupholstery" },
+      { value: "furniture-repair", label: "Furniture Repair & Restoration" },
+      { value: "cabinet-making", label: "Custom Cabinet Making" },
+      { value: "sofa-repair", label: "Sofa & Couch Repair" },
+      { value: "wood-polishing", label: "Wood Polishing & Finishing" },
+      { value: "bed-repair", label: "Bed Frame & Mattress Support Repair" }
     ]
   },
 
@@ -298,6 +307,17 @@ export const productCategories = [
       premium:      { label: "Premium",      min: 12000, max: 25000, unit: "per service" }
     },
     specialties: [
+      { value: "general-mechanic", label: "General Auto Mechanic" },
+      { value: "engine-repair", label: "Engine Repair & Overhaul" },
+      { value: "transmission", label: "Transmission / Gearbox Repair" },
+      { value: "brake-service", label: "Brake Repair & Replacement" },
+      { value: "electrical", label: "Auto Electrical & Wiring" },
+      { value: "ac-repair", label: "Car Air Conditioning Repair" },
+      { value: "diagnostic", label: "Computer Diagnostics & Scanning" },
+      { value: "generator-mechanic", label: "Generator Mechanic" },
+      { value: "panel-beating", label: "Panel Beating & Spray Painting" }
+    ],
+      subcategories: [
       { value: "general-mechanic", label: "General Auto Mechanic" },
       { value: "engine-repair", label: "Engine Repair & Overhaul" },
       { value: "transmission", label: "Transmission / Gearbox Repair" },
@@ -328,7 +348,16 @@ export const productCategories = [
       { value: "sofa-cleaning", label: "Sofa & Upholstery Cleaning" },
       { value: "marble-polishing", label: "Marble, Granite & Tile Polishing" },
       { value: "post-construction", label: "Post-Construction / Renovation Cleaning" }
-    ]
+    ],
+    subcategories: [
+      { value: "home-cleaning", label: "Home / Apartment Cleaning" },
+      { value: "office-cleaning", label: "Office & Commercial Cleaning" },
+      { value: "deep-cleaning", label: "Deep Cleaning / After Party" },
+      { value: "carpet-cleaning", label: "Carpet & Rug Cleaning" },
+      { value: "sofa-cleaning", label: "Sofa & Upholstery Cleaning" },
+      { value: "marble-polishing", label: "Marble, Granite & Tile Polishing" },
+      { value: "post-construction", label: "Post-Construction / Renovation Cleaning" }
+    ],
   },
 
   {
@@ -342,6 +371,15 @@ export const productCategories = [
       premium:      { label: "Premium",      min: 10000, max: 18000, unit: "per call" }
     },
     specialties: [
+      { value: "general-plumbing", label: "General Plumbing" },
+      { value: "leak-repair", label: "Leak Detection & Repair" },
+      { value: "pipe-installation", label: "Pipe Installation & Replacement" },
+      { value: "toilet-repair", label: "Toilet, Sink & Tap Repair" },
+      { value: "water-heater", label: "Water Heater / Boiler Repair" },
+      { value: "drain-unblocking", label: "Drain & Sewage Unblocking" },
+      { value: "borehole-pump", label: "Borehole & Water Pump Services" }
+    ],
+      subcategories: [
       { value: "general-plumbing", label: "General Plumbing" },
       { value: "leak-repair", label: "Leak Detection & Repair" },
       { value: "pipe-installation", label: "Pipe Installation & Replacement" },
@@ -370,6 +408,15 @@ export const productCategories = [
       { value: "generator-install", label: "Generator Installation & Maintenance" },
       { value: "cctv", label: "CCTV & Security Camera Installation" },
       { value: "smart-home", label: "Smart Home & Automation Systems" }
+    ],
+      subcategories: [
+      { value: "house-wiring", label: "House / Building Wiring" },
+      { value: "inverter-solar", label: "Inverter & Solar Panel Installation" },
+      { value: "fault-finding", label: "Electrical Fault Finding & Repair" },
+      { value: "lighting", label: "Lighting Installation & Design" },
+      { value: "generator-install", label: "Generator Installation & Maintenance" },
+      { value: "cctv", label: "CCTV & Security Camera Installation" },
+      { value: "smart-home", label: "Smart Home & Automation Systems" }
     ]
   },
 
@@ -390,7 +437,15 @@ export const productCategories = [
       { value: "pop-painting", label: "POP Ceiling & Plaster Painting" },
       { value: "textured", label: "Textured & Designer Wall Finishing" },
       { value: "roof-coating", label: "Roof Waterproofing & Coating" }
-    ]
+    ],
+      subcategories: [
+      { value: "interior-painting", label: "Interior Painting" },
+      { value: "exterior-painting", label: "Exterior / Fence Painting" },
+      { value: "pop-painting", label: "POP Ceiling & Plaster Painting" },
+      { value: "textured", label: "Textured & Designer Wall Finishing" },
+      { value: "roof-coating", label: "Roof Waterproofing & Coating" }
+    ],
+
   },
 
   {
@@ -411,7 +466,16 @@ export const productCategories = [
       { value: "massage", label: "Body Massage & Spa Services" },
       { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
       { value: "facials", label: "Facials & Skincare Treatments" }
-    ]
+    ],
+      subcategories: [
+      { value: "hairdressing", label: "Hair Dressing / Weaving / Braiding" },
+      { value: "manicure-pedicure", label: "Manicure & Pedicure" },
+      { value: "makeup", label: "Makeup (Bridal / Event / Everyday)" },
+      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" },
+      { value: "massage", label: "Body Massage & Spa Services" },
+      { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
+      { value: "facials", label: "Facials & Skincare Treatments" }
+    ],
   },
 
   {
@@ -428,7 +492,11 @@ export const productCategories = [
     specialties: [
       { value: "shaving", label: "Shaving beards" },
       { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
-    ]
+    ],
+      subcategories: [
+      { value: "shaving", label: "Shaving beards" },
+      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
+    ],
   },
 
   {
@@ -449,7 +517,15 @@ export const productCategories = [
       { value: "roofing", label: "Roofing (Aluminum, Stone-coated)" },
       { value: "concrete", label: "Concrete Works & Flooring" },
       { value: "block-laying", label: "Block Laying & Plastering" }
-    ]
+    ],
+      subcategories: [
+      { value: "building-construction", label: "Building Construction" },
+      { value: "renovation", label: "Home / Office Renovation" },
+      { value: "tiling", label: "Floor & Wall Tiling" },
+      { value: "roofing", label: "Roofing (Aluminum, Stone-coated)" },
+      { value: "concrete", label: "Concrete Works & Flooring" },
+      { value: "block-laying", label: "Block Laying & Plastering" }
+    ],
   },
 
   {
@@ -468,7 +544,14 @@ export const productCategories = [
       { value: "fridge-repair", label: "Refrigerator & Freezer Repair" },
       { value: "cold-room", label: "Cold Room & Chiller Maintenance" },
       { value: "gas-refill", label: "AC Gas Refill & Pressure Testing" }
-    ]
+    ],
+      subcategories: [
+      { value: "split-unit", label: "Split AC Repair & Installation" },
+      { value: "central-ac", label: "Central / Ducted AC" },
+      { value: "fridge-repair", label: "Refrigerator & Freezer Repair" },
+      { value: "cold-room", label: "Cold Room & Chiller Maintenance" },
+      { value: "gas-refill", label: "AC Gas Refill & Pressure Testing" }
+    ],
   },
 
   {
@@ -487,7 +570,14 @@ export const productCategories = [
       { value: "traditional", label: "Traditional / Aso-ebi Sewing" },
       { value: "alteration", label: "Clothing Alteration & Repair" },
       { value: "embroidery", label: "Embroidery & Beading" }
-    ]
+    ],
+      subcategories: [
+      { value: "men-clothing", label: "Men's Native & Suits" },
+      { value: "women-clothing", label: "Women’s Dresses & Gowns" },
+      { value: "traditional", label: "Traditional / Aso-ebi Sewing" },
+      { value: "alteration", label: "Clothing Alteration & Repair" },
+      { value: "embroidery", label: "Embroidery & Beading" }
+    ],
   },
 
   {
@@ -506,82 +596,89 @@ export const productCategories = [
       { value: "studio", label: "Studio Portrait & Headshots" },
       { value: "drone", label: "Drone Aerial Photography" },
       { value: "product", label: "Product & E-commerce Photography" }
-    ]
+    ],
+    subcategories: [
+      { value: "wedding", label: "Wedding Photography & Videography" },
+      { value: "event", label: "Event Coverage (Birthday, Naming)" },
+      { value: "studio", label: "Studio Portrait & Headshots" },
+      { value: "drone", label: "Drone Aerial Photography" },
+      { value: "product", label: "Product & E-commerce Photography" }
+    ],
   },
 
-  {
-    id: "event-planning",
-    name: "Event Planning & Decoration",
-    icon: "🎉",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
-      standard:     { label: "Standard",     min: 10000, max: 20000, unit: "per event" },
-      homeServices: { label: "Home Services", min: 15000, max: 30000, unit: "per event" },
-      premium:      { label: "Premium",      min: 25000, max: 50000, unit: "per event" }
-    },
-    specialties: [
-      { value: "wedding-planning", label: "Wedding Planning & Coordination" },
-      { value: "decoration", label: "Event Decoration & Setup" },
-      { value: "mc", label: "Master of Ceremony (MC)" },
-      { value: "catering", label: "Catering Services" },
-      { value: "dj", label: "DJ & Sound Services" }
-    ]
-  },
+  // {
+  //   id: "event-planning",
+  //   name: "Event Planning & Decoration",
+  //   icon: "🎉",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
+  //     standard:     { label: "Standard",     min: 10000, max: 20000, unit: "per event" },
+  //     homeServices: { label: "Home Services", min: 15000, max: 30000, unit: "per event" },
+  //     premium:      { label: "Premium",      min: 25000, max: 50000, unit: "per event" }
+  //   },
+  //   specialties: [
+  //     { value: "wedding-planning", label: "Wedding Planning & Coordination" },
+  //     { value: "decoration", label: "Event Decoration & Setup" },
+  //     { value: "mc", label: "Master of Ceremony (MC)" },
+  //     { value: "catering", label: "Catering Services" },
+  //     { value: "dj", label: "DJ & Sound Services" }
+  //   ]
+  // },
 
-  {
-    id: "home-tutor",
-    name: "Home Tutoring & Lessons",
-    icon: "📚",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
-      standard:     { label: "Standard",     min: 3000, max: 6000, unit: "per hour" },
-      homeServices: { label: "Home Services", min: 5000, max: 8000, unit: "per hour" },
-      premium:      { label: "Premium",      min: 7000, max: 12000, unit: "per hour" }
-    },
-    specialties: [
-      { value: "primary", label: "Primary / Nursery Lessons" },
-      { value: "jamb", label: "JAMB / WAEC / NECO Preparation" },
-      { value: "coding", label: "Coding & Programming for Kids" },
-      { value: "languages", label: "English, Yoruba, Igbo, French" },
-      { value: "music", label: "Music Lessons (Piano, Guitar)" }
-    ]
-  },
+  // {
+  //   id: "home-tutor",
+  //   name: "Home Tutoring & Lessons",
+  //   icon: "📚",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
+  //     standard:     { label: "Standard",     min: 3000, max: 6000, unit: "per hour" },
+  //     homeServices: { label: "Home Services", min: 5000, max: 8000, unit: "per hour" },
+  //     premium:      { label: "Premium",      min: 7000, max: 12000, unit: "per hour" }
+  //   },
+  //   specialties: [
+  //     { value: "primary", label: "Primary / Nursery Lessons" },
+  //     { value: "jamb", label: "JAMB / WAEC / NECO Preparation" },
+  //     { value: "coding", label: "Coding & Programming for Kids" },
+  //     { value: "languages", label: "English, Yoruba, Igbo, French" },
+  //     { value: "music", label: "Music Lessons (Piano, Guitar)" }
+  //   ]
+  // },
 
-  {
-    id: "security",
-    name: "Security & Surveillance",
-    icon: "🔒",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 4000, max: 7000, unit: "per installation" },
-      standard:     { label: "Standard",     min: 6000, max: 10000, unit: "per installation" },
-      homeServices: { label: "Home Services", min: 8000, max: 15000, unit: "per installation" },
-      premium:      { label: "Premium",      min: 12000, max: 20000, unit: "per installation" }
-    },
-    specialties: [
-      { value: "cctv-install", label: "CCTV Installation" },
-      { value: "alarm", label: "Burglar Alarm Systems" },
-      { value: "gate-automation", label: "Electric Gate & Door Automation" },
-      { value: "security-guard", label: "Security Guard Services" }
-    ]
-  },
+  // {
+  //   id: "security",
+  //   name: "Security & Surveillance",
+  //   icon: "🔒",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 4000, max: 7000, unit: "per installation" },
+  //     standard:     { label: "Standard",     min: 6000, max: 10000, unit: "per installation" },
+  //     homeServices: { label: "Home Services", min: 8000, max: 15000, unit: "per installation" },
+  //     premium:      { label: "Premium",      min: 12000, max: 20000, unit: "per installation" }
+  //   },
+  //   specialties: [
+  //     { value: "cctv-install", label: "CCTV Installation" },
+  //     { value: "alarm", label: "Burglar Alarm Systems" },
+  //     { value: "gate-automation", label: "Electric Gate & Door Automation" },
+  //     { value: "security-guard", label: "Security Guard Services" }
+  //   ]
+  // },
 
-  {
-    id: "laundry",
-    name: "Laundry & Dry Cleaning",
-    icon: "🧼",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
-      standard:     { label: "Standard",     min: 3000, max: 5000, unit: "per kg / item" },
-      homeServices: { label: "Home Services", min: 4000, max: 7000, unit: "per kg / item" },
-      premium:      { label: "Premium",      min: 5000, max: 9000, unit: "per kg / item" }
-    },
-    specialties: [
-      { value: "home-laundry", label: "Home Pickup & Delivery Laundry" },
-      { value: "dry-cleaning", label: "Dry Cleaning (Suits, Gowns)" },
-      { value: "bedding", label: "Bedding & Curtain Cleaning" },
-      { value: "shoe-cleaning", label: "Shoe & Sneaker Cleaning" }
-    ]
-  },
+  // {
+  //   id: "laundry",
+  //   name: "Laundry & Dry Cleaning",
+  //   icon: "🧼",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
+  //     standard:     { label: "Standard",     min: 3000, max: 5000, unit: "per kg / item" },
+  //     homeServices: { label: "Home Services", min: 4000, max: 7000, unit: "per kg / item" },
+  //     premium:      { label: "Premium",      min: 5000, max: 9000, unit: "per kg / item" }
+  //   },
+  //   specialties: [
+  //     { value: "home-laundry", label: "Home Pickup & Delivery Laundry" },
+  //     { value: "dry-cleaning", label: "Dry Cleaning (Suits, Gowns)" },
+  //     { value: "bedding", label: "Bedding & Curtain Cleaning" },
+  //     { value: "shoe-cleaning", label: "Shoe & Sneaker Cleaning" }
+  //   ]
+  // },
 
   {
     id: "catering",
@@ -598,60 +695,66 @@ export const productCategories = [
       { value: "full-catering", label: "Full Event Catering" },
       { value: "continental", label: "Continental Dishes" },
       { value: "local-dishes", label: "Local / Native Dishes" }
-    ]
+    ],
+      subcategories: [
+      { value: "small-chops", label: "Small Chops & Finger Foods" },
+      { value: "full-catering", label: "Full Event Catering" },
+      { value: "continental", label: "Continental Dishes" },
+      { value: "local-dishes", label: "Local / Native Dishes" }
+    ],
   },
 
-  {
-    id: "welding",
-    name: "Welding & Fabrication",
-    icon: "🔩",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 4000, max: 7000, unit: "per job" },
-      standard:     { label: "Standard",     min: 6000, max: 10000, unit: "per job" },
-      homeServices: { label: "Home Services", min: 8000, max: 15000, unit: "per job" },
-      premium:      { label: "Premium",      min: 12000, max: 20000, unit: "per job" }
-    },
-    specialties: [
-      { value: "metal-fabrication", label: "Metal Fabrication" },
-      { value: "gate-welding", label: "Gate & Burglary Proof Welding" },
-      { value: "railings", label: "Staircase & Balcony Railings" },
-      { value: "welding-repair", label: "Welding Repair & Maintenance" }
-    ]
-  },
+  // {
+  //   id: "welding",
+  //   name: "Welding & Fabrication",
+  //   icon: "🔩",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 4000, max: 7000, unit: "per job" },
+  //     standard:     { label: "Standard",     min: 6000, max: 10000, unit: "per job" },
+  //     homeServices: { label: "Home Services", min: 8000, max: 15000, unit: "per job" },
+  //     premium:      { label: "Premium",      min: 12000, max: 20000, unit: "per job" }
+  //   },
+  //   specialties: [
+  //     { value: "metal-fabrication", label: "Metal Fabrication" },
+  //     { value: "gate-welding", label: "Gate & Burglary Proof Welding" },
+  //     { value: "railings", label: "Staircase & Balcony Railings" },
+  //     { value: "welding-repair", label: "Welding Repair & Maintenance" }
+  //   ]
+  // },
 
-  {
-    id: "it-support",
-    name: "IT & Computer Services",
-    icon: "💻",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 3000, max: 5000, unit: "per job" },
-      standard:     { label: "Standard",     min: 4000, max: 7000, unit: "per job" },
-      homeServices: { label: "Home Services", min: 6000, max: 10000, unit: "per job" },
-      premium:      { label: "Premium",      min: 8000, max: 15000, unit: "per job" }
-    },
-    specialties: [
-      { value: "laptop-repair", label: "Laptop & Desktop Repair" },
-      { value: "software", label: "Software Installation & Troubleshooting" },
-      { value: "networking", label: "Network Setup & Wi-Fi" },
-      { value: "web-design", label: "Website Design & Hosting" }
-    ]
-  },
+  // {
+  //   id: "it-support",
+  //   name: "IT & Computer Services",
+  //   icon: "💻",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 3000, max: 5000, unit: "per job" },
+  //     standard:     { label: "Standard",     min: 4000, max: 7000, unit: "per job" },
+  //     homeServices: { label: "Home Services", min: 6000, max: 10000, unit: "per job" },
+  //     premium:      { label: "Premium",      min: 8000, max: 15000, unit: "per job" }
+  //   },
+  //   specialties: [
+  //     { value: "laptop-repair", label: "Laptop & Desktop Repair" },
+  //     { value: "software", label: "Software Installation & Troubleshooting" },
+  //     { value: "networking", label: "Network Setup & Wi-Fi" },
+  //     { value: "web-design", label: "Website Design & Hosting" }
+  //   ]
+  // },
 
-  {
-    id: "other",
-    name: "Other / Miscellaneous",
-    icon: "⋯",
-    description: "Use this if your service doesn't fit elsewhere",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 3000, max: 5000, unit: "per job" },
-      standard:     { label: "Standard",     min: 4000, max: 7000, unit: "per job" },
-      homeServices: { label: "Home Services", min: 6000, max: 10000, unit: "per job" },
-      premium:      { label: "Premium",      min: 8000, max: 15000, unit: "per job" }
-    },
-    specialties: [
-      { value: "custom", label: "Custom / Specify in description" }
-    ]
-  }
+  // {
+  //   id: "other",
+  //   name: "Other / Miscellaneous",
+  //   icon: "⋯",
+  //   description: "Use this if your service doesn't fit elsewhere",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 3000, max: 5000, unit: "per job" },
+  //     standard:     { label: "Standard",     min: 4000, max: 7000, unit: "per job" },
+  //     homeServices: { label: "Home Services", min: 6000, max: 10000, unit: "per job" },
+  //     premium:      { label: "Premium",      min: 8000, max: 15000, unit: "per job" }
+  //   },
+  //   specialties: [
+  //     { value: "custom", label: "Custom / Specify in description" }
+  //   ]
+  // }
 ]
 // ────────────────────────────────────────────────
 // Helper functions
@@ -672,6 +775,7 @@ export const getAllProductCategories = () => {
     icon: cat.icon || "🛠️"
   }));
 };
+
 
 export const getSpecialtiesForProductCategory = (categoryId) => {
   const category = PRODUCT_CATEGORIES.find(cat => cat.id === categoryId);

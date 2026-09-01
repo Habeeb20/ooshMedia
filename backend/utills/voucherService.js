@@ -66,7 +66,7 @@ export async function reserveVoucherCheckout({ code, cartKobo, orderReference, c
       category:category,
       order_reference: orderReference,
     },
-  
+   {headers: walletHeaders()} ,
   );
   return data?.data; // { redemption_reference, discount_kobo, amount_to_charge_kobo, expires_at, ... }
 }

@@ -1006,6 +1006,20 @@ const handleToggleVariety = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
                 <select
+  name="category"
+  required
+  value={formData.category}
+  onChange={handleCategoryChange}
+  className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+>
+  <option value="">Select Category</option>
+  {productCategories.map((cat, index) => (
+    <option key={`${cat.id}-${index}`} value={cat.id}>
+      {cat.icon} {cat.name}
+    </option>
+  ))}
+</select>
+                {/* <select
                   name="category"
                   required
                   value={formData.category}
@@ -1018,28 +1032,56 @@ const handleToggleVariety = () => {
                       {cat.icon} {cat.name}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
 
               {selectedCategory && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
-                  <select
-                    name="subCategory"
-                    required
-                    value={formData.subCategory}
-                    onChange={handleChange}
-                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
-                  >
-                    <option value="">Select Subcategory</option>
-                    {selectedCategory?.subcategories?.map((sub, index) => (
-                      <option key={index} value={sub}>
-                        {sub}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                // <div>
+                //   <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
+                //   <select
+                //     name="subCategory"
+                //     required
+                //     value={formData.subCategory}
+                //     onChange={handleChange}
+                //     className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+                //   >
+                //     <option value="">Select Subcategory</option>
+                //     {selectedCategory?.subcategories?.map((sub, index) => (
+                //       <option key={index} value={sub}>
+                //         {sub}
+                //       </option>
+                //     ))}
+                //   </select>
+                // </div>
+
+               
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
+    <select
+      name="subCategory"
+      required
+      value={formData.subCategory}
+      onChange={handleChange}
+      className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+    >
+      <option value="">Select Subcategory</option>
+      {selectedCategory?.subcategories?.map((sub, index) => {
+        // Fallback: some category entries store subcategories as plain
+        // strings, others as { value, label } objects — handle both
+        // without changing the source data.
+        const isObj = sub && typeof sub === 'object';
+        const optValue = isObj ? sub.value : sub;
+        const optLabel = isObj ? sub.label : sub;
+        return (
+          <option key={isObj ? sub.value : `${optValue}-${index}`} value={optValue}>
+            {optLabel}
+          </option>
+        );
+      })}
+    </select>
+  </div>
+)}
+            
             </div>
 
             {isGroceryCategory && (

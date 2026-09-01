@@ -429,6 +429,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import ExchangeRateTicker from './home/ExchangeRateTicket';
 
 const slugify = (str) =>
   str
@@ -475,8 +476,10 @@ export default function Navbar() {
 
   return (
     <>
+  
       <nav className="fixed left-0 right-0 z-[100] bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
+        <ExchangeRateTicker />
+        <div className="max-w-7xl mt-5 mx-auto px-6">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">

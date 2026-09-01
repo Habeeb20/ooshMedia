@@ -68,6 +68,7 @@ import RawMaterials from "./components/home/RawMaterials";
 import ExploreProducers from "./components/home/ExploreProducers";
 import getStoreSlug from "./config/getslug";
 import CarPartsListing from "./pages/others/carpart/CarpartListing";
+import ExchangeRateTicker from "./components/home/ExchangeRateTicket";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -90,6 +91,7 @@ const App = () => {
         <Toaster richColors position="top-right" />
 
         <Navbar />
+      
         {/* Your other content with pt-20 */}
         <div className="pt-20">
           <Routes>
