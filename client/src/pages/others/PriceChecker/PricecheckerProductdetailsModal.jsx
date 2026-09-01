@@ -6,7 +6,7 @@ export default function ProductDetailsModal({ product, onClose }) {
   const shopName = product.seller?.sellerProfile?.shopName || product.seller?.username;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-40 mt-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-6 shadow-2xl sm:rounded-2xl">
         <button
@@ -38,3 +38,16 @@ export default function ProductDetailsModal({ product, onClose }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
