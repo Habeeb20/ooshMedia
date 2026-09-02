@@ -16,6 +16,20 @@ const categories = [
       "Beverages",
     ],
   },
+  {
+    id: "drinks",
+    name: "drinks",
+    icon: "🛒",
+    subcategories: [
+      "soft drink",
+      "Alcohol",
+      "Energy drinks",
+      "Water",
+      "Juices",
+      "Hot drinks",
+  
+    ],
+  },
   // ...your other categories
 ];
 

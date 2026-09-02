@@ -34,7 +34,16 @@ export default function PropertyDetailsModal({ item, onClose }) {
         {item.owner && (
           <p className="mt-4 text-[12px] text-[#8a8291]">Listed by {item.owner.full_name}</p>
         )}
+            <a    
+          href={`https://eproperties.ng/properties/${item.slug || item._slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 block w-full rounded-full bg-[#9c1f45] py-3 text-center text-sm font-semibold text-white hover:bg-[#7a1834]"
+        >
+          Want to buy
+        </a>
       </div>
+      
     </div>
   );
 }

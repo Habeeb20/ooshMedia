@@ -44,7 +44,16 @@ export default function CarDetailsModal({ car, onClose }) {
             {car.postedBy.phoneNumber && ` · ${car.postedBy.phoneNumber}`}
           </p>
         )}
+                <a
+          href={`https://ecars.ng/cars/${car._id || car.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 block w-full rounded-full bg-[#9c1f45] py-3 text-center text-sm font-semibold text-white hover:bg-[#7a1834]"
+        >
+          Want to buy
+        </a>
       </div>
+      
     </div>
   );
 }

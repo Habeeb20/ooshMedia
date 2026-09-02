@@ -103,6 +103,14 @@ export const productCategories = [
     ]
   },
   {
+    id: "drinks",
+    name: "drinks",
+    icon: "🛒",
+    subcategories: [
+      "Soft drink", "hot drinks", "Water", "Juices", "Alcohol", "Wine"
+    ]
+  },
+  {
     id: "baby",
     name: "Baby Products",
     icon: "🍼",

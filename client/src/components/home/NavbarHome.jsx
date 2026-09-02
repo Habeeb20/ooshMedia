@@ -202,7 +202,7 @@ export default function Navbar() {
               className="flex-1 min-w-0 mx-2 md:mx-4"
             >
               <div
-                className="flex rounded-2xl overflow-hidden border-1 transition-all focus-within:shadow-md"
+                className="flex rounded-2xl overflow-hidden border-1 transition-all focus-within:shadow-md mt-5"
                 style={{ borderColor: appConfig.colors.primary }}
               >
                 <input
@@ -223,7 +223,7 @@ export default function Navbar() {
             </form>
 
             {/* Cart - beside the search bar */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1 mt-5 flex-shrink-0">
               <Link
                 to="/cart"
                 className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl hover:bg-gray-50 group relative"

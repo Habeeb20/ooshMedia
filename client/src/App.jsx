@@ -69,6 +69,8 @@ import ExploreProducers from "./components/home/ExploreProducers";
 import getStoreSlug from "./config/getslug";
 import CarPartsListing from "./pages/others/carpart/CarpartListing";
 import ExchangeRateTicker from "./components/home/ExchangeRateTicket";
+import EdrinkHome from "./pages/others/edrinks/EdrinkHome";
+import DrinkStorefront from "./pages/others/edrinks/DrinkStoreFront";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -207,11 +209,13 @@ const App = () => {
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/business/*" element={<FeedPage />} />
             <Route path="/food" element={<HomePage />} />
+            <Route path="/edrinks" element={<EdrinkHome />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
 
             <Route path="/seller/:sellerId" element={<SellerStorefront />} />
+            <Route path="/drinksseller/:sellerId" element={<DrinkStorefront />} />
             <Route path="/videos" element={<VideoGridPage />} />
 
 
