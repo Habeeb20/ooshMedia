@@ -7,6 +7,8 @@ import Post from '../models/post/post.js';
 import Loyalty from '../models/order/Loyalty.js';
 import jwt from "jsonwebtoken"
 
+import Voucher from "../models/voucher.js";
+
 
 export const adminLogin = async (req, res) => {
       const { email, password } = req.body;
@@ -542,4 +544,55 @@ function formatGroup(arr) {
     acc[cur._id || 'unknown'] = cur.count;
     return acc;
   }, {});
+}
+
+
+
+
+
+
+
+
+
+export async function adminGetAllVouchers(req, res) {
+  try {
+    const { status, category, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (category) filter.category = category;
+
+    const vouchers = await Voucher.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .populate("createdBy", "firstName lastName username email")
+      .populate("redemptions.user", "firstName lastName username email")
+      .populate("redemptions.matchedItems.product", "name")
+      .populate("redemptions.matchedItems.seller", "firstName lastName businessProfile.businessName");
+
+    const total = await Voucher.countDocuments(filter);
+    return res.json({ vouchers, total, page: Number(page), pages: Math.ceil(total / limit) });
+  } catch (err) {
+    console.error("adminGetAllVouchers error:", err);
+    return res.status(500).json({ message: "Could not load vouchers." });
+  }
+}
+
+export async function adminGetVoucherDetail(req, res) {
+  try {
+    const voucher = await Voucher.findById(req.params.id)
+      .populate("createdBy", "firstName lastName username email phoneNumber")
+      .populate("redemptions.user", "firstName lastName username email phoneNumber")
+      .populate("redemptions.order")
+      .populate("redemptions.matchedItems.product", "name images price")
+      .populate(
+        "redemptions.matchedItems.seller",
+        "firstName lastName phoneNumber businessProfile.businessName sellerProfile.shopName sellerProfile.bankDetails"
+      );
+    if (!voucher) return res.status(404).json({ message: "Voucher not found." });
+    return res.json({ voucher });
+  } catch (err) {
+    console.error("adminGetVoucherDetail error:", err);
+    return res.status(500).json({ message: "Could not load voucher." });
+  }
 }

@@ -71,6 +71,7 @@ import CarPartsListing from "./pages/others/carpart/CarpartListing";
 import ExchangeRateTicker from "./components/home/ExchangeRateTicket";
 import EdrinkHome from "./pages/others/edrinks/EdrinkHome";
 import DrinkStorefront from "./pages/others/edrinks/DrinkStoreFront";
+import VoucherPaymentCallback from "./pages/order/voucher/VoucherPaymentCallback";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -111,6 +112,7 @@ const App = () => {
             />
 
             <Route path="/blacklisted-sellers" element={<BlacklistedSellers />} />
+            <Route path="/voucher/payment-callback" element={<VoucherPaymentCallback />} />
             <Route path="/category/automotive/part/:partSlug" element={<CarPartsListing />} />
             <Route path="/category/automotive/brand/:partSlug" element={<CarPartsListing />} />
 
@@ -148,6 +150,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+
             <Route
               path="/product/:slug/:id"
               element={

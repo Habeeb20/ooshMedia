@@ -43,6 +43,10 @@ import VerificationHub from '../IdentityVerification';
 import ProductVideoUploadForm from '../vendor/UploadFakeProductVideo';
 import MyProductVideos from '../vendor/MyproductVideo';
 import ContactSupport from '../../components/dashboard/ContactSupport';
+import SellerVoucherSalesPage from '../vendor/SellerVoucherSalesPage';
+import CreateVoucherPage from '../order/voucher/CreateVoucherPage';
+import VoucherHistoryPage from '../order/voucher/VoucherHistoryPage';
+
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -104,7 +108,10 @@ const pages = {
   buyerOrderTracking: BuyerOrderTracking,
   riderDashboard: RiderDashboard,
   riderBreakdown: RiderBreakdown,
-  customerAnalytics: SellerAnalyticsDashboard
+  customerAnalytics: SellerAnalyticsDashboard,
+  sellerVoucher: SellerVoucherSalesPage,
+  createVoucher: CreateVoucherPage,
+  voucherHistory: VoucherHistoryPage
 };
 
 const navItems = [
@@ -112,13 +119,18 @@ const navItems = [
   { id: 'post', label: 'Feed', icon: Rss },
   { id: 'postFeedbacks', label: 'Post Feedbacks', icon: Rss },
   { id: 'cart', label: 'Cart', icon: Sparkles },
-  { id: 'ads', label: 'my ads', icon: Rss },
-  { id: 'subscribe', label: 'AdPlansPage', icon: Rss },
+  { id: 'createVoucher', label: 'Create a voucher', icon: Sparkles },
+  { id: 'voucherHistory', label: 'My Voucher', icon: Sparkles },
+
   { id: 'orderBreakdown', label: 'Orders', icon: Package },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'wallet', label: 'Set up wallet', icon: User },
   { id: 'support', label: 'Support Desk', icon: User },
-  { id: 'sellerProfile', label: 'Seller Profile', icon: Package },
+
+  { id: 'ads', label: 'my ads', icon: Rss, sellerOnly: true },
+  { id: 'subscribe', label: 'AdPlansPage', icon: Rss, sellerOnly: true },
+  { id: 'sellerVoucher', label: 'Voucher Sales', icon: Rss, sellerOnly: true },
+  { id: 'sellerProfile', label: 'Seller Profile', icon: Package, sellerOnly: true },
 ];
 
 // Pages that require the one-time ₦3,000 inventory-access payment.
@@ -227,7 +239,13 @@ export default function Dashboard() {
   const SidebarContent = ({ mobile = false }) => (
     <div className="px-3 py-4">
       <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold px-3 mb-3">Main Menu</p>
-      {navItems.map(item => (
+      {/* {navItems.map(item => (
+        <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} />
+      ))} */}
+
+        {navItems
+      .filter(item => !item.sellerOnly || isSeller)
+      .map(item => (
         <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} />
       ))}
 
@@ -508,3 +526,10 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+
+
+
+
