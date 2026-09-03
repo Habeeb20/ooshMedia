@@ -9,7 +9,8 @@ import { createProduct,  getSellerProducts,
   rateProduct,
   getProductsByCategory,
   getBuildMaterialsProducts,
-  shareProduct} from '../../controllers/sellers/productController.js';
+  shareProduct,
+  getProductById} from '../../controllers/sellers/productController.js';
 import { verifyToken } from '../../middleware/verifyToken.js';
 import { upload } from '../../middleware/multer.js';
 import { getAllProducts, getAllPartProducts } from '../../controllers/sellers/productController.js';
@@ -25,6 +26,7 @@ router.get('/building-materials', getBuildMaterialsProducts);
 
 router.get('/', verifyToken, getSellerProducts);
 router.put('/:id', verifyToken, updateProduct);
+router.get('/:id', verifyToken, getProductById);
 router.delete('/:id', verifyToken, deleteProduct);
 router.get('/stats', verifyToken, getProductStats);
 // Stock Management

@@ -26,7 +26,7 @@ export const productCategories = [
     name: "Mobile Phones & Accessories",
     icon: "📲",
     subcategories: [
-      "Phone Cases", "Chargers", "Power Banks", 
+      "Phone Cases", "phones", "Chargers", "Power Banks", 
       "Screen Protectors", "Earphones"
     ]
   },

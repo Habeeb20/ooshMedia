@@ -135,7 +135,7 @@ export default function Navbar() {
                       className={navLinkClass('/business')}
                       style={isActive('/business') ? { background: null } : undefined}
                     >
-                      Businesses
+                      Open Market
                     </Link>
                   )}
                 </>
@@ -217,7 +217,7 @@ export default function Navbar() {
                   }`}
                   style={isActive('/business') ? { color: primary } : undefined}
                 >
-                  Business
+                  Open Market
                 </Link>
               )}
               <Link

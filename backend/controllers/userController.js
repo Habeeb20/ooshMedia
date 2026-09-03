@@ -1120,7 +1120,7 @@ export const storeFront = async (req, res) => {
         { username: req.params.slug?.toLowerCase() },
       ],
       isSeller: true,
-    }).select('-password -identityVerification -walletAccount -sellerProfile.bankDetails');
+    })
 
     if (!seller) return res.status(404).json({ message: 'Store not found' });
     res.json({ seller });

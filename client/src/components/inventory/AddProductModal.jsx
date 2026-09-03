@@ -3,8 +3,6 @@
 
 
 
-
-
 // import { useState } from 'react';
 // import { X, ToggleLeft, ToggleRight } from 'lucide-react';
 // import { toast } from 'sonner';
@@ -40,6 +38,7 @@
 //     yearOfMake: '',
 //     maker:'',
 //     fuelType: '',
+//     rawMaterial: false,
 //   });
 
 
@@ -159,6 +158,16 @@
 //       yearOfMake: !prev.part ? prev.yearOfMake : '',
 //       maker: !prev.part ? prev.maker : '',
 //       fuelType: !prev.part ? prev.fuelType : '',
+//     }));
+//   };
+
+//   // Simple boolean toggle for marking a product as a raw material.
+//   // Mirrors handleTogglePart's shape in case rawMaterial grows its own
+//   // dedicated fields later (e.g. unit of measure, supplier, batch no.).
+//   const handleToggleRawMaterial = () => {
+//     setFormData(prev => ({
+//       ...prev,
+//       rawMaterial: !prev.rawMaterial,
 //     }));
 //   };
 
@@ -331,13 +340,32 @@
 //   >
 //     <option value="">Select grade</option>
 //     <option value="new">New</option>
+//     <option value="original">Original</option>
+//     <option value="Imitation">Imitation</option>
+//     <option value="grade 1">Grade 1</option>
+//     <option value="grade 2">Grade 2</option>
 //     <option value="foreign used">Foreign Used</option>
 //     <option value="nigerian used">Nigerian Used</option>
+//     <option value="others">Others</option>
 //   </select>
 // </div>
 //               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
 //                 <select
+//   name="category"
+//   required
+//   value={formData.category}
+//   onChange={handleCategoryChange}
+//   className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+// >
+//   <option value="">Select Category</option>
+//   {productCategories.map((cat, index) => (
+//     <option key={`${cat.id}-${index}`} value={cat.id}>
+//       {cat.icon} {cat.name}
+//     </option>
+//   ))}
+// </select>
+//                 {/* <select
 //                   name="category"
 //                   required
 //                   value={formData.category}
@@ -350,28 +378,56 @@
 //                       {cat.icon} {cat.name}
 //                     </option>
 //                   ))}
-//                 </select>
+//                 </select> */}
 //               </div>
 
 //               {selectedCategory && (
-//                 <div>
-//                   <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
-//                   <select
-//                     name="subCategory"
-//                     required
-//                     value={formData.subCategory}
-//                     onChange={handleChange}
-//                     className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
-//                   >
-//                     <option value="">Select Subcategory</option>
-//                     {selectedCategory?.subcategories?.map((sub, index) => (
-//                       <option key={index} value={sub}>
-//                         {sub}
-//                       </option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               )}
+//                 // <div>
+//                 //   <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
+//                 //   <select
+//                 //     name="subCategory"
+//                 //     required
+//                 //     value={formData.subCategory}
+//                 //     onChange={handleChange}
+//                 //     className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+//                 //   >
+//                 //     <option value="">Select Subcategory</option>
+//                 //     {selectedCategory?.subcategories?.map((sub, index) => (
+//                 //       <option key={index} value={sub}>
+//                 //         {sub}
+//                 //       </option>
+//                 //     ))}
+//                 //   </select>
+//                 // </div>
+
+               
+//   <div>
+//     <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory *</label>
+//     <select
+//       name="subCategory"
+//       required
+//       value={formData.subCategory}
+//       onChange={handleChange}
+//       className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#8B1E3F]"
+//     >
+//       <option value="">Select Subcategory</option>
+//       {selectedCategory?.subcategories?.map((sub, index) => {
+//         // Fallback: some category entries store subcategories as plain
+//         // strings, others as { value, label } objects — handle both
+//         // without changing the source data.
+//         const isObj = sub && typeof sub === 'object';
+//         const optValue = isObj ? sub.value : sub;
+//         const optLabel = isObj ? sub.label : sub;
+//         return (
+//           <option key={isObj ? sub.value : `${optValue}-${index}`} value={optValue}>
+//             {optLabel}
+//           </option>
+//         );
+//       })}
+//     </select>
+//   </div>
+// )}
+            
 //             </div>
 
 //             {isGroceryCategory && (
@@ -485,6 +541,22 @@
 //                   <ToggleLeft size={28} className="text-gray-400" />
 //                 )}
 //                 <span>This is a Spare Part</span>
+//               </button>
+//             </div>
+
+//             {/* Is Raw Material Toggle */}
+//             <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl">
+//               <button
+//                 type="button"
+//                 onClick={handleToggleRawMaterial}
+//                 className="flex items-center gap-2 text-sm font-medium"
+//               >
+//                 {formData.rawMaterial ? (
+//                   <ToggleRight size={28} className="text-green-600" />
+//                 ) : (
+//                   <ToggleLeft size={28} className="text-gray-400" />
+//                 )}
+//                 <span>This is a Raw Material</span>
 //               </button>
 //             </div>
 
@@ -659,8 +731,12 @@
 
 
 
+
+
+
+
 import { useState } from 'react';
-import { X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { X, ToggleLeft, ToggleRight, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import CloudinaryUpload from '../../config/CloudinaryUpload';
 import { productCategories } from '../../categories/productCategories';
@@ -706,6 +782,7 @@ const isGroceryCategory =
   selectedCategory?.name?.toLowerCase().includes('food');
 
   const [images, setImages] = useState([]); // Array of {url, publicId}
+  const [showAdditionalUploader, setShowAdditionalUploader] = useState(false);
   const [loading, setLoading] = useState(false);
 
  
@@ -829,6 +906,7 @@ const handleToggleVariety = () => {
 
   const handleImageUpload = (url, publicId) => {
     setImages(prev => [...prev, { url, publicId }]);
+    setShowAdditionalUploader(false);
   };
 
   const removeImage = (index) => {
@@ -923,18 +1001,35 @@ const handleToggleVariety = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Images */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Product Images <span className="text-red-500">*</span>
-              </label>
-              <CloudinaryUpload
-                onUploadComplete={handleImageUpload}
-                folder="products"
-                label="Upload Product Images"
-              />
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium text-gray-700">
+                  Product Images <span className="text-red-500">*</span> ({images.length})
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowAdditionalUploader(prev => !prev)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition"
+                >
+                  <ImagePlus size={16} />
+                  <span>{showAdditionalUploader ? 'Cancel' : '+ Add More Images'}</span>
+                </button>
+              </div>
 
+              {/* Upload Dropzone */}
+              {(images.length === 0 || showAdditionalUploader) && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <CloudinaryUpload
+                    onUploadComplete={handleImageUpload}
+                    folder="products"
+                    label={images.length === 0 ? "Upload Product Images" : "Upload Additional Image"}
+                  />
+                </div>
+              )}
+
+              {/* Uploaded Images Preview Grid */}
               {images.length > 0 && (
-                <div className="mt-4 grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   {images.map((img, index) => (
                     <div key={index} className="relative group">
                       <img
@@ -996,6 +1091,8 @@ const handleToggleVariety = () => {
   >
     <option value="">Select grade</option>
     <option value="new">New</option>
+    <option value="original">Original</option>
+    <option value="Imitation">Imitation</option>
     <option value="grade 1">Grade 1</option>
     <option value="grade 2">Grade 2</option>
     <option value="foreign used">Foreign Used</option>

@@ -928,6 +928,7 @@ const SellerDetail = () => {
         const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/storefront/${slug}`);
         setResolvedSellerId(data.seller._id);
       } catch (err) {
+        console.log(err)
         navigate('/store-not-found');
       }
     };
