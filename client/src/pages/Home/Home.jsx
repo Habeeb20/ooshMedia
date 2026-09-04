@@ -26,6 +26,7 @@ import RawMaterialsBanner from "../../components/home/RawmaterialsBanner";
 import PriceCheckerBanner from "../../components/home/PricecheckerBanner";
 import OtherPage from "../../components/home/OthersPage";
 import DrinksPromoBanner from "../../components/home/DrinkPromoBanner";
+import SellerTypesOverview from "../../components/home/SellerTypeGrid";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -86,6 +87,7 @@ export default function Home() {
       {/* Promo banner */}
       <PromoBanner />
 <OtherPage/>
+<SellerTypesOverview />
       {/* Products */}
       <ProductsGrid />
       <DrinksPromoBanner />

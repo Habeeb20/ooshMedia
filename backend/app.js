@@ -32,7 +32,7 @@ import ticketRoutes from './routes/ticketRoutes.js';
 import fakeProductvideoRoutes from "./routes/sellers/fakeProductVideoRoute.js"
 import reviewRoutes from "./routes/order/reviewRoute.js"
 import platformFeeRoutes from "./routes/platformfeeRoute.js"
-
+import videoSubscriptionRoutes from "./routes/sellers/videoproductSubscriptionRoute.js"
   import voucherRoutes from './routes/voucherRoutes.js';
 import loyaltyRoutes from './routes/loyaltyRoutes.js'
 dotenv.config();
@@ -106,7 +106,7 @@ app.use('/api/reviews', reviewRoutes),
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/analytics/seller', platformFeeRoutes)
 app.use('/api/admin/sellers', platformFeeRoutes)
-
+app.use('/api/video-subscription', videoSubscriptionRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
 
 

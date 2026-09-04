@@ -72,6 +72,8 @@ import ExchangeRateTicker from "./components/home/ExchangeRateTicket";
 import EdrinkHome from "./pages/others/edrinks/EdrinkHome";
 import DrinkStorefront from "./pages/others/edrinks/DrinkStoreFront";
 import VoucherPaymentCallback from "./pages/order/voucher/VoucherPaymentCallback";
+import SellersByType from "./components/home/SellersByType";
+import SellerTypeDetail from "./components/home/SellerTypeDetails";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -115,7 +117,7 @@ const App = () => {
             <Route path="/voucher/payment-callback" element={<VoucherPaymentCallback />} />
             <Route path="/category/automotive/part/:partSlug" element={<CarPartsListing />} />
             <Route path="/category/automotive/brand/:partSlug" element={<CarPartsListing />} />
-
+<Route path="/sellers/type/:type" element={<SellersByType />} />
 
             <Route
               path="/checkout"
@@ -194,6 +196,10 @@ const App = () => {
             <Route
               path="/orders/:orderId/track"
               element={<BuyerOrdersDashboard />}
+            />
+            <Route
+              path="/sellerstypepage/:id"
+              element={<SellerTypeDetail />}
             />
 
             {/* Rider: their delivery dashboard */}

@@ -58,6 +58,8 @@ export default function ProductDetails() {
   const [showVarietyModal, setShowVarietyModal] = useState(false);
 const [addingVariety, setAddingVariety] = useState(null);
   const { addToCart, cart, cartCount } = useCart();
+  
+const [mainMediaType, setMainMediaType] = useState("image");
   const [showModal, setShowModal] = useState(false);
   const [selectedPartnerName, setSelectedPartnerName] = useState("");
   const [purchaseHistory, setPurchaseHistory] = useState([]);
@@ -256,7 +258,12 @@ const fetchProduct = async () => {
     }
 
     setProduct(found || null);
-    if (found?.images?.length) setMainImage(found.images[0].url);
+    if (found?.images?.length) {
+      setMainImage(found.images[0].url)
+       setMainMediaType("image");
+    };
+
+
     setRelatedProducts(
       products.filter((p) => p.category === found?.category && p._id !== found?._id)
     );
@@ -603,6 +610,10 @@ const handleShareProduct = async () => {
       </div>
     );
   }
+  const galleryItems = [
+  ...(product?.images?.map((img) => ({ url: img.url, type: "image" })) || []),
+  ...(product?.videos?.map((vid) => ({ url: vid.url, type: "video" })) || []),
+];
 
   const maxQty = product.stockQuantity || 1;
   // const effectivePrice = product.salePrice || product.price;
@@ -880,6 +891,39 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
               {/* LEFT SIDE — Images */}
               <div>
                 <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden relative flex items-center justify-center h-[300px] sm:h-[380px] md:h-[440px]">
+  {mainMediaType === "video" ? (
+    <video
+      key={mainImage}
+      src={mainImage}
+      controls
+      className="w-full h-full object-contain bg-black"
+    >
+      Your browser does not support video playback.
+    </video>
+  ) : (
+    <img
+      src={mainImage || "https://via.placeholder.com/700"}
+      alt={product?.name}
+      className="w-full h-full object-contain p-6"
+    />
+  )}
+  {product?.salePrice && (
+    <div
+      className="absolute top-4 left-4 px-4 py-1.5 rounded-full text-sm font-black text-white"
+      style={{ background: appConfig.colors.primary }}
+    >
+      SALE
+    </div>
+  )}
+  {product?.stockQuantity <= 0 && (
+    <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-3xl">
+      <span className="bg-white px-6 py-2 rounded-full font-black text-gray-800 text-lg">
+        Out of Stock
+      </span>
+    </div>
+  )}
+</div>
+                {/* <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden relative flex items-center justify-center h-[300px] sm:h-[380px] md:h-[440px]">
                   <img
                     src={mainImage || "https://via.placeholder.com/700"}
                     alt={product?.name}
@@ -900,10 +944,10 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                       </span>
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* Thumbnails */}
-                <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                {/* <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
                   {product?.images?.map((img, index) => (
                     <button
                       key={index}
@@ -915,7 +959,36 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
                       <img src={img.url} alt="" className="w-20 h-20 object-contain p-1" />
                     </button>
                   ))}
-                </div>
+                </div> */}
+                <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+  {galleryItems.map((item, index) => (
+    <button
+      key={index}
+      onClick={() => {
+        setMainImage(item.url);
+        setMainMediaType(item.type);
+      }}
+      className={`relative border-2 rounded-2xl overflow-hidden min-w-[90px] transition-all bg-white ${
+        mainImage === item.url ? "border-[#8B1E3F]" : "border-transparent"
+      }`}
+    >
+      {item.type === "video" ? (
+        <>
+          <video src={item.url} muted className="w-20 h-20 object-cover p-1" />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <span className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-3 h-3 text-gray-800 ml-0.5" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </span>
+        </>
+      ) : (
+        <img src={item.url} alt="" className="w-20 h-20 object-contain p-1" />
+      )}
+    </button>
+  ))}
+</div>
               </div>
 
               {/* RIGHT SIDE — Info */}

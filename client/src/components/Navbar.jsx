@@ -129,7 +129,7 @@ export default function Navbar() {
                   >
                     Price Checker
                   </Link>
-                  {isAuthenticated && (
+                  {/* {isAuthenticated && ( */}
                     <Link
                       to="/business"
                       className={navLinkClass('/business')}
@@ -137,7 +137,7 @@ export default function Navbar() {
                     >
                       Open Market
                     </Link>
-                  )}
+                  {/* // )} */}
                 </>
               )}
             </div>
@@ -209,7 +209,7 @@ export default function Navbar() {
           {/* Mobile secondary row — Business / Price Checker / Distribution chain. Hidden entirely on /dashboard routes. */}
           {!isDashboardRoute && (
             <div className="md:hidden flex items-center justify-center gap-4 pb-2 -mt-5  text-sm overflow-x-auto">
-              {isAuthenticated && (
+              {/* {isAuthenticated && ( */}
                 <Link
                   to="/business"
                   className={`font-medium whitespace-nowrap ${
@@ -219,7 +219,7 @@ export default function Navbar() {
                 >
                   Open Market
                 </Link>
-              )}
+              {/* )} */}
               <Link
                 to="/price-checker"
                 className={`font-medium whitespace-nowrap ${

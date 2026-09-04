@@ -402,10 +402,7 @@ export const getSellerById = async (req, res) => {
  
   try {
     const seller = await User.findById(req.params.id)
-      .select(
-        'username firstName lastName email phoneNumber state lga profilePicture role ' +
-        'businessProfile sellerProfile'
-      )
+    
       .populate('businessProfile.reviews.user', 'firstName lastName profilePicture');
     
 

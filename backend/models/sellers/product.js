@@ -50,7 +50,8 @@ varieties: [{
 
   videos: [{        // From S3
     url: String,
-    key: String
+    key: String,
+     duration: Number, 
   }],
 
   sku: { type: String, unique: true },

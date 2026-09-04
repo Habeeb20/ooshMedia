@@ -523,6 +523,21 @@ identityVerification: {
   lastAttemptAt: Date,
 },
 
+
+// models/User.js — add near identityVerification
+videoSubscription: {
+  creditsRemaining: { type: Number, default: 0 },
+  totalPurchasedBatches: { type: Number, default: 0 },
+  payments: [{
+    reference: { type: String, unique: true, sparse: true },
+    amount: Number,              // in Naira, e.g. 5000
+    videosGranted: { type: Number, default: 10 },
+    status: { type: String, enum: ['pending', 'success', 'failed'], default: 'pending' },
+    paidAt: Date,
+    createdAt: { type: Date, default: Date.now },
+  }],
+},
+
 }, { timestamps: true });
 
 // Index for better performance

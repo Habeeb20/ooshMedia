@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import Voucher from "../models/Voucher.js";
+import Voucher from "../models/voucher.js";
 
 // Excludes 0/O/1/I to avoid ambiguity when a user types the code manually.
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
