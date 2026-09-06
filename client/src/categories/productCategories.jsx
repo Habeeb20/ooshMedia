@@ -456,56 +456,56 @@ export const productCategories = [
 
   },
 
-  {
-    id: "beauty",
-    name: "Beauty & Personal Care",
-    icon: "💅",
-    pricing: {
-      roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
-      standard:     { label: "Standard",     min: 3000, max: 5000, unit: "per session" },
-      homeServices: { label: "Home Services", min: 5000, max: 8000, unit: "per session" },
-      premium:      { label: "Premium",      min: 7000, max: 12000, unit: "per session" }
-    },
-    specialties: [
-      { value: "hairdressing", label: "Hair Dressing / Weaving / Braiding" },
-      { value: "manicure-pedicure", label: "Manicure & Pedicure" },
-      { value: "makeup", label: "Makeup (Bridal / Event / Everyday)" },
-      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" },
-      { value: "massage", label: "Body Massage & Spa Services" },
-      { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
-      { value: "facials", label: "Facials & Skincare Treatments" }
-    ],
-      subcategories: [
-      { value: "hairdressing", label: "Hair Dressing / Weaving / Braiding" },
-      { value: "manicure-pedicure", label: "Manicure & Pedicure" },
-      { value: "makeup", label: "Makeup (Bridal / Event / Everyday)" },
-      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" },
-      { value: "massage", label: "Body Massage & Spa Services" },
-      { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
-      { value: "facials", label: "Facials & Skincare Treatments" }
-    ],
-  },
+  // {
+  //   id: "beauty",
+  //   name: "Beauty & Personal Care",
+  //   icon: "💅",
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 0, max: 0, unit: "N/A" },
+  //     standard:     { label: "Standard",     min: 3000, max: 5000, unit: "per session" },
+  //     homeServices: { label: "Home Services", min: 5000, max: 8000, unit: "per session" },
+  //     premium:      { label: "Premium",      min: 7000, max: 12000, unit: "per session" }
+  //   },
+  //   specialties: [
+  //     { value: "hairdressing", label: "Hair Dressing / Weaving / Braiding" },
+  //     { value: "manicure-pedicure", label: "Manicure & Pedicure" },
+  //     { value: "makeup", label: "Makeup (Bridal / Event / Everyday)" },
+  //     { value: "barbing", label: "Barbing / Men's Haircut & Grooming" },
+  //     { value: "massage", label: "Body Massage & Spa Services" },
+  //     { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
+  //     { value: "facials", label: "Facials & Skincare Treatments" }
+  //   ],
+  //     subcategories: [
+  //     { value: "hairdressing", label: "Hair Dressing / Weaving / Braiding" },
+  //     { value: "manicure-pedicure", label: "Manicure & Pedicure" },
+  //     { value: "makeup", label: "Makeup (Bridal / Event / Everyday)" },
+  //     { value: "barbing", label: "Barbing / Men's Haircut & Grooming" },
+  //     { value: "massage", label: "Body Massage & Spa Services" },
+  //     { value: "nail-tech", label: "Nail Technician (Gel, Acrylic, Extensions)" },
+  //     { value: "facials", label: "Facials & Skincare Treatments" }
+  //   ],
+  // },
 
-  {
-    id: "barbing",
-    name: "Barbing",
-    icon: "💈",
-    images: [im, im2, im3, im4, im5, im6],
-    pricing: {
-      roadside:     { label: "Roadside",     min: 1000, max: 3500, unit: "per session" },
-      standard:     { label: "Standard",     min: 3000, max: 10000, unit: "per session" },
-      homeServices: { label: "Home Services", min: 5000, max: 20000, unit: "per session" },
-      premium:      { label: "Premium",      min: 10000, max: 20000, unit: "per session" }
-    },
-    specialties: [
-      { value: "shaving", label: "Shaving beards" },
-      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
-    ],
-      subcategories: [
-      { value: "shaving", label: "Shaving beards" },
-      { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
-    ],
-  },
+  // {
+  //   id: "barbing",
+  //   name: "Barbing",
+  //   icon: "💈",
+  //   images: [im, im2, im3, im4, im5, im6],
+  //   pricing: {
+  //     roadside:     { label: "Roadside",     min: 1000, max: 3500, unit: "per session" },
+  //     standard:     { label: "Standard",     min: 3000, max: 10000, unit: "per session" },
+  //     homeServices: { label: "Home Services", min: 5000, max: 20000, unit: "per session" },
+  //     premium:      { label: "Premium",      min: 10000, max: 20000, unit: "per session" }
+  //   },
+  //   specialties: [
+  //     { value: "shaving", label: "Shaving beards" },
+  //     { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
+  //   ],
+  //     subcategories: [
+  //     { value: "shaving", label: "Shaving beards" },
+  //     { value: "barbing", label: "Barbing / Men's Haircut & Grooming" }
+  //   ],
+  // },
 
   {
     id: "construction",
