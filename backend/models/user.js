@@ -217,7 +217,18 @@ controlRoom: {
   codeHash: String,      // bcrypt hash of the creator's 4-digit access code
   activatedAt: Date,
   codeIssuedAt: Date,
+    codeHistory: [{
+     code: String,  // hash of the code that was issued
+    issuedAt: { type: Date, default: Date.now },
+    issuedVia: { type: String, enum: ['email', 'sms'] },
+  }],
 },
+
+
+
+
+
+
     // Seller Chain (especially for Manufacturers)
     sellerChain: [{
       businessName: String,
@@ -545,3 +556,32 @@ userSchema.index({ "businessProfile.businessName": "text" });
 userSchema.index({ "riderProfile.currentLocation": "2dsphere" });
 // userSchema.index({ "riderProfile.licensePlate": 1 });
 export default mongoose.model('User', userSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

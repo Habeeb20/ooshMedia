@@ -186,11 +186,13 @@ export const reissueCreatorCode = async (req, res) => {
 
     const code = generate4DigitCode();
     const hashedCode = await bcrypt.hash(code, 10);
+     const issuedAt = new Date();
+
 
     // Update code
     user.sellerProfile.controlRoom.codeHash = hashedCode;
     user.sellerProfile.controlRoom.codeIssuedAt = new Date();
-    await user.save();
+
 
     const contactEmail = user.email || user.alternateContact;
     const contactPhone = user.phone || user.alternateContact;
@@ -233,6 +235,14 @@ export const reissueCreatorCode = async (req, res) => {
       }
     }
 
+
+
+    user.sellerProfile.controlRoom.codeHistory.push({
+  code,                     // plain string, not hashed
+  issuedAt,
+  issuedVia: emailSent ? 'email' : (smsSent ? 'sms' : undefined),
+});
+    await user.save();
     // Response
     if (emailSent || smsSent) {
       return res.status(200).json({ 

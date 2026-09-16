@@ -1,57 +1,6 @@
 
 
 
-
-// import { useNavigate } from "react-router-dom";
-// import appConfig from "../../config/appConfig";
-// import im from "../../assets/chicken3.png"
-// export default function PromoBanner() {
-//   const navigate = useNavigate();
-
-//   return (
-//     <section className="max-w-7xl mx-auto px-4 mt-10">
-//       <div
-//         onClick={() => navigate("/category/groceries-food")}
-//         className="rounded-[2rem] overflow-hidden relative h-[220px] md:h-[300px] cursor-pointer"
-//         style={{
-//           background: `linear-gradient(135deg, ${appConfig.colors.primary}, #111827)`,
-//         }}
-//       >
-//         <div className="absolute inset-0 flex items-center justify-between px-8 md:px-14">
-//           <div className="text-white max-w-xl">
-//             <h1 className="text-1xl md:text-2xl font-black leading-tight">
-//              Quench the Hunger
-//             </h1>
-
-//             <p className="mt-4 text-white/80 text-sm md:text-lg">
-//             Freshly made, Fuel your hunger with every bite
-//             </p>
-
-//             <button
-//               onClick={(e) => {
-//                 e.stopPropagation();
-//                 navigate("/category/groceries-food");
-//               }}
-//               className="bg-white text-black px-7 py-4 rounded-2xl font-bold mt-6 hover:scale-105 transition"
-//             >
-//              Order Now
-//             </button>
-//           </div>
-
-//           <img
-//             src={im}
-//             alt="Fresh groceries and food"
-//             className="hidden md:block w-[490px] rounded-3xl shadow-2xl"
-//           />
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-
-
-
 import { useNavigate } from "react-router-dom";
 import appConfig from "../../config/appConfig";
 import im from "../../assets/chicken3.png";

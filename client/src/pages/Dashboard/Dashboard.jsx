@@ -119,8 +119,8 @@ const navItems = [
   { id: 'post', label: 'Feed', icon: Rss },
   { id: 'postFeedbacks', label: 'Post Feedbacks', icon: Rss },
   { id: 'cart', label: 'Cart', icon: Sparkles },
-  { id: 'createVoucher', label: 'Create a voucher', icon: Sparkles },
-  { id: 'voucherHistory', label: 'My Voucher', icon: Sparkles },
+  // { id: 'createVoucher', label: 'Create a voucher', icon: Sparkles },
+  // { id: 'voucherHistory', label: 'My Voucher', icon: Sparkles },
 
   { id: 'orderBreakdown', label: 'Orders', icon: Package },
   { id: 'profile', label: 'Profile', icon: User },
@@ -146,6 +146,11 @@ export default function Dashboard() {
     return params.get('page') || 'home';
   };
 
+
+
+  
+
+  
   const [activePage, setActivePage] = useState(getPageFromURL());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -226,11 +231,11 @@ export default function Dashboard() {
     { label: 'POS', page: 'POS' },
     { label: 'Delivery Panel', page: 'sellerDelivery' },
     { label: 'Delivery Tracking', page: 'deliveryTracking' },
-    { label: 'seller Chain History', page: 'sellerChain' },
+    { label: 'Seller Chain History', page: 'sellerChain' },
     { label: 'Products', page: 'products' },
   
-    { label: 'Upload fake products', page: 'uploadFakeProductVideo' },
-      { label: 'my product videos', page: 'myproductvideo' },
+    { label: 'Upload Fake products', page: 'uploadFakeProductVideo' },
+      { label: 'My Product Videos', page: 'myproductvideo' },
     { label: 'Sales analytics', page: 'customerAnalytics' },
     { label: 'Verify', page: 'IdentityVerification' },
     { label: 'Orders', page: null },
@@ -248,6 +253,49 @@ export default function Dashboard() {
       .map(item => (
         <NavItem key={item.id} item={item} onClick={mobile ? () => setSidebarOpen(false) : null} />
       ))}
+
+           {/* Voucher dropdown */}
+      <div className="mt-2">
+        <button
+          onClick={() => toggleDropdown('voucher')}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-1 transition-all text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-800 group"
+        >
+          <div className="flex items-center gap-3.5">
+            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 group-hover:bg-gray-200 flex-shrink-0">
+              <Sparkles size={17} />
+            </span>
+            <span>Voucher</span>
+          </div>
+          <span className={`transition-transform duration-200 ${openDropdown === 'voucher' ? 'rotate-90' : ''}`}>
+            <ChevronRight size={15} />
+          </span>
+        </button>
+
+        {openDropdown === 'voucher' && (
+          <div className="ml-[52px] space-y-0.5 mt-1 pl-3 border-l-2 border-rose-100">
+            {[
+              { label: 'Create a voucher', page: 'createVoucher' },
+              { label: 'My Voucher', page: 'voucherHistory' },
+            ].map(sub => (
+              <button
+                key={sub.label}
+                onClick={() => {
+                  setActivePage(sub.page);
+                  setOpenDropdown(null);
+                  if (mobile) setSidebarOpen(false);
+                }}
+                className={`block w-full text-left py-2 px-3 text-sm rounded-lg transition-colors ${
+                  activePage === sub.page
+                    ? 'text-[#8B1E3F] font-medium bg-rose-50'
+                    : 'text-black hover:text-[#8B1E3F] hover:bg-rose-50'
+                }`}
+              >
+                {sub.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {isSeller && (
         <div className="mt-6">
@@ -330,6 +378,7 @@ export default function Dashboard() {
                   { label: 'Rider Dashboard', page: 'riderBreakdown' },
                   { label: 'Rider Breakdown', page: 'riderDashboard' },
                   { label: 'Rider Profile', page: 'riderProfile' },
+                    { label: 'Verify', page: 'IdentityVerification' },
                 ].map(sub => (
                   <button
                     key={sub.label}
@@ -379,7 +428,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+        <div className="flex-1 mt-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
           <SidebarContent />
         </div>
 {/* 
@@ -405,7 +454,7 @@ export default function Dashboard() {
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
 
         {/* Top Navbar */}
-        <nav className="bg-white border-b border-gray-100 px-4 md:px-6 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <nav className="bg-white border-b border-gray-100  mt-6 px-4 md:px-6 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -440,6 +489,7 @@ export default function Dashboard() {
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-gray-800 leading-none">{dashboardData?.user?.firstName}</p>
                 <p className="text-xs text-gray-400 mt-0.5">@{dashboardData?.user?.username}</p>
+                <p className="text-xs text-gray-400 mt-0.5">@{dashboardData?.user?.email || dashboardData?.user?.alternateContact}</p>
               </div>
             </div>
           </div>
@@ -526,6 +576,22 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -981,6 +981,103 @@ const WALLET_BASE = 'https://api-ewallet.eroot.ng/api';
  *         description: Failed to create wallet
  */
 
+// export const createWallet = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const user = await User.findById(userId);
+
+//     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+//     if (user.isWallet) {
+//       return res.status(400).json({ success: false, message: 'Wallet already created' });
+//     }
+
+//     // ── Resolve email — generate fallback if missing ──────────────
+//     const email = user.email
+//       || (user.alternateContact?.includes('@') ? user.alternateContact : null)
+//       || generateFallbackEmail(user._id, user.username);
+
+//     // ── Normalise phone to 080XXXXXXXXX ──────────────────────────
+//     const rawPhone = user.phoneNumber || user.alternateContact || '';
+//     let phone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
+//     if (phone.startsWith('234')) phone = '0' + phone.slice(3);
+
+//     if (!phone || phone.length < 10) {
+//       return res.status(400).json({ success: false, message: 'A valid phone number is required' });
+//     }
+
+//     const payload = {
+//       first_name:     user.firstName,
+//       last_name:      user.lastName,
+//       email:          email || user.alternateContact,          // ← real or generated fallback
+//       password:       'password123',
+//       phone:          phone  || user.alternateContact,          // ← normalised 080XXXXXXXXX
+//       preferred_bank: 'wema-bank',
+//       provider_slug:  'wema-bank',
+//       metadata: [
+//         { key: 'user_id',  value: user._id.toString() },
+//         { key: 'username', value: user.username },
+//       ],
+//     };
+
+//     console.log('Wallet create payload →', payload);
+
+//     const walletRes = await axios.post(
+//       `${WALLET_BASE}/register`,
+//       payload,
+//       { headers: { 'Content-Type': 'application/json' } }
+//     );
+
+//     const responseData = walletRes.data;
+//     console.log('Wallet API response →', responseData);
+
+//     // ── Extract token returned by the API after registration ──────
+//     const walletToken =
+//       responseData?.token ||
+//       responseData?.access_token ||
+//       responseData?.data?.token ||
+//       responseData?.data?.access_token ||
+//       null;
+
+//     // ── Extract dedicated account details ─────────────────────────
+//     const dedicated = responseData?.dedicated_account || {};
+
+//     // ── Persist to user document ──────────────────────────────────
+//     user.isWallet          = true;
+//     user.walletAccount     = {
+//       accountNumber: dedicated.account_number || 'N/A',
+//       accountName:   dedicated.account_name   || `${user.firstName} ${user.lastName}`,
+//       bankName:      dedicated.bank_name       || 'Wema Bank',
+//       currency:      dedicated.currency        || 'NGN',
+//       providerSlug:  'wema-bank',
+//       customerCode:  responseData?.customer?.customer_code || null,
+//       externalId:    responseData?.user?.id?.toString()   || null,
+//       walletEmail:   email,       // ← save whichever email was used (real or fallback)
+//       walletToken:   walletToken, // ← save token for future API calls
+//       createdAt:     new Date(),
+//     };
+
+//     await user.save();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: 'Wallet created successfully',
+//       wallet:  user.walletAccount,
+//     });
+
+//   } catch (error) {
+//     const apiError = error.response?.data;
+//     console.error('createWallet error →', apiError || error.message);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: apiError?.message || 'Failed to create wallet',
+//       details: apiError || null,
+//     });
+//   }
+// };
+
+
 export const createWallet = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -993,9 +1090,9 @@ export const createWallet = async (req, res) => {
     }
 
     // ── Resolve email — generate fallback if missing ──────────────
-    const email = user.email
+    let email = user.email
       || (user.alternateContact?.includes('@') ? user.alternateContact : null)
-      || generateFallbackEmail(user._id, user.username);
+      || generateFallbackEmail(user._id, user.username); // ← your existing function, untouched
 
     // ── Normalise phone to 080XXXXXXXXX ──────────────────────────
     const rawPhone = user.phoneNumber || user.alternateContact || '';
@@ -1006,32 +1103,77 @@ export const createWallet = async (req, res) => {
       return res.status(400).json({ success: false, message: 'A valid phone number is required' });
     }
 
-    const payload = {
-      first_name:     user.firstName,
-      last_name:      user.lastName,
-      email:          email || user.alternateContact,          // ← real or generated fallback
-      password:       'password123',
-      phone:          phone  || user.alternateContact,          // ← normalised 080XXXXXXXXX
-      preferred_bank: 'wema-bank',
-      provider_slug:  'wema-bank',
-      metadata: [
-        { key: 'user_id',  value: user._id.toString() },
-        { key: 'username', value: user.username },
-      ],
+    // ── Helper: does the wallet API's error mean "email already taken"? ──
+    const isEmailTakenError = (apiError) => {
+      const emailErrors = apiError?.errors?.email;
+      if (Array.isArray(emailErrors)) {
+        const combined = emailErrors.join(' ').toLowerCase();
+        if (combined.includes('taken') || combined.includes('already') || combined.includes('exist')) {
+          return true;
+        }
+      }
+      const msg = (apiError?.message || apiError?.error || '').toLowerCase();
+      return (
+        msg.includes('email') &&
+        (msg.includes('taken') || msg.includes('already') || msg.includes('exist') || msg.includes('in use'))
+      );
     };
 
-    console.log('Wallet create payload →', payload);
+    // ── Attempt wallet creation, mutating the email and retrying
+    //    if the API reports it's already taken ──────────────────────
+    const MAX_EMAIL_RETRIES = 3;
+    let walletRes = null;
 
-    const walletRes = await axios.post(
-      `${WALLET_BASE}/register`,
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+    for (let attempt = 0; attempt <= MAX_EMAIL_RETRIES; attempt++) {
+      const payload = {
+        first_name:     user.firstName,
+        last_name:      user.lastName,
+        email:          email || user.alternateContact,
+        password:       'password123',
+        phone:          phone || user.alternateContact,
+        preferred_bank: 'wema-bank',
+        provider_slug:  'wema-bank',
+        metadata: [
+          { key: 'user_id',  value: user._id.toString() },
+          { key: 'username', value: user.username },
+        ],
+      };
+
+      console.log(`Wallet create payload (attempt ${attempt + 1}) →`, payload);
+
+      try {
+        walletRes = await axios.post(
+          `${WALLET_BASE}/register`,
+          payload,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        break; // success
+      } catch (err) {
+        const apiError = err.response?.data;
+
+        if (isEmailTakenError(apiError) && attempt < MAX_EMAIL_RETRIES) {
+          // Mutate the email inline — no changes to generateFallbackEmail needed.
+          // Insert a short random/timestamp tag right before the @ so it stays
+          // recognisably tied to the original but is guaranteed unique.
+          const [localPart, domain] = email.split('@');
+          const uniqueTag = Date.now().toString(36).slice(-5);
+          email = `${localPart}+${uniqueTag}@${domain || 'yourapp-wallet.com'}`;
+
+          console.warn(`Email already taken — retrying with "${email}"...`);
+          continue;
+        }
+
+        throw err; // not an email-taken error, or retries exhausted
+      }
+    }
+
+    if (!walletRes) {
+      throw new Error('Failed to create wallet after retries');
+    }
 
     const responseData = walletRes.data;
     console.log('Wallet API response →', responseData);
 
-    // ── Extract token returned by the API after registration ──────
     const walletToken =
       responseData?.token ||
       responseData?.access_token ||
@@ -1039,10 +1181,8 @@ export const createWallet = async (req, res) => {
       responseData?.data?.access_token ||
       null;
 
-    // ── Extract dedicated account details ─────────────────────────
     const dedicated = responseData?.dedicated_account || {};
 
-    // ── Persist to user document ──────────────────────────────────
     user.isWallet          = true;
     user.walletAccount     = {
       accountNumber: dedicated.account_number || 'N/A',
@@ -1052,8 +1192,8 @@ export const createWallet = async (req, res) => {
       providerSlug:  'wema-bank',
       customerCode:  responseData?.customer?.customer_code || null,
       externalId:    responseData?.user?.id?.toString()   || null,
-      walletEmail:   email,       // ← save whichever email was used (real or fallback)
-      walletToken:   walletToken, // ← save token for future API calls
+      walletEmail:   email,
+      walletToken:   walletToken,
       createdAt:     new Date(),
     };
 

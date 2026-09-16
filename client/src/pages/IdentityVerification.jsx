@@ -404,7 +404,8 @@ export default function VerificationHub() {
             style={{ backgroundColor: TOKENS.wineSoft, color: TOKENS.routeEmerald }}
           >
             <ShieldCheck size={16} />
-            {verifiedCount}/{CHECKS.length} verified
+            {verifiedCount} verified 
+            {/* {verifiedCount}/{CHECKS.length} verified */}
           </div>
         </div>
 

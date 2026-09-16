@@ -136,20 +136,27 @@ function CategorySection({ category, products, loading }) {
 
       {/* Subcategory pills */}
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-        {subcategories?.map((sub) => (
-          <Link
-            key={sub}
-            to={`/category/${slugId}?sub=${encodeURIComponent(sub)}`}
-            className="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors hover:shadow-sm"
-            style={{
-              color: badgeText,
-              background: badge,
-              borderColor: "transparent",
-            }}
-          >
-            {sub}
-          </Link>
-        ))}
+    
+
+
+        {subcategories?.map((sub) => {
+  const subValue = typeof sub === "string" ? sub : sub?.value;
+  const subLabel = typeof sub === "string" ? sub : sub?.label;
+  return (
+    <Link
+      key={subValue}
+      to={`/category/${slugId}?sub=${encodeURIComponent(subValue)}`}
+      className="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors hover:shadow-sm"
+      style={{
+        color: badgeText,
+        background: badge,
+        borderColor: "transparent",
+      }}
+    >
+      {subLabel}
+    </Link>
+  );
+})}
       </div>
 
       {/* Products grid */}

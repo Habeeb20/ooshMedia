@@ -259,7 +259,7 @@ export default function BuyerDashboard() {
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
             <Package size={22} className="text-purple-500 mx-auto mb-1" />
-            <p className="text-xs text-gray-400">Orders</p>
+            <p className="text-xs text-gray-400">Paid Orders</p>
             <p className="font-black text-gray-800">{analytics.totalOrders}</p>
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm text-center col-span-2">

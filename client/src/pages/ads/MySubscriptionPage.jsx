@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, TrendingUp, Eye, MousePointer, Clock, CheckCircle, XCircle, AlertCircle, Plus, BarChart2 } from 'lucide-react';
 import { adAPI } from '../../config/adApi';
-
+import { useSearchParams } from 'react-router-dom';
 
 const STATUS_STYLE = {
   active:    { color: '#16a34a', bg: '#dcfce7', icon: CheckCircle },
@@ -17,7 +17,11 @@ export default function MySubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const navigate = useNavigate();
+  
 
+
+const [searchParams, setSearchParams] = useSearchParams();
+const page = searchParams.get('page') || 'overview';
   useEffect(() => {
     Promise.all([adAPI.getMySubscriptions(), adAPI.getStats()])
       .then(([subsRes, statsRes]) => {
@@ -51,9 +55,16 @@ export default function MySubscriptionsPage() {
           <h1 style={styles.pageTitle}>My Ad Subscriptions</h1>
           <p style={styles.pageSub}>Track and manage your advertising campaigns</p>
         </div>
-        <button style={styles.newAdBtn} onClick={() => navigate('/dashboard/ads/subscribe')}>
+        {/* <button type="button" style={styles.newAdBtn} onClick={() => navigate('/dashboard?page=subscribe')}>
+      
           <Plus size={16} /> New Ad
-        </button>
+        </button> */}
+        <button
+  style={styles.newAdBtn}
+  onClick={() => { window.location.href = '/dashboard?page=subscribe'; }}
+>
+  <Plus size={16} /> New Ad
+</button>
       </div>
 
       {/* Stats */}
@@ -209,14 +220,15 @@ export default function MySubscriptionsPage() {
               {sub.status === 'active' && (
                 <div style={styles.subActions}>
                   <button style={styles.cancelBtn} onClick={() => handleCancel(sub._id)}>Cancel</button>
-                  <button style={styles.renewBtn} onClick={() => navigate('/dashboard/ads/subscribe')}>
+                 
+                  <button style={styles.renewBtn}  onClick={() => { window.location.href = '/dashboard?page=subscribe'; }}>
                     Renew / Upgrade
                   </button>
                 </div>
               )}
               {sub.status === 'expired' && (
                 <div style={styles.subActions}>
-                  <button style={styles.renewBtn} onClick={() => navigate('/dashboard/ads/subscribe')}>
+                  <button style={styles.renewBtn}   onClick={() => { window.location.href = '/dashboard?page=subscribe'; }}>
                     Renew Ad
                   </button>
                 </div>

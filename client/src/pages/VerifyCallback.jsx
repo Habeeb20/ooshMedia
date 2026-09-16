@@ -22,7 +22,8 @@ const TYPE_LABELS = {
   cac: 'CAC',
 };
 
-const API_BASE = import.meta.env.VITE_BACKEND;
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
 export default function VerifyCallback() {
   const [searchParams] = useSearchParams();
@@ -30,47 +31,7 @@ export default function VerifyCallback() {
   const [state, setState] = useState('confirming'); // confirming | success | failed | error
   const [result, setResult] = useState(null);
 
-//   useEffect(() => {
-//     const controller = new AbortController();
 
-//     const outcome = searchParams.get('outcome');
-//     const reference = searchParams.get('reference');
-//     const session_id = searchParams.get('session_id');
-//     const verified_at = searchParams.get('verified_at');
-//     const sig = searchParams.get('sig');
-
-//     if (!reference || !sig) {
-//       setState('error');
-//       return () => controller.abort();
-//     }
-
-//     (async () => {
-//       try {
-//         const res = await fetch(`${API_BASE}/api/identity-verification/confirm`, {
-        
-//           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-//           body: JSON.stringify({ outcome, reference, session_id, verified_at, sig }),
-//           signal: controller.signal,
-//         });
-//         const data = await res.json();
-
-//         if (!data.success) {
-//           setState('error');
-//           return;
-//         }
-
-//         setResult(data);
-//         setState(data.verified ? 'success' : 'failed');
-//       } catch (err) {
-//         if (err.name !== 'AbortError') {
-//           console.error(err);
-//           setState('error');
-//         }
-//       }
-//     })();
-
-//     return () => controller.abort();
-//   }, [searchParams]);
 
 
 useEffect(() => {
@@ -107,7 +68,7 @@ useEffect(() => {
       });
 
       const data = await res.json();
-
+console.log(data)
       if (!data.success) {
         setState('error');
         return;

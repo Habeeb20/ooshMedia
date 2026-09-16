@@ -1052,7 +1052,7 @@ import { validateRedemption, allocateLoyaltyAcrossCart,
 
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
-const PLATFORM_FEE_RATE = 0.01; // 1%
+const PLATFORM_FEE_RATE = 0.03; // 1%
 
 const generateVerificationCode = () => String(Math.floor(1000 + Math.random() * 9000));
 

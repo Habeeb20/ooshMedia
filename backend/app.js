@@ -34,6 +34,7 @@ import reviewRoutes from "./routes/order/reviewRoute.js"
 import platformFeeRoutes from "./routes/platformfeeRoute.js"
 import videoSubscriptionRoutes from "./routes/sellers/videoproductSubscriptionRoute.js"
   import voucherRoutes from './routes/voucherRoutes.js';
+  import eauctionRoutes from "./routes/auctionRoute.js"
 import loyaltyRoutes from './routes/loyaltyRoutes.js'
 dotenv.config();
 connectDb();
@@ -108,7 +109,7 @@ app.use('/api/analytics/seller', platformFeeRoutes)
 app.use('/api/admin/sellers', platformFeeRoutes)
 app.use('/api/video-subscription', videoSubscriptionRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
-
+app.use("/api/eauction", eauctionRoutes);
 
   app.use('/api/vouchers', voucherRoutes);
 // Start server

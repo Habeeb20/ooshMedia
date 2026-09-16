@@ -27,6 +27,10 @@ import PriceCheckerBanner from "../../components/home/PricecheckerBanner";
 import OtherPage from "../../components/home/OthersPage";
 import DrinksPromoBanner from "../../components/home/DrinkPromoBanner";
 import SellerTypesOverview from "../../components/home/SellerTypeGrid";
+import PrimePropertiesSection from "../../components/home/EpropertiesSection";
+import CertifiedVehiclesSection from "../../components/home/CertifiedVehicle";
+import PromoBannerCarousel from "../../components/home/PromoBannerCarousel";
+import AuctionCatalog from "../../components/home/Actioncar";
 const TRUST_BADGES = [
   { icon: Truck, label: "Fast Delivery", desc: "fast and reliable" },
   { icon: ShieldCheck, label: "Secure Payment", desc: "100% Protected" },
@@ -84,13 +88,13 @@ export default function Home() {
       {/* Feature grid */}
 
 
-      {/* Promo banner */}
-      <PromoBanner />
+  <PromoBannerCarousel />
+      {/* <PromoBanner /> */}
 <OtherPage/>
 <SellerTypesOverview />
       {/* Products */}
       <ProductsGrid />
-      <DrinksPromoBanner />
+      {/* <DrinksPromoBanner /> */}
 
       <FeatureGrid />
       {/* Fashion deals */}
@@ -100,6 +104,9 @@ export default function Home() {
       <ProductVideoSection />
 
       <RawMaterialsBanner />
+      <PrimePropertiesSection />
+      <CertifiedVehiclesSection />
+      <AuctionCatalog/>
       <PriceCheckerBanner/>
 
       <CarParts />
@@ -165,25 +172,3 @@ export default function Home() {
 
 
 
-
-
-
-
-// import {
-//   FlashSaleSection, DiscountDealsSection, TrendingNowSection,
-//   TopSellersSection, TopProductsSection, AnniversaryDealsSection,
-//   CompanyAdDisplay
-// } from './components/ads/EcommerceAdsBanner';
-
-// // In your homepage layout:
-// <div style={{ display: 'flex', gap: 20 }}>
-//   <div style={{ flex: 1 }}>
-//     <FlashSaleSection />
-//     <DiscountDealsSection />
-//     <TrendingNowSection />
-//     <TopSellersSection />
-//     <TopProductsSection />
-//     <AnniversaryDealsSection />
-//   </div>
-//   <CompanyAdDisplay /> {/* shows sidebar on desktop, popup on mobile */}
-// </div>

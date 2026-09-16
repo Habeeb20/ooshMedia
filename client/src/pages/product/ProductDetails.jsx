@@ -1002,7 +1002,18 @@ const effectivePrice = product?.hasVariety && product?.varieties?.length > 0
 
                 <h1 className="text-xl md:text-3xl font-black mt-3 text-gray-900 leading-tight">
                   {product?.name}
+                   {(upstream.length > 0 || downstream.length > 0) && (
+    <span
+      className="inline-flex items-center justify-center text-[10px] font-black px-5 ml-20 py-2 rounded-full text-white flex-shrink-0 align-middle"
+      style={{ background: appConfig.colors.primary }}
+      title="This seller is part of a distribution chain"
+    >
+      DC
+    </span>
+  )}
                 </h1>
+
+                
 
                 {product?.brand && (
                   <p className="mt-3 text-gray-500">
