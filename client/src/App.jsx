@@ -74,6 +74,11 @@ import DrinkStorefront from "./pages/others/edrinks/DrinkStoreFront";
 import VoucherPaymentCallback from "./pages/order/voucher/VoucherPaymentCallback";
 import SellersByType from "./components/home/SellersByType";
 import SellerTypeDetail from "./components/home/SellerTypeDetails";
+import RentalLandingPage from "./pages/rental/RentalPages/RentalLandingPage";
+import DashboardLayout from "./pages/rental/Dashboard/DashboardLayout";
+import PaymentVerify from "./pages/rental/utils/Paymentverify";
+import RentalItemDetailPage from "./pages/rental/components/RentalItemDetailPage";
+import RentalBookingCheckoutPage from "./pages/rental/components/RentalBookingCheckoutpage";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -179,6 +184,9 @@ const App = () => {
               }
             />
             <Route path="/payment/verify/" element={<PaymentVerifyPage />} />
+
+
+     
             <Route
               path="/subscription/verify"
               element={<SubscriptionVerify />}
@@ -245,6 +253,22 @@ const App = () => {
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />
             <Route path="/priceChecker" element={<PriceChecker />} />
+
+            
+
+
+
+
+
+            <Route path="/rental/dashboard" element={< DashboardLayout/>} />
+
+            <Route path="/rental" element={<RentalLandingPage />} />
+                   <Route path="/rental/payment/verify/" element={<PaymentVerify />} />
+
+
+
+<Route path="/rentals/:itemId" element={<RentalItemDetailPage />} />
+<Route path="/rentals/:itemId/book" element={<RentalBookingCheckoutPage />} />
           </Routes>
         </div>
       </CartProvider>

@@ -79,6 +79,14 @@ export const productCategories = [
     ]
   },
   {
+    id: "stylist",
+    name: "stylist",
+    icon: "💄",
+    subcategories: [
+      "hair dressing Skincare", "Makeup", "Hair Care", "Fragrances", "weaving", "hair braiding"
+    ]
+  },
+  {
     id: "health",
     name: "Health & Wellness",
     icon: "💊",

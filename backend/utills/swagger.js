@@ -11,7 +11,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.BACKEND_URL || "http://localhost:5000",
+        url: process.env.BACKEND_URL || "http://localhost:2023",
         description: "Development server",
       },
     ],
@@ -27,7 +27,39 @@ const options = {
     security: [{ bearerAuth: [] }],
   },
   // Glob pattern(s) pointing to files with your Swagger JSDoc comments
-  apis: ["../routes/*.js", "./controllers/**/*.js", "../models/*.js"],
+  apis: ["../routes/*.js", "./controllers/**/*.js", "../models/*.js", "../rental/routes/*.js"],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

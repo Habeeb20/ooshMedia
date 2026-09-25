@@ -46,7 +46,7 @@ import ContactSupport from '../../components/dashboard/ContactSupport';
 import SellerVoucherSalesPage from '../vendor/SellerVoucherSalesPage';
 import CreateVoucherPage from '../order/voucher/CreateVoucherPage';
 import VoucherHistoryPage from '../order/voucher/VoucherHistoryPage';
-
+import { useNavigate } from 'react-router-dom';
 const Jobs = () => (
   <div className="flex flex-col items-center justify-center h-64 gap-4">
     <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -162,7 +162,7 @@ export default function Dashboard() {
   const isRider = dashboardData?.user?.isRider || false;
   const hasInventoryAccess = dashboardData?.user?.sellerProfile?.inventoryAccess?.paid || false;
   const isGatedPage = PAID_INVENTORY_PAGES.includes(activePage);
-
+const navigate = useNavigate()
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.set('page', activePage);
@@ -476,6 +476,15 @@ export default function Dashboard() {
               <span className="text-sm font-medium text-gray-700 capitalize">{activePage === 'home' ? 'Dashboard' : activePage}</span>
             </div>
           </div>
+<button className='bg-rose-900 rounded-lg'>
+   <div className="hidden sm:block">
+                
+              <p onClick={() => navigate('/rental/dashboard')} className="text-xs text-white m-3">rental dashboard</p>
+             
+              </div>
+
+</button>
+           
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2.5 pl-3 border-l border-gray-100">

@@ -36,6 +36,12 @@ import videoSubscriptionRoutes from "./routes/sellers/videoproductSubscriptionRo
   import voucherRoutes from './routes/voucherRoutes.js';
   import eauctionRoutes from "./routes/auctionRoute.js"
 import loyaltyRoutes from './routes/loyaltyRoutes.js'
+import categoryRoutes from "./rental/routes/categoryRoutes.js"
+import rentalItemRoutes from "./rental/routes/rentalItemRoutes.js"
+import rentalBookingRoutes from "./rental/routes/rentalBookingRoute.js"
+import RentalvideoSubscriptionRoutes from "./rental/routes/videoSubscriptioRoute.js"
+import rentalconversationRoutes from "./rental/routes/rentalChatRoutes.js"
+import adminRentalRoutes from "./routes/adminRentalRoutes.js"
 dotenv.config();
 connectDb();
 
@@ -107,11 +113,18 @@ app.use('/api/reviews', reviewRoutes),
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/analytics/seller', platformFeeRoutes)
 app.use('/api/admin/sellers', platformFeeRoutes)
+app.use('/api/admin/rentals', adminRentalRoutes)
 app.use('/api/video-subscription', videoSubscriptionRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
 app.use("/api/eauction", eauctionRoutes);
 
   app.use('/api/vouchers', voucherRoutes);
+
+app.use("/api/rentals/conversations", rentalconversationRoutes)
+app.use('/api/rentals/categories', categoryRoutes);
+app.use('/api/rentals/items', rentalItemRoutes);
+app.use('/api/rentals', rentalBookingRoutes); // booking/payment/return/extend/review routes are nested under /api/rentals
+app.use('/api/rentals/video-subscription', RentalvideoSubscriptionRoutes);
 // Start server
 const port = process.env.PORT || 2021;
 
@@ -128,6 +141,21 @@ initSocket(server);                       // attach socket.io to that server
 server.listen(port, () => {               // listen on server, not app
   console.log(`Server is running on port ${port}`);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

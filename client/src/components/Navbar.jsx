@@ -43,7 +43,9 @@ export default function Navbar() {
   const location = useLocation();
   const accountMenuRef = useRef(null);
 
-  const isDashboardRoute = location.pathname.startsWith('/dashboard');
+  
+  const isDashboardRoute =
+  location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/rental/dashboard');
 
   const primary = appConfig.colors.primary;
   const primaryHover = appConfig.colors.primaryHover;
@@ -163,6 +165,7 @@ export default function Navbar() {
                     {isAuthenticated ? (
                       <>
                         {!isDashboardRoute && (
+                          <>
                           <Link
                             to="/dashboard"
                             onClick={() => setAccountMenuOpen(false)}
@@ -170,6 +173,14 @@ export default function Navbar() {
                           >
                             <LayoutDashboard size={18} /> Dashboard
                           </Link>
+                          <Link
+                            to="/rental/dashboard"
+                            onClick={() => setAccountMenuOpen(false)}
+                            className="flex items-center gap-3 px-5 py-3 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                          >
+                            <LayoutDashboard size={18} /> Rental Dashboard
+                          </Link>
+                          </>
                         )}
                         <button
                           onClick={() => {
