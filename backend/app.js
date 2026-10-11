@@ -42,6 +42,7 @@ import rentalBookingRoutes from "./rental/routes/rentalBookingRoute.js"
 import RentalvideoSubscriptionRoutes from "./rental/routes/videoSubscriptioRoute.js"
 import rentalconversationRoutes from "./rental/routes/rentalChatRoutes.js"
 import adminRentalRoutes from "./routes/adminRentalRoutes.js"
+import rentalReportRoutes from "./rental/routes/rentalReportRoutes.js"
 dotenv.config();
 connectDb();
 
@@ -125,6 +126,7 @@ app.use('/api/rentals/categories', categoryRoutes);
 app.use('/api/rentals/items', rentalItemRoutes);
 app.use('/api/rentals', rentalBookingRoutes); // booking/payment/return/extend/review routes are nested under /api/rentals
 app.use('/api/rentals/video-subscription', RentalvideoSubscriptionRoutes);
+app.use('/api/rentalreport', rentalReportRoutes)
 // Start server
 const port = process.env.PORT || 2021;
 

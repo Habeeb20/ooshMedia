@@ -52,6 +52,7 @@ import AdminPlatformFeeTracker from "../../components/AdminPlatformfee.jsx";
 import AdminLoyaltyDashboard from "../../components/admin/AdminLoyaltydashboard.jsx";
 import AdminVouchersPage from "../../components/admin/AdminVoucherPage.jsx";
 import AdminRentalsPage from "../../components/admin/AdminRentalPage.jsx";
+import AdminRentalReports from "../../components/admin/AdminRentalReport.jsx";
 // import RewardRules from './RewardRules';
 // import Reports from './Reports';
 
@@ -91,6 +92,7 @@ const NAV = [
   { key: "loyalty", label: "Loyalty settings", icon: FileText },
   { key: "adminVoucher", label: "Voucher Settings", icon: FileText },
   { key: "rental", label: "Rentals", icon: FileText },
+  { key: "rentalReport", label: "Rental Reports", icon: FileText },
 ];
 
 export default function AdminDashboard() {
@@ -225,6 +227,7 @@ export default function AdminDashboard() {
           {active === "platformFee" && <AdminPlatformFeeTracker />}
           {active === "loyalty" && <AdminLoyaltyDashboard />}
           {active === "rental" && <AdminRentalsPage />}
+          {active === "rentalReport" && <AdminRentalReports />}
 
       
           {active === "adminVoucher" && <AdminVouchersPage/>} 

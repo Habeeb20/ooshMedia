@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Flag } from 'lucide-react';
 import { SOCKET_EVENTS, useSocketEvent } from '../utils/useSocket';
-
+import ReportSellerModal from '../../vendor/ReportSellerModal';
 import { rentalApi } from '../api/rentalApi';
+import RentalReportModal from './RentalReportModal';
 const STEPS = ['confirmed', 'item_collected', 'return_requested', 'completed'];
 const STEP_LABEL = {
   confirmed: 'Confirmed',
@@ -12,18 +14,21 @@ const STEP_LABEL = {
 
 export default function BookingStatusTracker({ booking: initialBooking, viewerRole }) {
   const [booking, setBooking] = useState(initialBooking);
+  console.log(booking)
   const [busy, setBusy] = useState(false);
   const isOwner = viewerRole === 'owner';
   const isRenter = viewerRole === 'renter';
-
+  const [showReportModal, setShowReportModal] = useState(false);
   const refresh = (patch) => setBooking((b) => ({ ...b, ...patch }));
-
+  const [toast, setToast] = useState(null);
   useSocketEvent(SOCKET_EVENTS.ITEM_COLLECTED, (p) => p.bookingId === booking._id && refresh({ status: 'item_collected' }));
   useSocketEvent(SOCKET_EVENTS.RETURN_REQUESTED, (p) => p.bookingId === booking._id && refresh({ status: 'return_requested' }));
   useSocketEvent(SOCKET_EVENTS.RENTAL_COMPLETED, (p) => p.bookingId === booking._id && refresh({ status: 'completed' }));
   useSocketEvent(SOCKET_EVENTS.BOOKING_CANCELLED, (p) => p.bookingId === booking._id && refresh({ status: 'cancelled' }));
 
   const currentIndex = STEPS.indexOf(booking.status);
+
+    const showToast = (message, type = "success") => setToast({ message, type });
 
   const act = async (fn) => {
     setBusy(true);
@@ -102,8 +107,32 @@ export default function BookingStatusTracker({ booking: initialBooking, viewerRo
               <p className="text-sm font-medium text-[#2F6846]">Rental completed.</p>
             )}
           </div>
+
+
+                       <button
+      onClick={() => {
+      
+        setShowReportModal(true);
+      }}
+      className="ml-auto flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition"
+    >
+      <Flag size={14} />
+      Report this user
+    </button>
+
+
+    <RentalReportModal
+      open={showReportModal}
+      onClose={() => setShowReportModal(false)}
+      sellerId={booking?.owner  || booking?.renter}
+      sellerName={booking?.owner?.firstName|| booking?.owner?.firstName}
+      productId={booking?._id}
+      showToast={showToast}
+    />
+    
         </>
       )}
+
     </div>
   );
 }

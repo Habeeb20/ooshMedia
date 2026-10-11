@@ -79,6 +79,7 @@ import DashboardLayout from "./pages/rental/Dashboard/DashboardLayout";
 import PaymentVerify from "./pages/rental/utils/Paymentverify";
 import RentalItemDetailPage from "./pages/rental/components/RentalItemDetailPage";
 import RentalBookingCheckoutPage from "./pages/rental/components/RentalBookingCheckoutpage";
+import PharmacyHomepage from "./pages/others/pharmacy/PharmacyHomepage";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -253,6 +254,8 @@ const App = () => {
             <Route path="/busibody" element={<BeautyMarketplace />} />
             <Route path="/herbal" element={<HerbalMarketplace />} />
             <Route path="/priceChecker" element={<PriceChecker />} />
+
+            <Route path="/pharmacy" element={<PharmacyHomepage />} />
 
             
 

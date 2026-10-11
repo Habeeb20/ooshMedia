@@ -106,6 +106,7 @@ import OwnerBookingsPanel from './panels/OwnerBookingsPanel';
 import VideoCreditsPanel from './panels/VideoCreditPanel';
 import CreateListingPanel from './panels/CreateListingPanel';
 import { useNavigate } from 'react-router-dom';
+import BlacklistedRentalUsers from '../components/BlacklistedRentalUsers';
 
 // Each sidebar item maps directly to the panel component it renders as main
 // content — add a new item here and its component shows up in the sidebar
@@ -117,6 +118,7 @@ const NAV_ITEMS = [
   { key: 'listings', label: 'My Listings', icon: '▦', Component: OwnerListingsPanel },
   { key: 'new-listing', label: 'List an Item', icon: '＋', Component: CreateListingPanel },
   { key: 'video-credits', label: 'Video Credits', icon: '▶', Component: VideoCreditsPanel },
+  { key: 'blacklisted', label: 'Blacklisted User', icon: '▶', Component: BlacklistedRentalUsers },
 ];
 
 export default function DashboardLayout() {
