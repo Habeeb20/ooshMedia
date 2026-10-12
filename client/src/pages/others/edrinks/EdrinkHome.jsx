@@ -12,6 +12,7 @@ import DrinksShowcase from './DrinksShowcase';
 import EventDrinksBanner from './EventDrinksBanner';
 import { EdrinksDiscountDealsSection } from './DrinksDiscountDeals';
 import EdrinksWhyBuySection from './DrinksWhyChooseus';
+import Footer from '../../../components/Footer';
 const EdrinkHome = () => {
   return (
     <div>
@@ -28,6 +29,7 @@ const EdrinkHome = () => {
               <CustomerReviews reviews={[]} />
               <EdrinksDiscountDealsSection />
               <EdrinksWhyBuySection/>
+              <Footer />
       
     </div>
   )

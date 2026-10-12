@@ -23,11 +23,11 @@ export default function Footer() {
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <MapPin size={18} className="text-gray-400" />
-                <span>123 Market Street, Lagos, Nigeria</span>
+                <span>24, iyalla Street,ikeja, Lagos, Nigeria</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Phone size={18} className="text-gray-400" />
-                <span>+234 803 000 0000</span>
+                <span>+234 7000 555 666</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Mail size={18} className="text-gray-400" />

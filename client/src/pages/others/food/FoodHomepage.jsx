@@ -5,6 +5,7 @@ import PopularFood from "./PopularFood";
 import RestaurantShowcase from "./RestaurantShowcase";
 import CustomerReviews from "./CustomerReview";
 import SellerAllReviews from "../../order/AllReview";
+import Footer from "../../../components/Footer";
 // import SiteFooter from "./Foodfooter";
 
 export default function HomePage() {
@@ -20,6 +21,7 @@ export default function HomePage() {
         <SellerAllReviews />
       </div>
       <CustomerReviews reviews={[]} />
+      <Footer/>
       {/* <SiteFooter /> */}
     </div>
   );

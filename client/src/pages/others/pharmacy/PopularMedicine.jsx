@@ -7,6 +7,7 @@ import * as categoryConfig from "../../../config/productcategories";
 import useUserLocation from "../../../config/useUserLocation";
 import appConfig from "../../../config/appConfig";
 import { withAlpha } from "./colorUtils";
+import PharmacyProductCard from "./PharmacyProductCard";
 
 const allCategories = categoryConfig.default || categoryConfig.productCategories || [];
 
@@ -273,7 +274,7 @@ export default function PopularMedicines() {
 
         {!loading && !error &&
           filteredProducts.slice(0, visible).map((product) => (
-            <ProductCard key={product._id} product={product} userLocation={userLocation} />
+            <PharmacyProductCard key={product._id} product={product} userLocation={userLocation} />
           ))}
       </div>
 

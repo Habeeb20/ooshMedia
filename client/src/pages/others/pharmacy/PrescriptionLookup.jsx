@@ -132,7 +132,7 @@ function PrescriptionCard({ rx, brand }) {
         <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex items-center gap-2 min-w-0">
             <User className="h-4 w-4 shrink-0 text-gray-400" />
-            <div className="min-w-0"><dt className="text-[11px] uppercase tracking-wide text-gray-400">Client</dt><dd className="truncate text-sm font-semibold text-gray-800">{rx.patient?.name || "Unknown"}</dd></div>
+            {/* <div className="min-w-0"><dt className="text-[11px] uppercase tracking-wide text-gray-400">Client</dt><dd className="truncate text-sm font-semibold text-gray-800">{rx.patient?.name || "Unknown"}</dd></div> */}
           </div>
           <div className="flex items-center gap-2 min-w-0">
             <Stethoscope className="h-4 w-4 shrink-0 text-gray-400" />

@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import PromoBanner from "./PromoBanner";
 import DrinksPromoBanner from "./DrinkPromoBanner";
 import RentalPromoBanner from "./RentalPromoBanner";
-
+import PharmacyPromoBanner from "./PharmacyPromoBanner";
 
 const SLIDE_INTERVAL = 2000; // 2 seconds
 
-const slides = [PromoBanner, DrinksPromoBanner, RentalPromoBanner];
+const slides = [PromoBanner, DrinksPromoBanner, RentalPromoBanner, PharmacyPromoBanner];
 
 export default function PromoBannerCarousel() {
   const [index, setIndex] = useState(0);

@@ -80,6 +80,7 @@ import PaymentVerify from "./pages/rental/utils/Paymentverify";
 import RentalItemDetailPage from "./pages/rental/components/RentalItemDetailPage";
 import RentalBookingCheckoutPage from "./pages/rental/components/RentalBookingCheckoutpage";
 import PharmacyHomepage from "./pages/others/pharmacy/PharmacyHomepage";
+import Wholesalers from "./components/home/Wholesalers";
 const App = () => {
   useScrollToTop();
   const location = useLocation();
@@ -124,6 +125,7 @@ const App = () => {
             <Route path="/category/automotive/part/:partSlug" element={<CarPartsListing />} />
             <Route path="/category/automotive/brand/:partSlug" element={<CarPartsListing />} />
 <Route path="/sellers/type/:type" element={<SellersByType />} />
+<Route path="/wholesale" element={<Wholesalers />} />
 
             <Route
               path="/checkout"
@@ -229,6 +231,7 @@ const App = () => {
             <Route path="/business/*" element={<FeedPage />} />
             <Route path="/food" element={<HomePage />} />
             <Route path="/edrinks" element={<EdrinkHome />} />
+            <Route path="/drinks" element={<EdrinkHome />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             <Route path="/category/:categorySlug" element={<ProductsGrid />} />
